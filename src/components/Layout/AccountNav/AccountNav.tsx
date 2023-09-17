@@ -7,8 +7,10 @@ import { Button } from "@radix-ui/themes";
 import { useUser } from "../../../contexts/UserContextProvider";
 import Link from "next/link";
 import { CheckCircledIcon, CrossCircledIcon } from "@radix-ui/react-icons";
+import { useNetworkConfiguration } from "../../../contexts/NetworkConfigurationProvider";
 
 const AccountNav: React.FC = () => {
+  const { setNetworkConfiguration } = useNetworkConfiguration();
   const { signIn, isSignedIn } = useUser();
   const walletModal = useWalletModal();
   const wallet = useWallet();
@@ -53,6 +55,29 @@ const AccountNav: React.FC = () => {
           >
             Disconnect
           </DropdownMenu.Item>
+
+          <DropdownMenu.Separator className="DropdownMenuSeparator" />
+
+          <DropdownMenu.Sub>
+            <DropdownMenu.SubTrigger>Pick Network...</DropdownMenu.SubTrigger>
+            <DropdownMenu.SubContent>
+              <DropdownMenu.Item
+                onClick={(e) => setNetworkConfiguration("mainnet-beta")}
+              >
+                Mainnet
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                onClick={(e) => setNetworkConfiguration("devnet")}
+              >
+                Devnet
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                onClick={(e) => setNetworkConfiguration("testnet")}
+              >
+                Testnet
+              </DropdownMenu.Item>
+            </DropdownMenu.SubContent>
+          </DropdownMenu.Sub>
         </DropdownMenu.Content>
       </DropdownMenu.Root>
     </div>
