@@ -18,6 +18,7 @@ import {
 } from "./NetworkConfigurationProvider";
 import dynamic from "next/dynamic";
 import { UserProvider } from "./UserContextProvider";
+import { Theme } from "@radix-ui/themes";
 
 const ReactUIWalletModalProviderDynamic = dynamic(
   async () =>
@@ -63,13 +64,15 @@ const WalletContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
 export const ContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <>
-      <NetworkConfigurationProvider>
-        <AutoConnectProvider>
-          <WalletContextProvider>
-            <UserProvider>{children}</UserProvider>
-          </WalletContextProvider>
-        </AutoConnectProvider>
-      </NetworkConfigurationProvider>
+      <Theme>
+        <NetworkConfigurationProvider>
+          <AutoConnectProvider>
+            <WalletContextProvider>
+              <UserProvider>{children}</UserProvider>
+            </WalletContextProvider>
+          </AutoConnectProvider>
+        </NetworkConfigurationProvider>
+      </Theme>
     </>
   );
 };

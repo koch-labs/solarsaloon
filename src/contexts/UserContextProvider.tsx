@@ -1,5 +1,5 @@
 import { utils } from "@coral-xyz/anchor";
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useLocalStorage, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import {
   createContext,
@@ -21,6 +21,7 @@ export interface UserContextState {
   user?: User;
   token?: string;
   signIn(): Promise<void>;
+  isSignedIn: boolean;
 }
 
 export const UserContext = createContext<UserContextState>(
@@ -31,15 +32,42 @@ export function useUser(): UserContextState {
   return useContext(UserContext);
 }
 
+const deserializeUser = ({
+  id,
+  publicKey,
+  lastLogin,
+}: {
+  id: number;
+  publicKey: string;
+  lastLogin: string;
+}) => {
+  return {
+    id,
+    publicKey: new PublicKey(publicKey),
+    lastLogin: new Date(lastLogin),
+  };
+};
+
 export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
+  const [defaultToken, setDefaultToken] = useLocalStorage(
+    "saloon_token",
+    undefined
+  );
+  const [defaultUser, setDefaultUser] = useLocalStorage(
+    "saloon_user",
+    undefined
+  );
   const { signMessage, publicKey } = useWallet();
-  const [user, setUser] = useState<User>();
-  const [token, setToken] = useState<string>();
+  const [user, setUser] = useState<User>(
+    defaultUser ? deserializeUser(defaultUser) : undefined
+  );
+  const [token, setToken] = useState<string>(defaultToken);
   const isSignedIn = useMemo(() => {
-    user?.lastLogin
+    return user?.lastLogin
       ? user?.lastLogin.valueOf() + TOKEN_EXPIRATION_DELAY > Date.now()
       : false;
   }, [user]);
+  console.log(user, isSignedIn);
 
   const signIn = useCallback(async () => {
     const responseChallenge = await fetch(
@@ -58,13 +86,22 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
       }),
     });
     const { token, user } = await responseLogin.json();
-    console.log(user);
-    setUser({ ...user, lastLogin: new Date(user.lastLogin) });
+    setUser({
+      id: user.id,
+      publicKey: user.publickey,
+      lastLogin: new Date(user.lastlogin),
+    });
+    setDefaultUser({
+      id: user.id,
+      publicKey: user.publickey,
+      lastLogin: new Date(user.lastlogin),
+    });
     setToken(token);
-  }, [signMessage, publicKey]);
+    setDefaultToken(token);
+  }, [signMessage, publicKey, setDefaultToken, setDefaultUser]);
 
   return (
-    <UserContext.Provider value={{ signIn, user, token }}>
+    <UserContext.Provider value={{ signIn, user, token, isSignedIn }}>
       {children}
     </UserContext.Provider>
   );
