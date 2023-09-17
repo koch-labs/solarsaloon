@@ -1,0 +1,1 @@
+export const TOKEN_EXPIRATION_DELAY = 86400000
