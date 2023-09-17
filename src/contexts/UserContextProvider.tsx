@@ -21,6 +21,7 @@ export interface UserContextState {
   user?: User;
   token?: string;
   signIn(): Promise<void>;
+  logOff(): Promise<void>;
   isSignedIn: boolean;
 }
 
@@ -100,8 +101,15 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setDefaultToken(token);
   }, [signMessage, publicKey, setDefaultToken, setDefaultUser]);
 
+  const logOff = useCallback(async () => {
+    setUser(undefined);
+    setDefaultUser(undefined);
+    setToken(undefined);
+    setDefaultToken(undefined);
+  }, [setDefaultToken, setDefaultUser]);
+
   return (
-    <UserContext.Provider value={{ signIn, user, token, isSignedIn }}>
+    <UserContext.Provider value={{ signIn, logOff, user, token, isSignedIn }}>
       {children}
     </UserContext.Provider>
   );

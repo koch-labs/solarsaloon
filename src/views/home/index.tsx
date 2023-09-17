@@ -1,6 +1,5 @@
 // Next, React
-import { FC, useEffect } from "react";
-import { useWallet, useConnection } from "@solana/wallet-adapter-react";
+import { FC, useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -8,11 +7,14 @@ import {
   Container,
   Flex,
   Heading,
+  Table,
   Text,
 } from "@radix-ui/themes";
+import { EnterIcon } from "@radix-ui/react-icons";
 
-import { useUser } from "../../contexts/UserContextProvider";
+import { User, useUser } from "../../contexts/UserContextProvider";
 import Link from "next/link";
+import { PublicKey } from "@solana/web3.js";
 
 const CreateSaloonCard = () => {
   return (
@@ -35,10 +37,72 @@ const CreateSaloonCard = () => {
   );
 };
 
-export const HomeView: FC = ({}) => {
+export const SaloonsList = ({ saloons }: { saloons: Saloon[] }) => {
   return (
-    <Box>
+    <Card>
+      <Table.Root>
+        <Table.Header>
+          <Table.Row>
+            <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Owner</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
+          </Table.Row>
+        </Table.Header>
+
+        <Table.Body className="align-middle">
+          {saloons.map((s) => (
+            <Table.Row key={s.id}>
+              <Table.RowHeaderCell>
+                {s.collectionMint.toString()}
+              </Table.RowHeaderCell>
+              <Table.Cell>{s.owner.publicKey.toString()}</Table.Cell>
+              <Table.Cell>
+                <Link href={`/saloon/${s.collectionMint.toString()}`}>
+                  <Button variant="soft">
+                    <EnterIcon />
+                  </Button>
+                </Link>
+              </Table.Cell>
+            </Table.Row>
+          ))}
+        </Table.Body>
+      </Table.Root>
+    </Card>
+  );
+};
+
+export interface Saloon {
+  id: number;
+  owner: User;
+  collectionMint: PublicKey;
+}
+
+export const HomeView: FC = ({}) => {
+  const [saloons, setSaloons] = useState<Saloon[]>([]);
+
+  useEffect(() => {
+    async function fetchSaloons() {
+      const { saloons } = await (await fetch("/api/saloons")).json();
+      setSaloons(
+        saloons.map((s) => ({
+          id: s.id,
+          collectionMint: new PublicKey(s.collectionmint),
+          owner: {
+            id: s.ownerid,
+            lastLogin: s.lastlogin,
+            publicKey: new PublicKey(s.publickey),
+          },
+        }))
+      );
+    }
+
+    fetchSaloons();
+  }, []);
+
+  return (
+    <Box className="flex flex-col gap-3">
       <CreateSaloonCard />
+      <SaloonsList saloons={saloons} />
     </Box>
   );
 };

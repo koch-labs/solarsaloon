@@ -45,13 +45,9 @@ export default async function handler(
       const user = await findUser(publicKey);
 
       // Generate a JWT token
-      const token = jwt.sign(
-        { publicKey: publicKey.toString() },
-        process.env.JWT_KEY,
-        {
-          expiresIn: "1D",
-        }
-      );
+      const token = jwt.sign(user, process.env.JWT_KEY, {
+        expiresIn: "1D",
+      });
 
       return response.status(200).json({
         token,

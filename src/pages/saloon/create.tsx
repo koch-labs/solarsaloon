@@ -43,10 +43,12 @@ import { Token, tokens } from "../../utils/tokens";
 import toast from "react-hot-toast";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { useUser } from "../../contexts/UserContextProvider";
 
 const CreateSaloon: React.FC = () => {
   const router = useRouter();
   const wallet = useWallet();
+  const { isSignedIn, token } = useUser();
   const { connection } = useConnection();
   const provider = useMemo(
     () =>
@@ -158,12 +160,22 @@ const CreateSaloon: React.FC = () => {
         tx.minNonceContextSlot = slot;
         return tx;
       });
+      await fetch("/api/saloon", {
+        method: "POST",
+        body: JSON.stringify({
+          collectionMint: collectionMintKeypair.publicKey,
+        }),
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const signedTxs = await wallet.signAllTransactions(txs);
       for (const tx of signedTxs) {
         await connection.sendRawTransaction(tx.serialize(), {
           skipPreflight: true,
         });
       }
+
       router.push(`/saloon?mint=${collectionMintKeypair.publicKey.toString()}`);
     } catch (err) {
       console.log(err);
@@ -171,7 +183,7 @@ const CreateSaloon: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [provider, wallet, name, connection, router, taxRate, taxToken]);
+  }, [provider, wallet, name, connection, router, taxRate, taxToken, token]);
 
   return (
     <Container className="content-center">

@@ -11,7 +11,7 @@ import { useNetworkConfiguration } from "../../../contexts/NetworkConfigurationP
 
 const AccountNav: React.FC = () => {
   const { setNetworkConfiguration } = useNetworkConfiguration();
-  const { signIn, isSignedIn } = useUser();
+  const { signIn, logOff, isSignedIn } = useUser();
   const walletModal = useWalletModal();
   const wallet = useWallet();
 
@@ -44,7 +44,11 @@ const AccountNav: React.FC = () => {
           <DropdownMenu.Label className="DropdownMenuLabel">
             Authentication
           </DropdownMenu.Label>
-          {isSignedIn ? null : (
+          {isSignedIn ? (
+            <DropdownMenu.Item color="crimson" onClick={() => logOff()}>
+              Log off
+            </DropdownMenu.Item>
+          ) : (
             <DropdownMenu.Item color="green" onClick={() => signIn()}>
               Sign In
             </DropdownMenu.Item>
