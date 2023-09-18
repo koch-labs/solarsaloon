@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { sql } from "@vercel/postgres";
-import { Saloon, Subscription } from "../../../models/types";
+import jwt from "jsonwebtoken";
+import { Saloon, Subscription, User } from "../../../models/types";
 
 export default async function handler(
   request: NextApiRequest,
@@ -27,6 +28,27 @@ export default async function handler(
       tokenMint: r.tokenmint,
       lastPost: r.lastpost,
     }));
+
+    // Check if the querier owns any subscriptions
+    const rawToken = request.headers.authorization.split("Bearer ")[1];
+    const user = jwt.decode(rawToken) as User;
+    if (user?.publicKey) {
+      const balancesResponse = await fetch(
+        `${
+          process.env.SOLANA_NETWORK === "devnet"
+            ? process.env.HELIUS_API_DEVNET
+            : process.env.HELIUS_API_MAINNET
+        }/v0/addresses/${user.publicKey}/balances?api-key=${
+          process.env.HELIUS_KEY
+        }`
+      );
+      const { tokens } = await balancesResponse.json();
+      subscriptions.forEach((s) => {
+        if (tokens.find((token) => token.mint === s.tokenMint)) {
+          s.owner = user.publicKey;
+        }
+      });
+    }
 
     const rawSaloon = saloonQuery.rows[0];
     const saloon: Saloon = {

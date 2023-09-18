@@ -65,16 +65,8 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
       }),
     });
     const { token, user } = await responseLogin.json();
-    setUser({
-      id: user.id,
-      publicKey: user.publickey,
-      lastLogin: user.lastlogin,
-    });
-    setDefaultUser({
-      id: user.id,
-      publicKey: user.publickey,
-      lastLogin: user.lastlogin,
-    });
+    setUser(user);
+    setDefaultUser(user);
     setToken(token);
     setDefaultToken(token);
   }, [signMessage, publicKey, setDefaultToken, setDefaultUser]);

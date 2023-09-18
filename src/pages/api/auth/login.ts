@@ -5,6 +5,7 @@ import { verify } from "@noble/ed25519";
 import { utils } from "@coral-xyz/anchor";
 import jwt from "jsonwebtoken";
 import { TOKEN_EXPIRATION_DELAY } from "../../../utils/constants";
+import { User } from "../../../models/types";
 
 export default async function handler(
   request: NextApiRequest,
@@ -28,7 +29,7 @@ export default async function handler(
 
     if (verified) {
       // Find the associated user
-      const findUser = async (publicKey: PublicKey) => {
+      const findUser = async (publicKey: PublicKey): Promise<User> => {
         const findUserQuery =
           await sql`SELECT * FROM users WHERE publicKey = ${publicKey.toString()};`;
         if (findUserQuery.rowCount === 0) {
@@ -39,7 +40,12 @@ export default async function handler(
 
         const selectedUser =
           await sql`SELECT * FROM users WHERE publicKey = ${publicKey.toString()};`;
-        return selectedUser.rows[0];
+        const row = selectedUser.rows[0];
+        return {
+          id: row.id,
+          publicKey: row.publickey,
+          lastLogin: row.lastlogin,
+        };
       };
 
       const user = await findUser(publicKey);

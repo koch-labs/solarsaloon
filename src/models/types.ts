@@ -19,4 +19,5 @@ export interface Subscription {
   id: number;
   tokenMint: string;
   lastPost: string;
+  owner?: string;
 }

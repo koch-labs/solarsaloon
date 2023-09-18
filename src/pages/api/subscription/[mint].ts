@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { sql } from "@vercel/postgres";
 import jwt from "jsonwebtoken";
-import { Saloon, User } from "../../models/types";
+import { Saloon, User } from "../../../models/types";
 
 export default async function handler(
   request: NextApiRequest,

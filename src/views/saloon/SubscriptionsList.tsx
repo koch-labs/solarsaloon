@@ -1,4 +1,4 @@
-import { Button, Card, Table } from "@radix-ui/themes";
+import { Button, Card, Table, Badge, Text, Flex } from "@radix-ui/themes";
 import { EnterIcon } from "@radix-ui/react-icons";
 
 import Link from "next/link";
@@ -17,10 +17,13 @@ export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
         </Table.Header>
 
         <Table.Body className="align-middle">
-          {saloon?.subscriptions.map((s) => (
+          {saloon?.subscriptions?.map((s) => (
             <Table.Row key={s.id}>
               <Table.RowHeaderCell>
-                {s.tokenMint.toString()}
+                <Flex gap={"2"}>
+                  <Badge color="blue">Yours</Badge>
+                  <Text>{s.tokenMint.toString()}</Text>
+                </Flex>
               </Table.RowHeaderCell>
               <Table.Cell>
                 {new Date(s.lastPost).valueOf() === -3600000
