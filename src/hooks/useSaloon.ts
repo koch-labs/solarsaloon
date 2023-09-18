@@ -1,28 +1,31 @@
 import { PublicKey } from "@solana/web3.js";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Saloon } from "../models/types";
 import toast from "react-hot-toast";
 
-export default function useSaloon(saloonMint: string) {
+export type Fetchable<T> = T & {
+  reload: () => Promise<void>;
+};
+
+export default function useSaloon(saloonMint: string): Fetchable<Saloon> {
   const [saloon, setSaloon] = useState<Saloon>();
   console.log("Use saloon", saloonMint, saloon);
 
-  useEffect(() => {
+  const fetchSaloon = useCallback(async () => {
     if (!saloonMint) return;
 
-    async function fetchSaloon() {
-      try {
-        const response = await fetch(`/api/saloon/${saloonMint}`);
-        console.log("saloon", response);
-        const { saloon } = await response.json();
-        setSaloon(saloon);
-      } catch (err) {
-        toast.error(String(err));
-      }
+    try {
+      const response = await fetch(`/api/saloon/${saloonMint}`);
+      const { saloon } = await response.json();
+      setSaloon(saloon);
+    } catch (err) {
+      toast.error(String(err));
     }
-
-    fetchSaloon();
   }, [saloonMint]);
 
-  return saloon;
+  useEffect(() => {
+    fetchSaloon();
+  }, [fetchSaloon]);
+
+  return { ...saloon, reload: async () => fetchSaloon() };
 }

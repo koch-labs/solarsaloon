@@ -24,6 +24,7 @@ import Link from "next/link";
 import { useUser } from "../../contexts/UserContextProvider";
 import CreateSubscription from "./CreateSubscription";
 import useSaloon from "../../hooks/useSaloon";
+import { SubscriptionsList } from "./SubscriptionsList";
 
 const SaloonView: React.FC = () => {
   const router = useRouter();
@@ -32,13 +33,6 @@ const SaloonView: React.FC = () => {
   const { connection } = useConnection();
   const saloonMint = router.query.mint as string;
   const saloon = useSaloon(saloonMint);
-  const provider = useMemo(
-    () =>
-      wallet ? new AnchorProvider(connection, wallet as any, {}) : undefined,
-    [wallet, connection]
-  );
-
-  console.log(user, wallet, router, saloon);
 
   return (
     <Container className="content-center">
@@ -58,6 +52,7 @@ const SaloonView: React.FC = () => {
               wallet.publicKey.toString() === user.publicKey.toString() ? (
                 <CreateSubscription saloon={saloon} />
               ) : null}
+              <SubscriptionsList saloon={saloon} />
             </Flex>
           </Card>
           <Popover.Root>

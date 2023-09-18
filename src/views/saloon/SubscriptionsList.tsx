@@ -1,34 +1,10 @@
-// Next, React
-import { FC, useEffect, useState } from "react";
-import {
-  Box,
-  Button,
-  Card,
-  Container,
-  Flex,
-  Heading,
-  Table,
-  Text,
-} from "@radix-ui/themes";
+import { Button, Card, Table } from "@radix-ui/themes";
 import { EnterIcon } from "@radix-ui/react-icons";
 
-import { User, useUser } from "../../contexts/UserContextProvider";
 import Link from "next/link";
-import { PublicKey } from "@solana/web3.js";
-import { Saloon } from "../home";
+import { Saloon } from "../../models/types";
 
-export interface Subscription {
-  id: number;
-  tokenMint: PublicKey;
-  saloon: Saloon;
-  lastPost: Date;
-}
-
-export const SubscriptionsList = ({
-  subscriptions,
-}: {
-  subscriptions: Subscription[];
-}) => {
+export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
   return (
     <Card>
       <Table.Root>
@@ -41,14 +17,18 @@ export const SubscriptionsList = ({
         </Table.Header>
 
         <Table.Body className="align-middle">
-          {subscriptions.map((s) => (
+          {saloon?.subscriptions.map((s) => (
             <Table.Row key={s.id}>
               <Table.RowHeaderCell>
                 {s.tokenMint.toString()}
               </Table.RowHeaderCell>
-              <Table.Cell>{s.lastPost.toLocaleDateString()}</Table.Cell>
               <Table.Cell>
-                <Link href={`/saloon/${s.saloon.collectionMint.toString()}`}>
+                {new Date(s.lastPost).valueOf() === -3600000
+                  ? "never"
+                  : new Date(s.lastPost).toLocaleDateString()}
+              </Table.Cell>
+              <Table.Cell>
+                <Link href={`/subscription/${s.tokenMint}`}>
                   <Button variant="soft">
                     <EnterIcon />
                   </Button>

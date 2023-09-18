@@ -10,19 +10,15 @@ export default async function handler(
   try {
     const rawToken = request.headers.authorization.split("Bearer ")[1];
     const user = jwt.verify(rawToken, process.env.JWT_KEY) as User;
-    const { saloon }: { saloon: Saloon } = JSON.parse(request.body);
+    const { saloon, tokenMint }: { saloon: Saloon; tokenMint: string } =
+      JSON.parse(request.body);
 
+    // The sender is the saloon's owner
     if (user.id !== saloon.owner.id) {
-      return response.status(401).json({});
-    }
-
-    const countQuery =
-      await sql`SELECT COUNT(*) FROM subscriptions WHERE id = ${saloon.id};`;
-    if (countQuery.rows[0].count !== 1) {
       return response.status(403).json({});
     }
 
-    await sql`INSERT INTO subscriptions (saloonId, lastPost) VALUES (${saloon.id}, 0);`;
+    await sql`INSERT INTO subscriptions (tokenMint, saloonId, lastPost) VALUES (${tokenMint}, ${saloon.id}, TO_TIMESTAMP(0));`;
     return response.status(200).json({});
   } catch (error) {
     console.log(error);

@@ -15,9 +15,10 @@ import { Saloon } from "../../models/types";
 // globalThis.fetch = fetch as any;
 import encoding from "encoding";
 import { builders as rentBuilders } from "@koch-labs/rent-nft";
+import { Fetchable } from "../../hooks/useSaloon";
 
 const CreateSubscription: React.FC<{
-  saloon: Saloon;
+  saloon: Fetchable<Saloon>;
 }> = ({ saloon }) => {
   const router = useRouter();
   const wallet = useWallet();
@@ -37,49 +38,46 @@ const CreateSubscription: React.FC<{
     setIsLoading(true);
     try {
       const tokenMintKeypair = Keypair.generate();
-      const txs: Transaction[] = [];
+      const tx = new Transaction();
       const {
         value: { blockhash, lastValidBlockHeight },
         context: { slot },
       } = await connection.getLatestBlockhashAndContext();
+      tx.recentBlockhash = blockhash;
+      tx.lastValidBlockHeight = lastValidBlockHeight;
+      tx.feePayer = wallet.publicKey;
+      tx.minNonceContextSlot = slot;
 
       const name = "Subscription";
       const content = {
         name,
         external_uri: "",
       };
-      console.log(utils.sha256.hash(JSON.stringify(content)));
-      txs.push(
+      tx.add(
         await rentBuilders
           .createToken({
             provider,
             uri: BASE_URL + `/metadata/${tokenMintKeypair.publicKey}`,
-            contentHash: utils.sha256.hash(JSON.stringify(content)),
+            contentHash: [
+              ...utils.bytes.utf8
+                .encode(utils.sha256.hash(JSON.stringify(content)))
+                .values(),
+            ],
             name,
             collectionMint: new PublicKey(saloon.collectionMint),
+            tokenMint: tokenMintKeypair.publicKey,
             authoritiesGroup: new PublicKey(saloon.authoritiesGroup),
           })
           .builder.transaction()
       );
 
-      txs.forEach((tx) => {
-        tx.feePayer = wallet.publicKey!;
-        tx.recentBlockhash = blockhash;
-        tx.lastValidBlockHeight = lastValidBlockHeight;
-        tx.minNonceContextSlot = slot;
-        return tx;
-      });
-
-      const signedTxs = await wallet.signAllTransactions(txs);
-      for (const tx of signedTxs) {
-        await connection.sendRawTransaction(tx.serialize(), {
-          skipPreflight: true,
-        });
-      }
+      tx.sign(tokenMintKeypair);
+      const signedTx = await wallet.signTransaction(tx);
+      await connection.sendRawTransaction(signedTx.serialize());
 
       await fetch("/api/subscription", {
         method: "POST",
-        body: JSON.stringify({ saloon }),
+        body: JSON.stringify({ saloon, tokenMint: tokenMintKeypair.publicKey }),
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -87,6 +85,7 @@ const CreateSubscription: React.FC<{
     } catch (err) {
       console.log(err);
       toast.error(String(err));
+      saloon.reload();
     } finally {
       setIsLoading(false);
     }
