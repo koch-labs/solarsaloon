@@ -11,12 +11,8 @@ import {
   useState,
 } from "react";
 import { TOKEN_EXPIRATION_DELAY } from "../utils/constants";
+import { User } from "../models/types";
 
-export interface User {
-  id: number;
-  publicKey: PublicKey;
-  lastLogin: Date;
-}
 export interface UserContextState {
   user?: User;
   token?: string;
@@ -33,42 +29,24 @@ export function useUser(): UserContextState {
   return useContext(UserContext);
 }
 
-const deserializeUser = ({
-  id,
-  publicKey,
-  lastLogin,
-}: {
-  id: number;
-  publicKey: string;
-  lastLogin: string;
-}) => {
-  return {
-    id,
-    publicKey: new PublicKey(publicKey),
-    lastLogin: new Date(lastLogin),
-  };
-};
-
 export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const [defaultToken, setDefaultToken] = useLocalStorage(
+  const [defaultToken, setDefaultToken] = useLocalStorage<string>(
     "saloon_token",
     undefined
   );
-  const [defaultUser, setDefaultUser] = useLocalStorage(
+  const [defaultUser, setDefaultUser] = useLocalStorage<User>(
     "saloon_user",
     undefined
   );
   const { signMessage, publicKey } = useWallet();
-  const [user, setUser] = useState<User>(
-    defaultUser ? deserializeUser(defaultUser) : undefined
-  );
+  const [user, setUser] = useState<User>(defaultUser);
   const [token, setToken] = useState<string>(defaultToken);
   const isSignedIn = useMemo(() => {
     return user?.lastLogin
-      ? user?.lastLogin.valueOf() + TOKEN_EXPIRATION_DELAY > Date.now()
+      ? new Date(user?.lastLogin).valueOf() + TOKEN_EXPIRATION_DELAY >
+          Date.now()
       : false;
   }, [user]);
-  console.log(user, isSignedIn);
 
   const signIn = useCallback(async () => {
     const responseChallenge = await fetch(
@@ -90,12 +68,12 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setUser({
       id: user.id,
       publicKey: user.publickey,
-      lastLogin: new Date(user.lastlogin),
+      lastLogin: user.lastlogin,
     });
     setDefaultUser({
       id: user.id,
       publicKey: user.publickey,
-      lastLogin: new Date(user.lastlogin),
+      lastLogin: user.lastlogin,
     });
     setToken(token);
     setDefaultToken(token);

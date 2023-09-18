@@ -6,8 +6,14 @@ export default async function handler(
   response: NextApiResponse
 ) {
   try {
+    const { limit, page } = Object.assign(
+      { limit: 20, page: 0 },
+      request.query
+    );
     const query =
-      await sql`SELECT * FROM saloons JOIN users on users.id = saloons.ownerid`;
+      await sql`SELECT * FROM saloons JOIN users on users.id = saloons.ownerid LIMIT ${limit} OFFSET ${
+        limit * page
+      }`;
     return response.status(200).json({ saloons: query.rows });
   } catch (error) {
     console.log(error);

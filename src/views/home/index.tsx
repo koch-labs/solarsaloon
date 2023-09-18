@@ -11,10 +11,9 @@ import {
   Text,
 } from "@radix-ui/themes";
 import { EnterIcon } from "@radix-ui/react-icons";
-
-import { User, useUser } from "../../contexts/UserContextProvider";
 import Link from "next/link";
 import { PublicKey } from "@solana/web3.js";
+import { Saloon, User } from "../../models/types";
 
 const CreateSaloonCard = () => {
   return (
@@ -70,12 +69,6 @@ export const SaloonsList = ({ saloons }: { saloons: Saloon[] }) => {
     </Card>
   );
 };
-
-export interface Saloon {
-  id: number;
-  owner: User;
-  collectionMint: PublicKey;
-}
 
 export const HomeView: FC = ({}) => {
   const [saloons, setSaloons] = useState<Saloon[]>([]);

@@ -26,6 +26,8 @@ export default async function handler(
       id SERIAL PRIMARY KEY,
       collectionMint TEXT UNIQUE NOT NULL,
       ownerId integer NOT NULL,
+      authoritiesGroup TEXT NOT NULL,
+      taxMint TEXT NOT NULL,
       CONSTRAINT fk_owner FOREIGN KEY (ownerId) REFERENCES users (id) ON DELETE CASCADE
     );
     `
@@ -34,6 +36,7 @@ export default async function handler(
       await sql`
     CREATE TABLE subscriptions (
       id SERIAL PRIMARY KEY,
+      tokenMint TEXT UNIQUE NOT NULL,
       saloonId integer NOT NULL,
       lastPost TIMESTAMP,
       CONSTRAINT fk_saloon FOREIGN KEY (saloonId) REFERENCES saloons (id) ON DELETE CASCADE
