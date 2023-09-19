@@ -3,7 +3,13 @@ import { sql } from "@vercel/postgres";
 import jwt from "jsonwebtoken";
 import { Saloon, Subscription, User } from "../../../models/types";
 import { Connection, PublicKey } from "@solana/web3.js";
-import { BidState, TokenState, getTokenStateKey } from "@koch-labs/rent-nft";
+import {
+  BidState,
+  CollectionConfig,
+  TokenState,
+  getConfigKey,
+  getTokenStateKey,
+} from "@koch-labs/rent-nft";
 import { TOKEN_2022_PROGRAM_ID, getAccount } from "@solana/spl-token";
 
 export default async function handler(
@@ -40,11 +46,14 @@ export default async function handler(
         "?api-key=" +
         process.env.HELIUS_KEY
     );
-    const subsAccounts = await connection.getMultipleAccountsInfo(
-      subscriptionsQuery.rows.map((r) =>
+    const accounts = await connection.getMultipleAccountsInfo([
+      getConfigKey(new PublicKey(mint)),
+      ...subscriptionsQuery.rows.map((r) =>
         getTokenStateKey(new PublicKey(mint), new PublicKey(r.tokenmint))
-      )
-    );
+      ),
+    ]);
+    const [configAccount, ...subsAccounts] = accounts;
+    const config = CollectionConfig.decode(configAccount.data).toJSON();
     const tokenStates = subsAccounts.map((a) =>
       TokenState.decode(a.data).toJSON()
     );
@@ -85,6 +94,7 @@ export default async function handler(
       collectionMint: rawSaloon.collectionmint,
       taxMint: rawSaloon.taxmint,
       authoritiesGroup: rawSaloon.authoritiesgroup,
+      config,
       subscriptions,
     };
 

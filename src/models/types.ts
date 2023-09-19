@@ -1,4 +1,4 @@
-import { TokenStateJSON } from "@koch-labs/rent-nft";
+import { CollectionConfigJSON, TokenStateJSON } from "@koch-labs/rent-nft";
 
 export type EndpointTypes = "mainnet" | "devnet" | "localnet";
 
@@ -14,6 +14,7 @@ export interface Saloon {
   collectionMint: string;
   taxMint: string;
   authoritiesGroup: string;
+  config: CollectionConfigJSON;
   subscriptions?: Subscription[];
 }
 

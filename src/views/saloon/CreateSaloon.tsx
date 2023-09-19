@@ -33,6 +33,7 @@ import { Token, tokens } from "../../utils/tokens";
 import toast from "react-hot-toast";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import numeral from "numeral";
 import { useUser } from "../../contexts/UserContextProvider";
 
 const CreateSaloon: React.FC = () => {
@@ -49,7 +50,28 @@ const CreateSaloon: React.FC = () => {
   const [name, setName] = useState<string>();
   const [taxToken, setTaxToken] = useState<Token>(tokens[0]);
   const [taxRate, setTaxRate] = useState<number>(1);
+  const [postCooldown, setPostCooldown] = useState<number>(86400000);
   const [isLoading, setIsLoading] = useState(false);
+
+  const formattedTime = useMemo(() => {
+    const seconds = postCooldown / 1000;
+    if (seconds < 60) {
+      return `${numeral(seconds).format("0.0a")} seconds`;
+    }
+
+    const minutes = seconds / 60;
+    if (minutes < 60) {
+      return `${numeral(minutes).format("0.0a")} minutes`;
+    }
+
+    const hours = minutes / 60;
+    if (hours < 24) {
+      return `${numeral(hours).format("0.0a")} hours`;
+    }
+
+    const days = hours / 24;
+    return `${numeral(days).format("0.0a")} days`;
+  }, [postCooldown]);
 
   const handleCreate = useCallback(async () => {
     if (!provider || !wallet.sendTransaction || !wallet.publicKey || !name)
@@ -164,6 +186,7 @@ const CreateSaloon: React.FC = () => {
           collectionMint: collectionMintKeypair.publicKey,
           authoritiesGroup,
           taxMint: taxToken.publicKey.toString(),
+          postCooldown,
         }),
         headers: {
           Authorization: `Bearer ${token}`,
@@ -177,7 +200,17 @@ const CreateSaloon: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [provider, wallet, name, connection, router, taxRate, taxToken, token]);
+  }, [
+    provider,
+    wallet,
+    name,
+    connection,
+    router,
+    taxRate,
+    taxToken,
+    token,
+    postCooldown,
+  ]);
 
   return (
     <Container className="content-center">
@@ -221,8 +254,8 @@ const CreateSaloon: React.FC = () => {
               <Flex direction="column" width="100%" wrap={"wrap"}>
                 <Text color="gray">Tax rate</Text>
                 <Slider
-                  min={0}
-                  max={Math.log10(500000)}
+                  min={1}
+                  max={Math.log10(1000000)}
                   step={0.01}
                   defaultValue={[taxRate]}
                   onValueChange={(e) => setTaxRate(10 ** e[0])}
@@ -234,6 +267,20 @@ const CreateSaloon: React.FC = () => {
                   <br />
                   Speculators will be rinsed within{" "}
                   {(100 / (taxRate / 5600)).toFixed(2)} weeks.
+                </Text>
+              </Flex>
+              <Flex direction="column" width="100%" wrap={"wrap"}>
+                <Text color="gray">Post cooldown</Text>
+                <Slider
+                  min={3}
+                  max={Math.log10(86400000 * 21)}
+                  step={0.001}
+                  defaultValue={[taxRate]}
+                  onValueChange={(e) => setPostCooldown(Math.round(10 ** e[0]))}
+                />
+                <Text weight="light" size="2" color="gray">
+                  Subscribers will have to wait at least {formattedTime} before
+                  being able to post again.
                 </Text>
               </Flex>
               <Button

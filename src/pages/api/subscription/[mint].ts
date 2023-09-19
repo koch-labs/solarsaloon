@@ -6,8 +6,10 @@ import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import {
   BidState,
   BidStateJSON,
+  CollectionConfig,
   TokenState,
   getBidStateKey,
+  getConfigKey,
   getTokenStateKey,
 } from "@koch-labs/rent-nft";
 import { tokens } from "../../../utils/tokens";
@@ -41,13 +43,16 @@ export default async function handler(
         "?api-key=" +
         process.env.HELIUS_KEY
     );
-    const tokenStateAccount = await connection.getAccountInfo(
-      getTokenStateKey(
-        new PublicKey(subscriptionRow.collectionmint),
-        new PublicKey(subscriptionRow.tokenmint)
-      )
-    );
+    const [tokenStateAccount, configAccount] =
+      await connection.getMultipleAccountsInfo([
+        getTokenStateKey(
+          new PublicKey(subscriptionRow.collectionmint),
+          new PublicKey(subscriptionRow.tokenmint)
+        ),
+        getConfigKey(new PublicKey(subscriptionRow.collectionmint)),
+      ]);
     const tokenState = TokenState.decode(tokenStateAccount.data).toJSON();
+    const config = CollectionConfig.decode(configAccount.data).toJSON();
 
     const largestOwners = await connection.getTokenLargestAccounts(
       new PublicKey(subscriptionRow.tokenmint)
@@ -78,6 +83,7 @@ export default async function handler(
       collectionMint: subscriptionRow.collectionmint,
       taxMint: subscriptionRow.taxmint,
       authoritiesGroup: subscriptionRow.authoritiesgroup,
+      config,
     };
 
     // Check if the querier has a bidding account or owns the token

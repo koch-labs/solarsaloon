@@ -8,12 +8,11 @@ export default async function handler(
   response: NextApiResponse
 ) {
   try {
-    const { collectionMint, authoritiesGroup, taxMint } = JSON.parse(
-      request.body
-    );
+    const { collectionMint, authoritiesGroup, taxMint, postCooldown } =
+      JSON.parse(request.body);
     const rawToken = request.headers.authorization.split("Bearer ")[1];
     const user = jwt.verify(rawToken, process.env.JWT_KEY) as User;
-    await sql`INSERT INTO saloons (collectionMint, ownerId, authoritiesGroup, taxMint) VALUES (${collectionMint}, ${user.id}, ${authoritiesGroup}, ${taxMint});`;
+    await sql`INSERT INTO saloons (collectionMint, ownerId, authoritiesGroup, taxMint, postCooldown) VALUES (${collectionMint}, ${user.id}, ${authoritiesGroup}, ${taxMint}, ${postCooldown});`;
 
     const query =
       await sql`SELECT * FROM saloons WHERE collectionMint = ${collectionMint}`;

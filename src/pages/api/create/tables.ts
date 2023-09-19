@@ -28,6 +28,7 @@ export default async function handler(
       ownerId integer NOT NULL,
       authoritiesGroup TEXT NOT NULL,
       taxMint TEXT NOT NULL,
+      postCooldown integer NOT NULL,
       CONSTRAINT fk_owner FOREIGN KEY (ownerId) REFERENCES users (id) ON DELETE CASCADE
     );
     `
@@ -50,6 +51,7 @@ export default async function handler(
       creatorId integer NOT NULL,
       saloonId integer NOT NULL,
       content TEXT NOT NULL,
+      draft boolean NOT NULL,
       creationTimestamp TIMESTAMP NOT NULL,
       CONSTRAINT fk_creator FOREIGN KEY (creatorId) REFERENCES users (id) ON DELETE CASCADE,
       CONSTRAINT fk_saloon FOREIGN KEY (saloonId) REFERENCES saloons (id) ON DELETE CASCADE

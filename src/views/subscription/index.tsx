@@ -21,6 +21,7 @@ import DepositFundsModal from "./DepositFundsModal";
 import { useState } from "react";
 import { tokens } from "../../utils/tokens";
 import BuyTokenModal from "./BuyTokenModal";
+import CreatePostCard from "./CreatePostCard";
 
 export default function ManageSubscription({ mint }: { mint: string }) {
   const wallet = useWallet();
@@ -211,6 +212,15 @@ export default function ManageSubscription({ mint }: { mint: string }) {
                   />
                 </Card>
               </Flex>
+              {wallet?.publicKey &&
+              ((subscription.subscription?.currentOwner &&
+                subscription.subscription.currentOwner ===
+                  wallet.publicKey.toString()) ||
+                (subscription.saloon?.owner &&
+                  subscription.saloon?.owner?.publicKey ===
+                    wallet.publicKey.toString())) ? (
+                <CreatePostCard subscription={subscription} />
+              ) : null}
             </Flex>
           </Card>
           <Popover.Root>
