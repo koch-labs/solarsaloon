@@ -19,6 +19,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import DepositFundsModal from "./DepositFundsModal";
 import { useState } from "react";
 import { tokens } from "../../utils/tokens";
+import BuyTokenModal from "./BuyTokenModal";
 
 export default function ManageSubscription({ mint }: { mint: string }) {
   const wallet = useWallet();
@@ -27,6 +28,7 @@ export default function ManageSubscription({ mint }: { mint: string }) {
     (t) => t.publicKey.toString() === subscription?.saloon?.taxMint
   );
   console.log(subscription);
+  const [openBuy, setOpenBuy] = useState(false);
   const [openOwnerDeposit, setOpenOwnerDeposit] = useState(false);
   const [openSelfDeposit, setOpenSelfDeposit] = useState(false);
 
@@ -34,7 +36,7 @@ export default function ManageSubscription({ mint }: { mint: string }) {
     <Container className="content-center">
       <Flex gap="2" direction="column">
         <Flex align="start" justify="between">
-          <Link href="/saloons">
+          <Link href={`/saloon/${subscription.saloon.collectionMint}`}>
             <IconButton variant="ghost">
               <ArrowLeftIcon width={32} height={32} strokeWidth={5} />
             </IconButton>
@@ -55,14 +57,23 @@ export default function ManageSubscription({ mint }: { mint: string }) {
                   <Heading size={"3"}>Token</Heading>
                   <Text>
                     Total amount deposited:{" "}
-                    {subscription.tokenState?.deposited || 0}
+                    {numeral(subscription.tokenState?.deposited || "0")
+                      .divide(10 ** (token?.decimals || 0))
+                      .format("0.0a")}
                   </Text>
                   <Text>
                     Current selling price:{" "}
-                    {subscription.tokenState?.currentSellingPrice || 0}
+                    {numeral(
+                      subscription.tokenState?.currentSellingPrice || "0"
+                    )
+                      .divide(10 ** (token?.decimals || 0))
+                      .format("0.0a")}
                   </Text>
                   <Text>
-                    Owner&apos;s bid: {subscription.tokenState?.ownerBidState}
+                    Owner&apos;s bid:{" "}
+                    {subscription.tokenState?.ownerBidState
+                      ? shortKey(subscription.tokenState.ownerBidState)
+                      : "???"}
                   </Text>
                   <Text>
                     Subscription mint:{" "}
@@ -78,9 +89,15 @@ export default function ManageSubscription({ mint }: { mint: string }) {
                       ).lt(
                         new BN(subscription.tokenState?.currentSellingPrice)
                       )}
+                      onClick={() => setOpenBuy(true)}
                     >
                       Buy
                     </Button>
+                    <BuyTokenModal
+                      open={openBuy}
+                      setOpen={setOpenBuy}
+                      subscription={subscription}
+                    />
                   </Flex>
                 </Flex>
               </Card>

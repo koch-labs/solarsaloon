@@ -11,6 +11,7 @@ import {
   getTokenStateKey,
 } from "@koch-labs/rent-nft";
 import { tokens } from "../../../utils/tokens";
+import { TOKEN_2022_PROGRAM_ID, getAccount } from "@solana/spl-token";
 
 export default async function handler(
   request: NextApiRequest,
@@ -48,11 +49,24 @@ export default async function handler(
     );
     const tokenState = TokenState.decode(tokenStateAccount.data).toJSON();
 
+    const largestOwners = await connection.getTokenLargestAccounts(
+      new PublicKey(subscriptionRow.tokenmint)
+    );
+    const currentOwner = (
+      await getAccount(
+        connection,
+        largestOwners.value[0].address,
+        undefined,
+        TOKEN_2022_PROGRAM_ID
+      )
+    ).owner;
+
     const subscription: Subscription = {
       id: subscriptionRow.id,
       tokenMint: subscriptionRow.tokenmint,
       lastPost: subscriptionRow.lastpost,
       tokenState: tokenState,
+      currentOwner: currentOwner.toString(),
     };
     const saloon: Saloon = {
       id: subscriptionRow.saloonid,
@@ -73,21 +87,6 @@ export default async function handler(
       let bidState: BidStateJSON, ownerBidState: BidStateJSON;
       let userBalance = 0;
       if (user?.publicKey) {
-        const balancesResponse = await fetch(
-          `${
-            process.env.SOLANA_NETWORK === "devnet"
-              ? process.env.HELIUS_API_DEVNET
-              : process.env.HELIUS_API_MAINNET
-          }/v0/addresses/${user.publicKey}/balances?api-key=${
-            process.env.HELIUS_KEY
-          }`
-        );
-        const { tokens: userTokens } = await balancesResponse.json();
-
-        if (userTokens.find((token) => token.mint === subscription.tokenMint)) {
-          subscription.owner = user.publicKey;
-        }
-
         const bidStates = [
           getBidStateKey(
             new PublicKey(saloon.collectionMint),
@@ -101,7 +100,6 @@ export default async function handler(
         const accountInfos = await connection.getMultipleAccountsInfo(
           bidStates
         );
-        console.log(accountInfos);
         bidState = accountInfos[0]
           ? BidState.decode(accountInfos[0].data).toJSON()
           : undefined;

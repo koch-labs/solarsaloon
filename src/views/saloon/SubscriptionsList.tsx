@@ -43,7 +43,7 @@ export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
               <Table.Row key={s.id}>
                 <Table.RowHeaderCell>
                   <Flex gap={"2"}>
-                    {s.owner === wallet.publicKey?.toString() ? (
+                    {s.currentOwner === wallet.publicKey?.toString() ? (
                       <Badge color="blue">Yours</Badge>
                     ) : s.tokenState.ownerBidState === null ? (
                       <Badge color="green">Claimable</Badge>

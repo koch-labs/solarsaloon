@@ -1,25 +1,17 @@
 import { Button, Dialog, Flex, Text, TextField } from "@radix-ui/themes";
 import { tokens } from "../../utils/tokens";
 import { useCallback, useMemo, useState } from "react";
-import {
-  LAMPORTS_PER_SOL,
-  PublicKey,
-  SystemProgram,
-  Transaction,
-} from "@solana/web3.js";
+import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { getConfigKey, builders as rentBuilders } from "@koch-labs/rent-nft";
 import { AnchorProvider, BN } from "@coral-xyz/anchor";
 import { FullSubscription } from "../../hooks/useSubscription";
 import { Fetchable } from "../../hooks/useSaloon";
 import {
-  NATIVE_MINT_2022,
-  TOKEN_2022_PROGRAM_ID,
   createAssociatedTokenAccountIdempotentInstruction,
   createSyncNativeInstruction,
   getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
-import getConfig from "next/config";
 
 export default function DepositFundsModal({
   setOpen,

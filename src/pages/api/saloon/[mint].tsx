@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { Saloon, Subscription, User } from "../../../models/types";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { BidState, TokenState, getTokenStateKey } from "@koch-labs/rent-nft";
+import { TOKEN_2022_PROGRAM_ID, getAccount } from "@solana/spl-token";
 
 export default async function handler(
   request: NextApiRequest,
@@ -47,34 +48,32 @@ export default async function handler(
     const tokenStates = subsAccounts.map((a) =>
       TokenState.decode(a.data).toJSON()
     );
-    const subscriptions: Subscription[] = subscriptionsQuery.rows.map((r) => ({
-      id: r.id,
-      tokenMint: r.tokenmint,
-      lastPost: r.lastpost,
-      tokenState: tokenStates.find((s) => s.tokenMint === r.tokenmint),
-    }));
+
+    const subscriptions: Subscription[] = await Promise.all(
+      subscriptionsQuery.rows.map(async (r) => {
+        const largestOwners = await connection.getTokenLargestAccounts(
+          new PublicKey(r.tokenmint)
+        );
+        const currentOwner = (
+          await getAccount(
+            connection,
+            largestOwners.value[0].address,
+            undefined,
+            TOKEN_2022_PROGRAM_ID
+          )
+        ).owner.toString();
+
+        return {
+          id: r.id,
+          tokenMint: r.tokenmint,
+          lastPost: r.lastpost,
+          tokenState: tokenStates.find((s) => s.tokenMint === r.tokenmint),
+          currentOwner,
+        };
+      })
+    );
 
     // Check if the querier owns any subscriptions
-    const rawToken = request.headers.authorization.split("Bearer ")[1];
-    const user = jwt.decode(rawToken) as User;
-    if (user?.publicKey) {
-      const balancesResponse = await fetch(
-        `${
-          process.env.SOLANA_NETWORK === "devnet"
-            ? process.env.HELIUS_API_DEVNET
-            : process.env.HELIUS_API_MAINNET
-        }/v0/addresses/${user.publicKey}/balances?api-key=${
-          process.env.HELIUS_KEY
-        }`
-      );
-      const { tokens } = await balancesResponse.json();
-      subscriptions.forEach((s) => {
-        if (tokens.find((token) => token.mint === s.tokenMint)) {
-          s.owner = user.publicKey;
-        }
-      });
-    }
-
     const rawSaloon = saloonQuery.rows[0];
     const saloon: Saloon = {
       id: rawSaloon.id,
