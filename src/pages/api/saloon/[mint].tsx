@@ -2,13 +2,18 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { sql } from "@vercel/postgres";
 import jwt from "jsonwebtoken";
 import { Saloon, Subscription, User } from "../../../models/types";
+import { Connection, PublicKey } from "@solana/web3.js";
+import { BidState, TokenState, getTokenStateKey } from "@koch-labs/rent-nft";
 
 export default async function handler(
   request: NextApiRequest,
   response: NextApiResponse
 ) {
   try {
-    const { mint } = request.query;
+    const { limit, page, mint } = Object.assign(
+      { limit: 20, page: 0 },
+      request.query
+    );
 
     const saloonQuery =
       await sql`SELECT * FROM users AS u JOIN saloons AS s ON s.ownerid = u.id WHERE collectionMint = ${
@@ -22,11 +27,31 @@ export default async function handler(
     }
 
     const subscriptionsQuery =
-      await sql`SELECT * FROM saloons JOIN subscriptions ON saloons.id = subscriptions.saloonId;`;
+      await sql`SELECT * FROM saloons JOIN subscriptions ON saloons.id = subscriptions.saloonId LIMIT ${limit} OFFSET ${
+        limit * page
+      };`;
+
+    // Fetch token states for each subscription
+    const connection = new Connection(
+      (process.env.SOLANA_NETWORK === "devnet"
+        ? process.env.HELIUS_RPC_DEVNET
+        : process.env.HELIUS_RPC_MAINNET) +
+        "?api-key=" +
+        process.env.HELIUS_KEY
+    );
+    const subsAccounts = await connection.getMultipleAccountsInfo(
+      subscriptionsQuery.rows.map((r) =>
+        getTokenStateKey(new PublicKey(mint), new PublicKey(r.tokenmint))
+      )
+    );
+    const tokenStates = subsAccounts.map((a) =>
+      TokenState.decode(a.data).toJSON()
+    );
     const subscriptions: Subscription[] = subscriptionsQuery.rows.map((r) => ({
       id: r.id,
       tokenMint: r.tokenmint,
       lastPost: r.lastpost,
+      tokenState: tokenStates.find((s) => s.tokenMint === r.tokenmint),
     }));
 
     // Check if the querier owns any subscriptions

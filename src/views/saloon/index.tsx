@@ -25,12 +25,12 @@ import { useUser } from "../../contexts/UserContextProvider";
 import CreateSubscription from "./CreateSubscription";
 import useSaloon from "../../hooks/useSaloon";
 import { SubscriptionsList } from "./SubscriptionsList";
+import { shortKey } from "../../utils";
 
 const SaloonView: React.FC = () => {
   const router = useRouter();
   const wallet = useWallet();
-  const { isSignedIn, token, user } = useUser();
-  const { connection } = useConnection();
+  const { user } = useUser();
   const saloonMint = router.query.mint as string;
   const saloon = useSaloon(saloonMint);
 
@@ -43,9 +43,11 @@ const SaloonView: React.FC = () => {
               <ArrowLeftIcon width={32} height={32} strokeWidth={5} />
             </IconButton>
           </Link>
-          <Card className="flex flex-col gap-4">
+          <Card className="flex flex-col gap-4 items-stretch">
             <Flex gap={"3"} direction={"column"}>
-              <Heading>Saloon {router.query.mint}</Heading>
+              <Heading align="center">
+                Saloon {shortKey(router.query.mint as string)}
+              </Heading>
               {saloon &&
               wallet?.publicKey &&
               user?.publicKey &&

@@ -158,7 +158,7 @@ const CreateSaloon: React.FC = () => {
       // await connection.sendRawTransaction(tx);
 
       // TODO: Let server handle tx exchange
-      await fetch("/api/saloon", {
+      await fetch("/api/create/saloon", {
         method: "POST",
         body: JSON.stringify({
           collectionMint: collectionMintKeypair.publicKey,

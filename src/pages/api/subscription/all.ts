@@ -1,8 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { sql } from "@vercel/postgres";
-import jwt from "jsonwebtoken";
-import { User } from "../../contexts/UserContextProvider";
-import { Saloon } from "../../views/home";
 
 export default async function handler(
   request: NextApiRequest,

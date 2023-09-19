@@ -1,3 +1,4 @@
+import { PublicKey } from "@solana/web3.js";
 import { format } from "date-fns";
 
 // Concatenates classes into a single className string
@@ -27,4 +28,8 @@ const numberToCurrencyString = (number: number) =>
  */
 const clamp = (current, min, max) => Math.min(Math.max(current, min), max);
 
-export { cn, formatDate, numberToCurrencyString, clamp };
+const shortKey = (key: PublicKey | string) => {
+  const str = key.toString();
+  return str.slice(0, 4) + "..." + str.slice(str.length - 4, str.length);
+};
+export { cn, formatDate, numberToCurrencyString, clamp, shortKey };

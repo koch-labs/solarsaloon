@@ -75,7 +75,7 @@ export const HomeView: FC = ({}) => {
 
   useEffect(() => {
     async function fetchSaloons() {
-      const { saloons } = await (await fetch("/api/saloons")).json();
+      const { saloons } = await (await fetch("/api/saloon/all")).json();
       setSaloons(
         saloons.map((s) => ({
           id: s.id,

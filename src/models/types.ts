@@ -1,3 +1,5 @@
+import { TokenStateJSON } from "@koch-labs/rent-nft";
+
 export type EndpointTypes = "mainnet" | "devnet" | "localnet";
 
 export interface User {
@@ -19,5 +21,6 @@ export interface Subscription {
   id: number;
   tokenMint: string;
   lastPost: string;
+  tokenState: TokenStateJSON;
   owner?: string;
 }

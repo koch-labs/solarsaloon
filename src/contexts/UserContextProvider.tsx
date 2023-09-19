@@ -7,6 +7,7 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -77,6 +78,17 @@ export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setToken(undefined);
     setDefaultToken(undefined);
   }, [setDefaultToken, setDefaultUser]);
+
+  // Log off when changing user
+  useEffect(() => {
+    if (
+      publicKey &&
+      user?.publicKey &&
+      publicKey.toString() !== user.publicKey
+    ) {
+      logOff();
+    }
+  }, [publicKey, logOff, user]);
 
   return (
     <UserContext.Provider value={{ signIn, logOff, user, token, isSignedIn }}>

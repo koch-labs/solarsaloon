@@ -1,5 +1,5 @@
 import React from "react";
-import { DropdownMenu, Tooltip } from "@radix-ui/themes";
+import { DropdownMenu, Text, Tooltip } from "@radix-ui/themes";
 import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
@@ -8,6 +8,7 @@ import { useUser } from "../../../contexts/UserContextProvider";
 import Link from "next/link";
 import { CheckCircledIcon, CrossCircledIcon } from "@radix-ui/react-icons";
 import { useNetworkConfiguration } from "../../../contexts/NetworkConfigurationProvider";
+import { shortKey } from "../../../utils";
 
 const AccountNav: React.FC = () => {
   const { setNetworkConfiguration } = useNetworkConfiguration();
@@ -42,7 +43,8 @@ const AccountNav: React.FC = () => {
           <DropdownMenu.Separator className="DropdownMenuSeparator" />
 
           <DropdownMenu.Label className="DropdownMenuLabel">
-            Authentication
+            Authentication <br />
+            {shortKey(wallet?.publicKey)}
           </DropdownMenu.Label>
           {isSignedIn ? (
             <DropdownMenu.Item color="crimson" onClick={() => logOff()}>
