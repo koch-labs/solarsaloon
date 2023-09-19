@@ -8,14 +8,17 @@ import {
   Heading,
 } from "@radix-ui/themes";
 import { EnterIcon } from "@radix-ui/react-icons";
-
+import numeral from "numeral";
 import Link from "next/link";
 import { Saloon } from "../../models/types";
 import { shortKey } from "../../utils";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { tokens } from "../../utils/tokens";
 
 export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
   const wallet = useWallet();
+  const token = tokens.find((t) => t.publicKey.toString() === saloon.taxMint);
+
   return (
     <Card>
       <Heading align="center" size="5">
@@ -52,7 +55,9 @@ export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
                   </Flex>
                 </Table.RowHeaderCell>
                 <Table.Cell>
-                  {Number(s.tokenState?.currentSellingPrice || 0)}
+                  {numeral(s.tokenState?.currentSellingPrice || "0")
+                    .divide(10 ** (token.decimals || 0))
+                    .format("0.0a")}
                 </Table.Cell>
                 <Table.Cell>
                   {new Date(s.lastPost).valueOf() === -3600000

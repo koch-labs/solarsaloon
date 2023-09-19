@@ -63,6 +63,22 @@ export default function BuyTokenModal({
         TOKEN_2022_PROGRAM_ID
       )
     );
+
+    if (!subscription.bidState) {
+      tx.add(
+        await rentBuilders
+          .createBid({
+            provider,
+            collectionMint,
+            authoritiesGroup: new PublicKey(
+              subscription.saloon.authoritiesGroup
+            ),
+            tokenMint,
+          })
+          .builder.transaction()
+      );
+    }
+
     tx.add(
       await rentBuilders
         .updateBid({
@@ -71,33 +87,6 @@ export default function BuyTokenModal({
           tokenMint,
         })
         .builder.transaction()
-    );
-    console.log(subscription.ownerBidState);
-    console.log(
-      getAssociatedTokenAddressSync(
-        tokenMint,
-        wallet.publicKey,
-        true,
-        TOKEN_2022_PROGRAM_ID
-      ),
-      getAssociatedTokenAddressSync(
-        tokenMint,
-        wallet.publicKey,
-        true,
-        TOKEN_PROGRAM_ID
-      ),
-      getAssociatedTokenAddressSync(
-        token.publicKey,
-        wallet.publicKey,
-        true,
-        TOKEN_2022_PROGRAM_ID
-      ),
-      getAssociatedTokenAddressSync(
-        token.publicKey,
-        wallet.publicKey,
-        true,
-        TOKEN_PROGRAM_ID
-      )
     );
 
     if (!subscription.ownerBidState) {

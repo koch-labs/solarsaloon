@@ -1,6 +1,7 @@
 import numeral from "numeral";
 import useSubscription from "../../hooks/useSubscription";
 import {
+  Badge,
   Button,
   Card,
   Container,
@@ -36,7 +37,7 @@ export default function ManageSubscription({ mint }: { mint: string }) {
     <Container className="content-center">
       <Flex gap="2" direction="column">
         <Flex align="start" justify="between">
-          <Link href={`/saloon/${subscription.saloon.collectionMint}`}>
+          <Link href={`/saloon/${subscription.saloon?.collectionMint}`}>
             <IconButton variant="ghost">
               <ArrowLeftIcon width={32} height={32} strokeWidth={5} />
             </IconButton>
@@ -70,10 +71,19 @@ export default function ManageSubscription({ mint }: { mint: string }) {
                       .format("0.0a")}
                   </Text>
                   <Text>
-                    Owner&apos;s bid:{" "}
-                    {subscription.tokenState?.ownerBidState
-                      ? shortKey(subscription.tokenState.ownerBidState)
-                      : "???"}
+                    Owner:{" "}
+                    {subscription.subscription?.currentOwner ===
+                    wallet?.publicKey?.toString() ? (
+                      <Link
+                        href={getExplorerUrl(
+                          subscription.subscription?.currentOwner
+                        )}
+                      >
+                        <Badge color="blue">You</Badge>
+                      </Link>
+                    ) : (
+                      shortKey(subscription.tokenState?.ownerBidState)
+                    )}
                   </Text>
                   <Text>
                     Subscription mint:{" "}
@@ -81,24 +91,27 @@ export default function ManageSubscription({ mint }: { mint: string }) {
                       ? shortKey(subscription.tokenState.tokenMint)
                       : null}
                   </Text>
-                  <Flex justify="center">
-                    <Button
-                      color="green"
-                      disabled={(
-                        new BN(subscription.bidState?.amount) || new BN(0)
-                      ).lt(
-                        new BN(subscription.tokenState?.currentSellingPrice)
-                      )}
-                      onClick={() => setOpenBuy(true)}
-                    >
-                      Buy
-                    </Button>
-                    <BuyTokenModal
-                      open={openBuy}
-                      setOpen={setOpenBuy}
-                      subscription={subscription}
-                    />
-                  </Flex>
+                  {subscription.subscription?.currentOwner !==
+                  wallet?.publicKey?.toString() ? (
+                    <Flex justify="center">
+                      <Button
+                        color="green"
+                        disabled={(
+                          new BN(subscription.bidState?.amount) || new BN(0)
+                        ).lt(
+                          new BN(subscription.tokenState?.currentSellingPrice)
+                        )}
+                        onClick={() => setOpenBuy(true)}
+                      >
+                        Buy
+                      </Button>
+                      <BuyTokenModal
+                        open={openBuy}
+                        setOpen={setOpenBuy}
+                        subscription={subscription}
+                      />
+                    </Flex>
+                  ) : null}
                 </Flex>
               </Card>
               <Flex wrap={"wrap"} className="justify-around">
@@ -106,14 +119,10 @@ export default function ManageSubscription({ mint }: { mint: string }) {
                   <Flex direction="column">
                     <Heading size={"3"}>Your bid</Heading>
                     <Text>
-                      Owner:{" "}
-                      {wallet.publicKey ? (
-                        <Link href={getExplorerUrl(wallet.publicKey)}>
-                          <Text weight={"light"}>View in explorer</Text>
-                        </Link>
-                      ) : (
-                        "Nobody"
-                      )}
+                      Owner:
+                      <Link href={getExplorerUrl(wallet.publicKey)}>
+                        <Badge color="blue">You</Badge>
+                      </Link>
                     </Text>
                     <Text>
                       Amount deposited:{" "}
@@ -155,17 +164,20 @@ export default function ManageSubscription({ mint }: { mint: string }) {
                   <Flex direction="column">
                     <Heading size={"3"}>The owner&apos;s bid</Heading>
                     <Text>
-                      Owner:{" "}
-                      {subscription.ownerBidState?.bidder ? (
-                        <Link
-                          href={getExplorerUrl(
-                            subscription.ownerBidState.bidder
-                          )}
-                        >
-                          <Text weight={"light"}>View in explorer</Text>
+                      Owner:
+                      {subscription.ownerBidState?.bidder ===
+                      wallet?.publicKey?.toString() ? (
+                        <Link href={getExplorerUrl(wallet.publicKey)}>
+                          <Badge color="blue">You</Badge>
                         </Link>
                       ) : (
-                        "Nobody"
+                        <Link
+                          href={getExplorerUrl(
+                            subscription.ownerBidState?.bidder
+                          )}
+                        >
+                          {shortKey(subscription.ownerBidState?.bidder)}
+                        </Link>
                       )}
                     </Text>
                     <Text>
