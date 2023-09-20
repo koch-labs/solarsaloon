@@ -92,6 +92,7 @@ export default async function handler(
       const user = jwt.decode(rawToken) as User;
       let bidState: BidStateJSON, ownerBidState: BidStateJSON;
       let userBalance = 0;
+      let posts = [];
       if (user?.publicKey) {
         const bidStates = [
           getBidStateKey(
@@ -124,6 +125,26 @@ export default async function handler(
           );
           userBalance = userAccount.value.uiAmount;
         }
+
+        if (user.publicKey === saloon.owner.publicKey) {
+          // User is the creator
+          const postsQuery =
+            await sql`SELECT * FROM posts JOIN subscriptions ON posts.subscriptionId = subscriptions.id`;
+          posts = postsQuery.rows;
+        } else if (user.publicKey === subscription.currentOwner) {
+          // The user is subscribed
+          const postsQuery =
+            await sql`SELECT * FROM posts JOIN subscriptions ON posts.subscriptionId = subscriptions.id WHERE ownerChangedTimestamp > creationTimestamp`;
+          posts = postsQuery.rows;
+        }
+        posts = posts.map((r) => ({
+          id: r.id,
+          creatorId: r.creatorid,
+          saloonId: r.saloonid,
+          content: r.content,
+          draft: r.draft,
+          creationTimestamp: r.creationtimestamp,
+        }));
       }
 
       return response.status(200).json({
@@ -133,6 +154,7 @@ export default async function handler(
         bidState,
         ownerBidState,
         userBalance,
+        posts,
       });
     } catch (err) {
       console.log(err);

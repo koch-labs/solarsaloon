@@ -14,6 +14,7 @@ import {
   createAssociatedTokenAccountIdempotentInstruction,
   getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
+import { useUser } from "../../contexts/UserContextProvider";
 
 export default function BuyTokenModal({
   setOpen,
@@ -28,6 +29,7 @@ export default function BuyTokenModal({
     (e) => e.publicKey.toString() === subscription?.saloon?.taxMint
   );
   const { connection } = useConnection();
+  const user = useUser();
   const wallet = useWallet();
   const provider = useMemo(
     () =>
@@ -134,9 +136,26 @@ export default function BuyTokenModal({
       skipPreflight: true,
     });
     await connection.confirmTransaction(conf);
+
+    await fetch("/api/subscription/change", {
+      body: JSON.stringify({ subscriptionId: subscription.subscription.id }),
+      headers: {
+        authorization: `Bearer ${user.token}`,
+      },
+    });
+
     subscription.reload();
     setOpen(false);
-  }, [connection, wallet, newPrice, provider, subscription, token, setOpen]);
+  }, [
+    connection,
+    wallet,
+    newPrice,
+    provider,
+    subscription,
+    token,
+    setOpen,
+    user,
+  ]);
 
   return (
     <Dialog.Root open={open}>

@@ -1,6 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
 import { useCallback, useEffect, useState } from "react";
-import { Saloon, Subscription } from "../models/types";
+import { Post, Saloon, Subscription } from "../models/types";
 import toast from "react-hot-toast";
 import { useUser } from "../contexts/UserContextProvider";
 import { Fetchable } from "./useSaloon";
@@ -13,6 +13,7 @@ export interface FullSubscription {
   bidState?: BidStateJSON;
   ownerBidState?: BidStateJSON;
   userBalance?: number;
+  posts?: Post[];
 }
 export default function useSubscription(
   tokenMint: string

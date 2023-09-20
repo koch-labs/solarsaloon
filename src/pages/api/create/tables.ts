@@ -40,6 +40,7 @@ export default async function handler(
       tokenMint TEXT UNIQUE NOT NULL,
       saloonId integer NOT NULL,
       lastPost TIMESTAMP,
+      ownerChangedTimestamp TIMESTAMP,
       CONSTRAINT fk_saloon FOREIGN KEY (saloonId) REFERENCES saloons (id) ON DELETE CASCADE
     );
     `
@@ -49,12 +50,12 @@ export default async function handler(
     CREATE TABLE posts (
       id SERIAL PRIMARY KEY,
       creatorId integer NOT NULL,
-      saloonId integer NOT NULL,
+      subscriptionId integer NOT NULL,
       content TEXT NOT NULL,
       draft boolean NOT NULL,
       creationTimestamp TIMESTAMP NOT NULL,
       CONSTRAINT fk_creator FOREIGN KEY (creatorId) REFERENCES users (id) ON DELETE CASCADE,
-      CONSTRAINT fk_saloon FOREIGN KEY (saloonId) REFERENCES saloons (id) ON DELETE CASCADE
+      CONSTRAINT fk_subscription FOREIGN KEY (subscriptionId) REFERENCES subscriptions (id) ON DELETE CASCADE
     );
     `
     );

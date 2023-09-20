@@ -25,3 +25,12 @@ export interface Subscription {
   tokenState: TokenStateJSON;
   currentOwner: string;
 }
+
+export interface Post {
+  id: number;
+  creatorId: number;
+  saloonId: number;
+  content: string;
+  draft: boolean;
+  creationTimestamp: string;
+}

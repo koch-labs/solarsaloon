@@ -20,7 +20,7 @@ export default async function handler(
     }
 
     await sql`UPDATE subscriptions SET lastPost = CURRENT_TIMESTAMP WHERE id = ${subscriptionId} AND saloonId = ${saloonId};`;
-    await sql`INSERT INTO posts (creatorId, saloonId, content, draft, creationTimestamp) VALUES (${user.id}, ${saloonId}, ${content}, false, CURRENT_TIMESTAMP);`;
+    await sql`INSERT INTO posts (creatorId, subscriptionId, content, draft, creationTimestamp) VALUES (${user.id}, ${subscriptionId}, ${content}, false, CURRENT_TIMESTAMP);`;
 
     return response.status(200).json({});
   } catch (error) {

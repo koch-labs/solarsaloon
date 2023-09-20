@@ -18,7 +18,7 @@ export default async function handler(
       return response.status(403).json({});
     }
 
-    await sql`INSERT INTO subscriptions (tokenMint, saloonId, lastPost) VALUES (${tokenMint}, ${saloon.id}, TO_TIMESTAMP(0));`;
+    await sql`INSERT INTO subscriptions (tokenMint, saloonId) VALUES (${tokenMint}, ${saloon.id});`;
     return response.status(200).json({});
   } catch (error) {
     console.log(error);
