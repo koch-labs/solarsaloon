@@ -20,7 +20,10 @@ export default async function handler(
   response: NextApiResponse
 ) {
   try {
-    const { mint } = request.query;
+    const { limit, page, mint } = Object.assign(
+      { limit: 20, page: 0 },
+      request.query
+    );
 
     const subQuery =
       await sql`SELECT * FROM (SELECT * FROM subscriptions JOIN saloons ON subscriptions.saloonId = saloons.id WHERE tokenMint = ${
@@ -128,13 +131,20 @@ export default async function handler(
 
         if (user.publicKey === saloon.owner.publicKey) {
           // User is the creator
-          const postsQuery =
-            await sql`SELECT * FROM posts JOIN subscriptions ON posts.subscriptionId = subscriptions.id`;
+          const postsQuery = await sql`
+            SELECT * FROM posts JOIN subscriptions ON posts.subscriptionId = subscriptions.id
+            ORDER BY creationTimestamp DESC
+            LIMIT ${limit} OFFSET ${limit * page}
+            `;
           posts = postsQuery.rows;
         } else if (user.publicKey === subscription.currentOwner) {
           // The user is subscribed
-          const postsQuery =
-            await sql`SELECT * FROM posts JOIN subscriptions ON posts.subscriptionId = subscriptions.id WHERE ownerChangedTimestamp > creationTimestamp`;
+          const postsQuery = await sql`
+          SELECT * FROM posts JOIN subscriptions ON posts.subscriptionId = subscriptions.id 
+          WHERE ownerChangedTimestamp > creationTimestamp 
+          ORDER BY creationTimestamp DESC
+          LIMIT ${limit} OFFSET ${limit * page}
+          `;
           posts = postsQuery.rows;
         }
         posts = posts.map((r) => ({
