@@ -138,6 +138,7 @@ export default function BuyTokenModal({
     await connection.confirmTransaction(conf);
 
     await fetch("/api/subscription/change", {
+      method: "POST",
       body: JSON.stringify({ subscriptionId: subscription.subscription.id }),
       headers: {
         authorization: `Bearer ${user.token}`,
@@ -163,7 +164,11 @@ export default function BuyTokenModal({
         <Dialog.Title>Buy token</Dialog.Title>
         <Dialog.Description size="2" mb="4">
           Buying the token will debit your account of{" "}
-          {numeral(subscription?.tokenState?.currentSellingPrice)
+          {numeral(
+            subscription.tokenState?.ownerBidState
+              ? subscription.tokenState?.currentSellingPrice
+              : "0"
+          )
             .divide(10 ** (token?.decimals || 0))
             .format("0.0a")}{" "}
           ${token?.symbol || "???"}.

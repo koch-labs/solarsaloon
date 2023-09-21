@@ -132,16 +132,20 @@ export default async function handler(
         if (user.publicKey === saloon.owner.publicKey) {
           // User is the creator
           const postsQuery = await sql`
-            SELECT * FROM posts JOIN subscriptions ON posts.subscriptionId = subscriptions.id
-            ORDER BY creationTimestamp DESC
-            LIMIT ${limit} OFFSET ${limit * page}
-            `;
+          SELECT * FROM posts JOIN saloons ON posts.saloonId = saloons.id
+          WHERE saloonId = ${saloon.id}
+          ORDER BY creationTimestamp DESC
+          LIMIT ${limit} OFFSET ${limit * page}
+          `;
           posts = postsQuery.rows;
         } else if (user.publicKey === subscription.currentOwner) {
           // The user is subscribed
+          // Can only view post starting from the moment it joined
           const postsQuery = await sql`
-          SELECT * FROM posts JOIN subscriptions ON posts.subscriptionId = subscriptions.id 
-          WHERE ownerChangedTimestamp > creationTimestamp 
+          SELECT * FROM posts AS P JOIN saloons AS sa ON p.saloonId = sa.id JOIN subscriptions AS su ON p.saloonId = su.saloonId
+          WHERE p.saloonId = ${
+            saloon.id
+          } AND ownerChangedTimestamp <= creationTimestamp 
           ORDER BY creationTimestamp DESC
           LIMIT ${limit} OFFSET ${limit * page}
           `;

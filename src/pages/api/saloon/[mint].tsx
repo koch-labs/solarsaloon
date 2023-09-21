@@ -21,22 +21,22 @@ export default async function handler(
       { limit: 20, page: 0 },
       request.query
     );
+    const collectionMint = mint as string;
 
     const saloonQuery =
-      await sql`SELECT * FROM users AS u JOIN saloons AS s ON s.ownerid = u.id WHERE collectionMint = ${
-        mint as string
-      }`;
+      await sql`SELECT * FROM users AS u JOIN saloons AS s ON s.ownerid = u.id WHERE collectionMint = ${collectionMint}`;
 
     if (saloonQuery.rowCount === 0) {
       return response.status(404).json({
-        message: `Found no saloon that had ${mint} as a collection mint`,
+        message: `Found no saloon that had ${collectionMint} as a collection mint`,
       });
     }
 
-    const subscriptionsQuery =
-      await sql`SELECT * FROM saloons JOIN subscriptions ON saloons.id = subscriptions.saloonId LIMIT ${limit} OFFSET ${
-        limit * page
-      };`;
+    const subscriptionsQuery = await sql`
+    SELECT * FROM saloons JOIN subscriptions ON saloons.id = subscriptions.saloonId
+    WHERE collectionMint = ${collectionMint}
+    LIMIT ${limit} OFFSET ${limit * page};
+    `;
 
     // Fetch token states for each subscription
     const connection = new Connection(
@@ -54,9 +54,9 @@ export default async function handler(
     ]);
     const [configAccount, ...subsAccounts] = accounts;
     const config = CollectionConfig.decode(configAccount.data).toJSON();
-    const tokenStates = subsAccounts.map((a) =>
-      TokenState.decode(a.data).toJSON()
-    );
+    const tokenStates = subsAccounts
+      .filter(Boolean)
+      .map((a) => TokenState.decode(a.data).toJSON());
 
     const subscriptions: Subscription[] = await Promise.all(
       subscriptionsQuery.rows.map(async (r) => {

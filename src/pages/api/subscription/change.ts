@@ -12,7 +12,8 @@ export default async function handler(
     const rawToken = request.headers.authorization.split("Bearer ")[1];
     jwt.verify(rawToken, process.env.JWT_KEY);
 
-    await sql`UPDATE subscription SET ownerChangedTimestamp=CURRENT_TIMESTAMP WHERE id = ${subscriptionId};`;
+    await sql`UPDATE subscriptions SET ownerChangedTimestamp=CURRENT_TIMESTAMP WHERE id = ${subscriptionId};`;
+    response.status(200).json({});
   } catch (error) {
     console.log(error);
     return response.status(500).json({ error });

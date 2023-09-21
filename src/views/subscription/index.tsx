@@ -14,24 +14,22 @@ import {
 import Link from "next/link";
 import { ArrowLeftIcon, QuestionMarkCircledIcon } from "@radix-ui/react-icons";
 import { shortKey } from "../../utils";
-import { BN } from "@coral-xyz/anchor";
 import { getExplorerUrl } from "../../utils/explorer";
-import { useWallet } from "@solana/wallet-adapter-react";
 import DepositFundsModal from "./DepositFundsModal";
 import { useState } from "react";
 import { tokens } from "../../utils/tokens";
-import BuyTokenModal from "./BuyTokenModal";
 import CreatePostCard from "./CreatePostCard";
 import { PostsList } from "./PostsList";
 import { useUser } from "../../contexts/UserContextProvider";
+import SubscriptionDescriptionCard from "./SubscriptionDescriptionCard";
 
 export default function ManageSubscription({ mint }: { mint: string }) {
   const { user } = useUser();
   const subscription = useSubscription(mint as string);
+  console.log(subscription);
   const token = tokens.find(
     (t) => t.publicKey.toString() === subscription?.saloon?.taxMint
   );
-  const [openBuy, setOpenBuy] = useState(false);
   const [openOwnerDeposit, setOpenOwnerDeposit] = useState(false);
   const [openSelfDeposit, setOpenSelfDeposit] = useState(false);
 
@@ -75,73 +73,7 @@ export default function ManageSubscription({ mint }: { mint: string }) {
                 </Popover.Content>
               </Popover.Root>
             </Flex>
-            <Card>
-              <Flex direction="column">
-                <Heading size={"3"}>Subscription</Heading>
-                <Text>
-                  Last post: {subscription.subscription?.lastPost || "Never"}
-                </Text>
-              </Flex>
-            </Card>
-            <Card>
-              <Flex direction="column">
-                <Heading size={"3"}>Token</Heading>
-                <Text>
-                  Total amount deposited:{" "}
-                  {numeral(subscription.tokenState?.deposited || "0")
-                    .divide(10 ** (token?.decimals || 0))
-                    .format("0.0a")}
-                </Text>
-                <Text>
-                  Current selling price:{" "}
-                  {numeral(subscription.tokenState?.currentSellingPrice || "0")
-                    .divide(10 ** (token?.decimals || 0))
-                    .format("0.0a")}
-                </Text>
-                <Text>
-                  Owner:{" "}
-                  {subscription.subscription?.currentOwner ===
-                  user?.publicKey ? (
-                    <Link
-                      href={getExplorerUrl(
-                        subscription.subscription?.currentOwner
-                      )}
-                    >
-                      <Badge color="blue">You</Badge>
-                    </Link>
-                  ) : (
-                    shortKey(subscription.tokenState?.ownerBidState)
-                  )}
-                </Text>
-                <Text>
-                  Subscription mint:{" "}
-                  {subscription.tokenState?.tokenMint
-                    ? shortKey(subscription.tokenState.tokenMint)
-                    : null}
-                </Text>
-                {user &&
-                subscription.subscription?.currentOwner !== user.publicKey ? (
-                  <Flex justify="center">
-                    <Button
-                      color="green"
-                      disabled={(
-                        new BN(subscription.bidState?.amount) || new BN(0)
-                      ).lt(
-                        new BN(subscription.tokenState?.currentSellingPrice)
-                      )}
-                      onClick={() => setOpenBuy(true)}
-                    >
-                      Buy
-                    </Button>
-                    <BuyTokenModal
-                      open={openBuy}
-                      setOpen={setOpenBuy}
-                      subscription={subscription}
-                    />
-                  </Flex>
-                ) : null}
-              </Flex>
-            </Card>
+            <SubscriptionDescriptionCard subscription={subscription} />
             <Flex wrap={"wrap"} className="justify-around">
               <Card>
                 <Flex direction="column">
@@ -156,7 +88,8 @@ export default function ManageSubscription({ mint }: { mint: string }) {
                     Amount deposited:{" "}
                     {numeral(subscription.bidState?.amount || "0")
                       .divide(10 ** (token?.decimals || 0))
-                      .format("0.0a")}
+                      .format("0.00a")}{" "}
+                    {token?.symbol}
                   </Text>
                   <Text>
                     Last update:{" "}
@@ -213,7 +146,8 @@ export default function ManageSubscription({ mint }: { mint: string }) {
                     Amount deposited:{" "}
                     {numeral(subscription.ownerBidState?.amount || "0")
                       .divide(10 ** (token?.decimals || 0))
-                      .format("0.0a")}
+                      .format("0.00a")}{" "}
+                    {token?.symbol}
                   </Text>
                   <Text>
                     Last update:{" "}

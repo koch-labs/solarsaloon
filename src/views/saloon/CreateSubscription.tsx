@@ -68,7 +68,7 @@ const CreateSubscription: React.FC<{
 
       tx.sign(tokenMintKeypair);
       const signedTx = await wallet.signTransaction(tx);
-      await connection.sendRawTransaction(signedTx.serialize());
+      const conf = await connection.sendRawTransaction(signedTx.serialize());
 
       await fetch("/api/create/subscription", {
         method: "POST",
@@ -77,6 +77,8 @@ const CreateSubscription: React.FC<{
           Authorization: `Bearer ${token}`,
         },
       });
+
+      await connection.confirmTransaction(conf);
 
       saloon.reload();
     } catch (err) {

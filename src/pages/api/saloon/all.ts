@@ -14,7 +14,17 @@ export default async function handler(
       await sql`SELECT * FROM saloons JOIN users on users.id = saloons.ownerid LIMIT ${limit} OFFSET ${
         limit * page
       }`;
-    return response.status(200).json({ saloons: query.rows });
+    return response.status(200).json({
+      saloons: query.rows.map((s) => ({
+        id: s.id,
+        collectionMint: s.collectionmint,
+        owner: {
+          id: s.ownerid,
+          lastLogin: s.lastlogin,
+          publicKey: s.publickey,
+        },
+      })),
+    });
   } catch (error) {
     console.log(error);
     return response.status(500).json({ error });

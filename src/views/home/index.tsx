@@ -54,9 +54,9 @@ export const SaloonsList = ({ saloons }: { saloons: Saloon[] }) => {
               <Table.RowHeaderCell>
                 {s.collectionMint.toString()}
               </Table.RowHeaderCell>
-              <Table.Cell>{s.owner.publicKey.toString()}</Table.Cell>
+              <Table.Cell>{s.owner.publicKey}</Table.Cell>
               <Table.Cell>
-                <Link href={`/saloon/${s.collectionMint.toString()}`}>
+                <Link href={`/saloon/${s.collectionMint}`}>
                   <Button variant="soft">
                     <EnterIcon />
                   </Button>
@@ -76,17 +76,7 @@ export const HomeView: FC = ({}) => {
   useEffect(() => {
     async function fetchSaloons() {
       const { saloons } = await (await fetch("/api/saloon/all")).json();
-      setSaloons(
-        saloons.map((s) => ({
-          id: s.id,
-          collectionMint: new PublicKey(s.collectionmint),
-          owner: {
-            id: s.ownerid,
-            lastLogin: s.lastlogin,
-            publicKey: new PublicKey(s.publickey),
-          },
-        }))
-      );
+      setSaloons(saloons);
     }
 
     fetchSaloons();

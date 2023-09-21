@@ -176,8 +176,9 @@ const CreateSaloon: React.FC = () => {
       );
 
       tx.sign(collectionMintKeypair);
-      await wallet.sendTransaction(tx, connection, { skipPreflight: true });
-      // await connection.sendRawTransaction(tx);
+      const conf = await wallet.sendTransaction(tx, connection, {
+        skipPreflight: true,
+      });
 
       // TODO: Let server handle tx exchange
       await fetch("/api/create/saloon", {
@@ -192,6 +193,8 @@ const CreateSaloon: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      await connection.confirmTransaction(conf);
 
       router.push(`/saloon/${collectionMintKeypair.publicKey.toString()}`);
     } catch (err) {
@@ -275,7 +278,7 @@ const CreateSaloon: React.FC = () => {
                   min={3}
                   max={Math.log10(86400000 * 21)}
                   step={0.001}
-                  defaultValue={[taxRate]}
+                  defaultValue={[Math.log10(postCooldown)]}
                   onValueChange={(e) => setPostCooldown(Math.round(10 ** e[0]))}
                 />
                 <Text weight="light" size="2" color="gray">

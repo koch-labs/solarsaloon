@@ -48,7 +48,7 @@ export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
                   <Flex gap={"2"}>
                     {s.currentOwner === wallet.publicKey?.toString() ? (
                       <Badge color="blue">Yours</Badge>
-                    ) : s.tokenState.ownerBidState === null ? (
+                    ) : s.tokenState?.ownerBidState === null ? (
                       <Badge color="green">Claimable</Badge>
                     ) : null}
                     <Text>{shortKey(s.tokenMint)}</Text>
