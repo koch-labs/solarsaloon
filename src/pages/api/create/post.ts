@@ -8,7 +8,7 @@ export default async function handler(
   response: NextApiResponse
 ) {
   try {
-    const { subscriptionId, saloonId, content } = JSON.parse(request.body);
+    const { tokenMint, collectionMint, content } = JSON.parse(request.body);
     const rawToken = request.headers.authorization.split("Bearer ")[1];
     const user = jwt.verify(rawToken, process.env.JWT_KEY) as User;
 
@@ -16,20 +16,26 @@ export default async function handler(
     const cdQuery = await sql`
     SELECT COUNT(*) FROM subscriptions JOIN saloons ON subscriptions.saloonId = saloons.id
     WHERE
-    subscriptions.id = ${subscriptionId} AND
+    subscriptions.tokenMint = ${tokenMint} AND
     subscriptions.lastPost + (saloons.postCooldown || ' milliseconds')::interval <= CURRENT_TIMESTAMP
     `;
     const ownerQuery = await sql`
     SELECT COUNT(*) FROM saloons
-    WHERE id = ${saloonId} AND ownerId = ${user.id}
+    WHERE collectionMint = ${collectionMint} AND owner = ${user.publicKey}
     `;
     console.log(ownerQuery, cdQuery);
     if (cdQuery.rows[0].count === "0" && ownerQuery.rows[0].count === "0") {
       return response.status(425).json({});
     }
 
-    await sql`UPDATE subscriptions SET lastPost = CURRENT_TIMESTAMP WHERE id = ${subscriptionId} AND saloonId = ${saloonId};`;
-    await sql`INSERT INTO posts (creatorId, saloonId, content, draft, creationTimestamp) VALUES (${user.id}, ${saloonId}, ${content}, false, CURRENT_TIMESTAMP);`;
+    await sql`
+    UPDATE subscriptions SET lastPost = CURRENT_TIMESTAMP
+    WHERE collectionMint = ${collectionMint} AND tokenMint = ${tokenMint};
+    `;
+    await sql`
+    INSERT INTO posts (creator, collectionMint, content, draft, creationTimestamp)
+    VALUES (${user.publicKey}, ${collectionMint}, ${content}, false, CURRENT_TIMESTAMP);
+    `;
 
     return response.status(200).json({});
   } catch (error) {

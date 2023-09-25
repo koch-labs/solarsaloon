@@ -8,18 +8,25 @@ export default async function handler(
   response: NextApiResponse
 ) {
   try {
-    const { collectionMint, authoritiesGroup, taxMint, postCooldown } =
-      JSON.parse(request.body);
+    const { subscription, saloon, mint } = JSON.parse(request.body);
     const rawToken = request.headers.authorization.split("Bearer ")[1];
     const user = jwt.verify(rawToken, process.env.JWT_KEY) as User;
-    await sql`
-    INSERT INTO saloons (collectionMint, owner, authoritiesGroup, taxMint, postCooldown)
-    VALUES (${collectionMint}, ${user.publicKey}, ${authoritiesGroup}, ${taxMint}, ${postCooldown});
-    `;
 
-    const query =
-      await sql`SELECT * FROM saloons WHERE collectionMint = ${collectionMint}`;
-    return response.status(200).json({ saloon: query.rows[0] });
+    if (saloon) {
+      await sql`
+      INSERT INTO saloonMetadata (collectionMint, metadata)
+      VALUES (${mint}, ${saloon});
+      `;
+    } else if (saloon) {
+      await sql`
+      INSERT INTO subscriptionMetadata (tokenMint, metadata)
+      VALUES (${mint}, ${subscription});
+      `;
+    } else {
+      return response.status(408).json({});
+    }
+
+    return response.status(200).json({});
   } catch (error) {
     console.log(error);
     return response.status(500).json({ error });

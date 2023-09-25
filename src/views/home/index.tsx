@@ -7,13 +7,11 @@ import {
   Container,
   Flex,
   Heading,
-  Table,
   Text,
 } from "@radix-ui/themes";
-import { EnterIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
-import { PublicKey } from "@solana/web3.js";
 import { Saloon, User } from "../../models/types";
+import { SaloonsList } from "./SaloonsList";
 
 const CreateSaloonCard = () => {
   return (
@@ -36,40 +34,6 @@ const CreateSaloonCard = () => {
   );
 };
 
-export const SaloonsList = ({ saloons }: { saloons: Saloon[] }) => {
-  return (
-    <Card>
-      <Table.Root>
-        <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Owner</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
-          </Table.Row>
-        </Table.Header>
-
-        <Table.Body className="align-middle">
-          {saloons.map((s) => (
-            <Table.Row key={s.id}>
-              <Table.RowHeaderCell>
-                {s.collectionMint.toString()}
-              </Table.RowHeaderCell>
-              <Table.Cell>{s.owner.publicKey}</Table.Cell>
-              <Table.Cell>
-                <Link href={`/saloon/${s.collectionMint}`}>
-                  <Button variant="soft">
-                    <EnterIcon />
-                  </Button>
-                </Link>
-              </Table.Cell>
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table.Root>
-    </Card>
-  );
-};
-
 export const HomeView: FC = ({}) => {
   const [saloons, setSaloons] = useState<Saloon[]>([]);
 
@@ -82,6 +46,7 @@ export const HomeView: FC = ({}) => {
     fetchSaloons();
   }, []);
 
+  console.log(saloons);
   return (
     <Box className="flex flex-col gap-3">
       <CreateSaloonCard />

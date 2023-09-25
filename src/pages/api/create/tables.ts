@@ -11,11 +11,12 @@ export default async function handler(
     results.push(await sql`DROP TABLE IF EXISTS saloons CASCADE;`);
     results.push(await sql`DROP TABLE IF EXISTS subscriptions CASCADE;`);
     results.push(await sql`DROP TABLE IF EXISTS posts CASCADE;`);
+    results.push(await sql`DROP TABLE IF EXISTS saloonMetadata CASCADE;`);
+    results.push(await sql`DROP TABLE IF EXISTS subscriptionMetadata CASCADE;`);
     results.push(
       await sql`
     CREATE TABLE users (
-      id SERIAL PRIMARY KEY,
-      publicKey TEXT NOT NULL,
+      publicKey TEXT PRIMARY KEY,
       lastLogin TIMESTAMP
     );
     `
@@ -23,25 +24,23 @@ export default async function handler(
     results.push(
       await sql`
     CREATE TABLE saloons (
-      id SERIAL PRIMARY KEY,
-      collectionMint TEXT UNIQUE NOT NULL,
-      ownerId integer NOT NULL,
+      collectionMint TEXT PRIMARY KEY,
+      owner TEXT NOT NULL,
       authoritiesGroup TEXT NOT NULL,
       taxMint TEXT NOT NULL,
       postCooldown integer NOT NULL,
-      CONSTRAINT fk_owner FOREIGN KEY (ownerId) REFERENCES users (id) ON DELETE CASCADE
+      CONSTRAINT fk_owner FOREIGN KEY (owner) REFERENCES users (publicKey) ON DELETE CASCADE
     );
     `
     );
     results.push(
       await sql`
     CREATE TABLE subscriptions (
-      id SERIAL PRIMARY KEY,
-      tokenMint TEXT UNIQUE NOT NULL,
-      saloonId integer NOT NULL,
+      tokenMint TEXT PRIMARY KEY,
+      collectionMint TEXT NOT NULL,
       lastPost TIMESTAMP,
       ownerChangedTimestamp TIMESTAMP,
-      CONSTRAINT fk_saloon FOREIGN KEY (saloonId) REFERENCES saloons (id) ON DELETE CASCADE
+      CONSTRAINT fk_saloon FOREIGN KEY (collectionMint) REFERENCES saloons (collectionMint) ON DELETE CASCADE
     );
     `
     );
@@ -49,13 +48,31 @@ export default async function handler(
       await sql`
     CREATE TABLE posts (
       id SERIAL PRIMARY KEY,
-      creatorId integer NOT NULL,
-      saloonId integer NOT NULL,
+      creator TEXT NOT NULL,
+      collectionMint TEXT NOT NULL,
       content TEXT NOT NULL,
       draft boolean NOT NULL,
       creationTimestamp TIMESTAMP NOT NULL,
-      CONSTRAINT fk_creator FOREIGN KEY (creatorId) REFERENCES users (id) ON DELETE CASCADE,
-      CONSTRAINT fk_saloon FOREIGN KEY (saloonId) REFERENCES saloons (id) ON DELETE CASCADE
+      CONSTRAINT fk_creator FOREIGN KEY (creator) REFERENCES users (publicKey) ON DELETE CASCADE,
+      CONSTRAINT fk_saloon FOREIGN KEY (collectionMint) REFERENCES saloons (collectionMint) ON DELETE CASCADE
+    );
+    `
+    );
+    results.push(
+      await sql`
+    CREATE TABLE saloonMetadata (
+      collectionMint TEXT PRIMARY KEY,
+      metadata JSON NOT NULL,
+      CONSTRAINT fk_saloon FOREIGN KEY (collectionMint) REFERENCES saloons (collectionMint) ON DELETE CASCADE
+    );
+    `
+    );
+    results.push(
+      await sql`
+    CREATE TABLE subscriptionMetadata (
+      tokenMint TEXT PRIMARY KEY,
+      metadata JSON NOT NULL,
+      CONSTRAINT fk_subscription FOREIGN KEY (tokenMint) REFERENCES subscriptions (tokenMint) ON DELETE CASCADE
     );
     `
     );

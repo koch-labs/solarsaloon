@@ -23,8 +23,12 @@ export default async function handler(
     );
     const collectionMint = mint as string;
 
-    const saloonQuery =
-      await sql`SELECT * FROM users AS u JOIN saloons AS s ON s.ownerid = u.id WHERE collectionMint = ${collectionMint}`;
+    const saloonQuery = await sql`
+      SELECT * FROM
+      users AS u
+      JOIN saloons AS s ON s.owner = u.publicKey
+      JOIN saloonMetadata AS m ON m.collectionMint = s.collectionMint
+      WHERE s.collectionMint = ${collectionMint}`;
 
     if (saloonQuery.rowCount === 0) {
       return response.status(404).json({
@@ -33,8 +37,8 @@ export default async function handler(
     }
 
     const subscriptionsQuery = await sql`
-    SELECT * FROM saloons JOIN subscriptions ON saloons.id = subscriptions.saloonId
-    WHERE collectionMint = ${collectionMint}
+    SELECT * FROM saloons AS sa JOIN subscriptions AS su ON sa.collectionMint = su.collectionMint
+    WHERE sa.collectionMint = ${collectionMint}
     LIMIT ${limit} OFFSET ${limit * page};
     `;
 
@@ -85,9 +89,7 @@ export default async function handler(
     // Check if the querier owns any subscriptions
     const rawSaloon = saloonQuery.rows[0];
     const saloon: Saloon = {
-      id: rawSaloon.id,
       owner: {
-        id: rawSaloon.ownerid,
         publicKey: rawSaloon.publickey,
         lastLogin: rawSaloon.lastlogin,
       },
@@ -95,6 +97,7 @@ export default async function handler(
       taxMint: rawSaloon.taxmint,
       authoritiesGroup: rawSaloon.authoritiesgroup,
       config,
+      metadata: rawSaloon.metadata,
       subscriptions,
     };
 

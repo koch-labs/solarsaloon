@@ -14,11 +14,11 @@ export default async function handler(
       JSON.parse(request.body);
 
     // The sender is the saloon's owner
-    if (user.id !== saloon.owner.id) {
+    if (user.publicKey !== saloon.owner.publicKey) {
       return response.status(403).json({});
     }
 
-    await sql`INSERT INTO subscriptions (tokenMint, saloonId) VALUES (${tokenMint}, ${saloon.id});`;
+    await sql`INSERT INTO subscriptions (tokenMint, collectionMint) VALUES (${tokenMint}, ${saloon.collectionMint});`;
     return response.status(200).json({});
   } catch (error) {
     console.log(error);

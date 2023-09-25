@@ -10,6 +10,7 @@ import {
   Select,
   Slider,
   Text,
+  TextArea,
   TextFieldInput,
 } from "@radix-ui/themes";
 import React, { useCallback, useMemo, useState } from "react";
@@ -48,8 +49,9 @@ const CreateSaloon: React.FC = () => {
   );
 
   const [name, setName] = useState<string>();
+  const [description, setDescription] = useState<string>();
   const [taxToken, setTaxToken] = useState<Token>(tokens[0]);
-  const [taxRate, setTaxRate] = useState<number>(1);
+  const [taxRate, setTaxRate] = useState<number>(Math.log10(10000));
   const [postCooldown, setPostCooldown] = useState<number>(86400000);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -155,7 +157,7 @@ const CreateSaloon: React.FC = () => {
         name,
         contentHash: Array(32).fill(0),
         data: createExternalMetadataData(
-          `https://madlads.s3.us-west-2.amazonaws.com/json/9967.json`
+          `https://solarsaloon.com/api/metadata/saloon/${collectionMintKeypair.publicKey.toString()}`
         ),
         mint: collectionMintKeypair.publicKey,
         tokenProgram: TOKEN_2022_PROGRAM_ID,
@@ -193,6 +195,49 @@ const CreateSaloon: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+      await fetch("/api/create/metadata", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          mint: collectionMintKeypair.publicKey.toString(),
+          saloon: {
+            name,
+            description,
+            symbol: "SOLSAL",
+            image: "https://madlads.s3.us-west-2.amazonaws.com/images/9967.png",
+            external_url: "https://solarsaloon.com",
+            seller_fee_basis_points: 0,
+            attributes: [
+              {
+                trait_type: "Creator",
+                value: wallet?.publicKey.toString(),
+              },
+            ],
+            properties: {
+              files: [
+                {
+                  id: "portrait",
+                  uri: "https://madlads.s3.us-west-2.amazonaws.com/images/9967.png",
+                  type: "image/png",
+                },
+              ],
+              category: "image",
+              collection: {
+                name: "Solar Saloons",
+                family: "SOLSAL",
+              },
+              creators: [
+                {
+                  address: wallet?.publicKey.toString(),
+                  share: 100,
+                },
+              ],
+            },
+          },
+        }),
+      });
 
       await connection.confirmTransaction(conf);
 
@@ -213,6 +258,7 @@ const CreateSaloon: React.FC = () => {
     taxToken,
     token,
     postCooldown,
+    description,
   ]);
 
   return (
@@ -232,6 +278,13 @@ const CreateSaloon: React.FC = () => {
                 <TextFieldInput
                   placeholder="My Cool Saloon"
                   onChange={(e) => setName(e.target.value)}
+                />
+              </Flex>
+              <Flex direction="column" width="100%">
+                <Text color="gray">Saloon&apos;s description</Text>
+                <TextArea
+                  placeholder="A short description of what happens in this saloon..."
+                  onChange={(e) => setDescription(e.target.value)}
                 />
               </Flex>
               <Flex direction="column" width="100%">
