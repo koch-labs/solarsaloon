@@ -139,7 +139,7 @@ export default function BuyTokenModal({
 
     await fetch("/api/subscription/change", {
       method: "POST",
-      body: JSON.stringify({ subscriptionId: subscription.subscription.id }),
+      body: JSON.stringify({ tokenMint: subscription.subscription.tokenMint }),
       headers: {
         authorization: `Bearer ${user.token}`,
       },

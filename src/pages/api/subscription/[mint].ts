@@ -25,10 +25,15 @@ export default async function handler(
       request.query
     );
 
-    const subQuery =
-      await sql`SELECT * FROM (SELECT * FROM subscriptions JOIN saloons ON subscriptions.saloonId = saloons.id WHERE tokenMint = ${
-        mint as string
-      }) AS s JOIN users ON users.id = s.ownerId;`;
+    const subQuery = await sql`
+    SELECT * FROM 
+    (SELECT * FROM 
+      subscriptions
+      JOIN saloons ON subscriptions.collectionMint = saloons.collectionMint
+      JOIN saloonMetadata ON subscriptions.collectionMint = saloonMetadata.collectionMint
+      WHERE tokenMint = ${mint as string}
+    ) AS s JOIN users ON users.publicKey = s.owner
+    ;`;
 
     if (subQuery.rowCount === 0) {
       return response.status(404).json({
@@ -70,16 +75,13 @@ export default async function handler(
     ).owner;
 
     const subscription: Subscription = {
-      id: subscriptionRow.id,
       tokenMint: subscriptionRow.tokenmint,
       lastPost: subscriptionRow.lastpost,
       tokenState: tokenState,
       currentOwner: currentOwner.toString(),
     };
     const saloon: Saloon = {
-      id: subscriptionRow.saloonid,
       owner: {
-        id: subscriptionRow.ownerid,
         publicKey: subscriptionRow.publickey,
         lastLogin: subscriptionRow.lastlogin,
       },
@@ -87,6 +89,7 @@ export default async function handler(
       taxMint: subscriptionRow.taxmint,
       authoritiesGroup: subscriptionRow.authoritiesgroup,
       config,
+      metadata: subscriptionRow.metadata,
     };
 
     // Check if the querier has a bidding account or owns the token
@@ -132,8 +135,8 @@ export default async function handler(
         if (user.publicKey === saloon.owner.publicKey) {
           // User is the creator
           const postsQuery = await sql`
-          SELECT * FROM posts JOIN saloons ON posts.saloonId = saloons.id
-          WHERE saloonId = ${saloon.id}
+          SELECT * FROM posts JOIN saloons ON posts.collectionMint = saloons.collectionMint
+          WHERE collectionMint = ${saloon.collectionMint}
           ORDER BY creationTimestamp DESC
           LIMIT ${limit} OFFSET ${limit * page}
           `;
@@ -142,9 +145,9 @@ export default async function handler(
           // The user is subscribed
           // Can only view post starting from the moment it joined
           const postsQuery = await sql`
-          SELECT * FROM posts AS P JOIN saloons AS sa ON p.saloonId = sa.id JOIN subscriptions AS su ON p.saloonId = su.saloonId
-          WHERE p.saloonId = ${
-            saloon.id
+          SELECT * FROM posts AS P JOIN saloons AS sa ON p.collectionMint = sa.collectionMint JOIN subscriptions AS su ON p.collectionMint = su.collectionMint
+          WHERE p.collectionMint = ${
+            saloon.collectionMint
           } AND ownerChangedTimestamp <= creationTimestamp 
           ORDER BY creationTimestamp DESC
           LIMIT ${limit} OFFSET ${limit * page}

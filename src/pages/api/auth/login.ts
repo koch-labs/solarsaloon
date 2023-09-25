@@ -6,6 +6,7 @@ import { utils } from "@coral-xyz/anchor";
 import jwt from "jsonwebtoken";
 import { TOKEN_EXPIRATION_DELAY } from "../../../utils/constants";
 import { User } from "../../../models/types";
+import { parseChallenge } from "../../../utils/auth";
 
 export default async function handler(
   request: NextApiRequest,
@@ -14,7 +15,7 @@ export default async function handler(
   try {
     const { challenge, signature }: { challenge: string; signature: string } =
       JSON.parse(request.body);
-    const [pubkey, timestamp] = challenge.split(" ");
+    const { pubkey, timestamp } = parseChallenge(challenge);
 
     if (Number(timestamp) + TOKEN_EXPIRATION_DELAY <= Date.now()) {
       return response.status(419).json({});
@@ -42,7 +43,6 @@ export default async function handler(
           await sql`SELECT * FROM users WHERE publicKey = ${publicKey.toString()};`;
         const row = selectedUser.rows[0];
         return {
-          id: row.id,
           publicKey: row.publickey,
           lastLogin: row.lastlogin,
         };

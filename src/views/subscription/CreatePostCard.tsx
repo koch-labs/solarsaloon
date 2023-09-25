@@ -30,8 +30,8 @@ export default function CreatePostCard({
     await fetch(`/api/create/post`, {
       method: "POST",
       body: JSON.stringify({
-        subscriptionId: subscription.subscription.id,
-        saloonId: subscription.saloon.id,
+        tokenMint: subscription.subscription.tokenMint,
+        collectionMint: subscription.saloon.collectionMint,
         content,
       }),
       headers: {

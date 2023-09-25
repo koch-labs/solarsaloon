@@ -43,7 +43,7 @@ export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
                 : 1
             )
             .map((s) => (
-              <Table.Row key={s.id}>
+              <Table.Row key={s?.tokenMint}>
                 <Table.RowHeaderCell>
                   <Flex gap={"2"}>
                     {s.currentOwner === wallet.publicKey?.toString() ? (
