@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { sql } from "@vercel/postgres";
 import jwt from "jsonwebtoken";
-import { Saloon, Subscription, User } from "../../../models/types";
+import { Saloon, Subscription, User } from "../../../../models/types";
 import { Connection, PublicKey } from "@solana/web3.js";
 import {
   BidState,

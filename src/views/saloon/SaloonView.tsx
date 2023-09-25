@@ -16,24 +16,20 @@ import {
   Slider,
   Text,
   TextFieldInput,
+  Avatar,
 } from "@radix-ui/themes";
 import React, { useMemo } from "react";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { AnchorProvider } from "@coral-xyz/anchor";
-import { useRouter } from "next/router";
 import Link from "next/link";
 import { useUser } from "../../contexts/UserContextProvider";
 import CreateSubscription from "./CreateSubscription";
-import useSaloon from "../../hooks/useSaloon";
+import useSaloon, { Fetchable } from "../../hooks/useSaloon";
 import { SubscriptionsList } from "./SubscriptionsList";
 import { shortKey } from "../../utils";
 import Image from "next/image";
+import { Saloon } from "../../models/types";
 
-const SaloonView: React.FC = () => {
-  const router = useRouter();
+const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({ saloon }) => {
   const { user } = useUser();
-  const saloonMint = router.query.mint as string;
-  const saloon = useSaloon(saloonMint);
 
   return (
     <Container className="content-center">
@@ -48,7 +44,7 @@ const SaloonView: React.FC = () => {
               </Link>
               <Flex gap={"3"}>
                 {user && user?.publicKey === saloon?.owner?.publicKey ? (
-                  <Link href={`/saloon/${saloonMint}/edit`}>
+                  <Link href={`/saloon/${saloon.collectionMint}/edit`}>
                     <IconButton variant="ghost">
                       <FileTextIcon width={32} height={32} strokeWidth={5} />
                     </IconButton>
@@ -84,15 +80,14 @@ const SaloonView: React.FC = () => {
               </Flex>
             </Flex>
             <Flex align="center" justify="center" direction="column">
-              <Image
-                src={saloon.metadata.image}
-                width="96"
-                height="96"
-                alt={saloon.metadata.name}
-              />
+              <Avatar src={saloon.metadata?.image} fallback="?" size="9" />
               <Heading align="center">
-                Saloon {saloon.metadata?.name || shortKey(saloonMint)}
+                Saloon{" "}
+                {saloon.metadata?.name || shortKey(saloon.collectionMint)}
               </Heading>
+              {saloon.metadata?.description ? (
+                <Text>{saloon.metadata.description}</Text>
+              ) : null}
             </Flex>
             {saloon &&
             user?.publicKey &&

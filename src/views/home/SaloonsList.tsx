@@ -1,4 +1,12 @@
-import { Button, Card, Flex, IconButton, Table, Text } from "@radix-ui/themes";
+import {
+  Avatar,
+  Button,
+  Card,
+  Flex,
+  IconButton,
+  Table,
+  Text,
+} from "@radix-ui/themes";
 import { EnterIcon, ExternalLinkIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import numeral from "numeral";
@@ -25,12 +33,7 @@ export const SaloonsList = ({ saloons }: { saloons: Saloon[] }) => {
             <Table.Row key={s.collectionMint}>
               <Table.RowHeaderCell>
                 <Flex gap="2" align="center">
-                  <Image
-                    src={s.metadata.image}
-                    width="32"
-                    height="32"
-                    alt={s.metadata.name}
-                  />
+                  <Avatar src={s.metadata.image} fallback="?" />
                   <Text weight={"bold"}>{s.metadata.name}</Text>
                 </Flex>
               </Table.RowHeaderCell>
