@@ -10,6 +10,7 @@ const nextConfig = {
   experimental: {
     esmExternals: "loose",
   },
+  images: { domains: [ "madlads.s3.us-west-2.amazonaws.com" ] }
 }
 
 module.exports = removeImports( nextConfig )

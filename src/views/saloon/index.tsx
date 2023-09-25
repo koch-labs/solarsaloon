@@ -27,6 +27,7 @@ import CreateSubscription from "./CreateSubscription";
 import useSaloon from "../../hooks/useSaloon";
 import { SubscriptionsList } from "./SubscriptionsList";
 import { shortKey } from "../../utils";
+import Image from "next/image";
 
 const SaloonView: React.FC = () => {
   const router = useRouter();
@@ -82,9 +83,17 @@ const SaloonView: React.FC = () => {
                 </Popover.Root>
               </Flex>
             </Flex>
-            <Heading align="center">
-              Saloon {shortKey(router.query.mint as string)}
-            </Heading>
+            <Flex align="center" justify="center" direction="column">
+              <Image
+                src={saloon.metadata.image}
+                width="96"
+                height="96"
+                alt={saloon.metadata.name}
+              />
+              <Heading align="center">
+                Saloon {saloon.metadata?.name || shortKey(saloonMint)}
+              </Heading>
+            </Flex>
             {saloon &&
             user?.publicKey &&
             saloon.owner?.publicKey === user.publicKey ? (

@@ -5,6 +5,7 @@ import numeral from "numeral";
 import { Saloon } from "../../models/types";
 import { shortKey } from "../../utils";
 import { getExplorerUrl } from "../../utils/explorer";
+import Image from "next/image";
 
 export const SaloonsList = ({ saloons }: { saloons: Saloon[] }) => {
   return (
@@ -24,7 +25,13 @@ export const SaloonsList = ({ saloons }: { saloons: Saloon[] }) => {
             <Table.Row key={s.collectionMint}>
               <Table.RowHeaderCell>
                 <Flex gap="2" align="center">
-                  {s.metadata.name}
+                  <Image
+                    src={s.metadata.image}
+                    width="32"
+                    height="32"
+                    alt={s.metadata.name}
+                  />
+                  <Text weight={"bold"}>{s.metadata.name}</Text>
                 </Flex>
               </Table.RowHeaderCell>
               <Table.Cell>
