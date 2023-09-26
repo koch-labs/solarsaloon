@@ -22,6 +22,7 @@ import CreatePostCard from "./CreatePostCard";
 import { PostsList } from "./PostsList";
 import { useUser } from "../../contexts/UserContextProvider";
 import SubscriptionDescriptionCard from "./SubscriptionDescriptionCard";
+import WithdrawFundsModal from "./WithdrawFundsModal";
 
 export default function ManageSubscription({ mint }: { mint: string }) {
   const { user } = useUser();
@@ -32,6 +33,7 @@ export default function ManageSubscription({ mint }: { mint: string }) {
   );
   const [openOwnerDeposit, setOpenOwnerDeposit] = useState(false);
   const [openSelfDeposit, setOpenSelfDeposit] = useState(false);
+  const [openSelfWithdraw, setOpenSelfWithdraw] = useState(false);
 
   return (
     <Container className="content-center">
@@ -109,6 +111,7 @@ export default function ManageSubscription({ mint }: { mint: string }) {
                       </Button>
                       <Button
                         color="crimson"
+                        onClick={() => setOpenSelfWithdraw(true)}
                         disabled={!subscription.bidState?.amount}
                       >
                         Withdraw funds
@@ -121,6 +124,11 @@ export default function ManageSubscription({ mint }: { mint: string }) {
                   open={openSelfDeposit}
                   subscription={subscription}
                   externalAccount={false}
+                />
+                <WithdrawFundsModal
+                  setOpen={setOpenSelfWithdraw}
+                  open={openSelfWithdraw}
+                  subscription={subscription}
                 />
               </Card>
               <Card>

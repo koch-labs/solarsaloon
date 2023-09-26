@@ -5,6 +5,7 @@ import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { getConfigKey, builders as rentBuilders } from "@koch-labs/rent-nft";
 import { AnchorProvider, BN } from "@coral-xyz/anchor";
+import numeral from "numeral";
 import { FullSubscription } from "../../hooks/useSubscription";
 import { Fetchable } from "../../hooks/useSaloon";
 import {
@@ -14,11 +15,10 @@ import {
 } from "@solana/spl-token";
 import WaitingButton from "../../components/WaitingButton";
 
-export default function DepositFundsModal({
+export default function WithdrawFundsModal({
   setOpen,
   open,
   subscription,
-  externalAccount,
 }: {
   setOpen: (boolean) => void;
   open: boolean;
@@ -38,7 +38,7 @@ export default function DepositFundsModal({
   const [amount, setAmount] = useState(0);
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
 
-  const handleDeposit = useCallback(async () => {
+  const handleWithdraw = useCallback(async () => {
     if (!amount) return;
 
     setIsWaiting(true);
@@ -54,48 +54,6 @@ export default function DepositFundsModal({
       tx.feePayer = wallet.publicKey;
       tx.minNonceContextSlot = slot;
 
-      // Wrap the needed SOL
-      if (token.publicKey === tokens[0].publicKey) {
-        const wrappedSolAccount = getAssociatedTokenAddressSync(
-          token.publicKey,
-          wallet.publicKey,
-          true,
-          token.tokenProgram
-        );
-        tx.add(
-          createAssociatedTokenAccountIdempotentInstruction(
-            wallet.publicKey,
-            wrappedSolAccount,
-            wallet.publicKey,
-            token.publicKey,
-            token.tokenProgram
-          )
-        );
-        tx.add(
-          SystemProgram.transfer({
-            fromPubkey: wallet.publicKey,
-            toPubkey: wrappedSolAccount,
-            lamports: Math.round(amount * 10 ** token.decimals),
-          })
-        );
-        tx.add(createSyncNativeInstruction(wrappedSolAccount));
-      }
-
-      if (!subscription.bidState) {
-        tx.add(
-          await rentBuilders
-            .createBid({
-              provider,
-              collectionMint: new PublicKey(subscription.saloon.collectionMint),
-              authoritiesGroup: new PublicKey(
-                subscription.saloon.authoritiesGroup
-              ),
-              tokenMint: new PublicKey(subscription.subscription.tokenMint),
-              tokenProgram: token.tokenProgram,
-            })
-            .builder.transaction()
-        );
-      }
       tx.add(
         await rentBuilders
           .updateBid({
@@ -106,22 +64,8 @@ export default function DepositFundsModal({
           .builder.transaction()
       );
       tx.add(
-        createAssociatedTokenAccountIdempotentInstruction(
-          wallet.publicKey,
-          getAssociatedTokenAddressSync(
-            token.publicKey,
-            getConfigKey(new PublicKey(subscription.saloon.collectionMint)),
-            true,
-            token.tokenProgram
-          ),
-          getConfigKey(new PublicKey(subscription.saloon.collectionMint)),
-          token.publicKey,
-          token.tokenProgram
-        )
-      );
-      tx.add(
         await rentBuilders
-          .increaseBid({
+          .decreaseBid({
             provider,
             amount: new BN(Math.round(amount * 10 ** token.decimals)),
             collectionMint: new PublicKey(subscription.saloon.collectionMint),
@@ -147,29 +91,19 @@ export default function DepositFundsModal({
   return (
     <Dialog.Root open={open}>
       <Dialog.Content style={{ maxWidth: 450 }}>
-        <Dialog.Title>Deposit funds</Dialog.Title>
+        <Dialog.Title>Withdraw funds</Dialog.Title>
         <Dialog.Description size="2" mb="4"></Dialog.Description>
         <Flex direction="column" gap="1" className="text-sm">
-          <Text>
-            Choose the amount of {token?.name} you want to deposit in your
-            account. This account is only used to bid on this subscription. You
-            can withdraw from it at any time.
-          </Text>
-          <Text>
-            To buy the token, you need to have at least the current selling
-            price available in your account, plus some extra to pay the taxes
-            for your desired duration.
-          </Text>
-          <Text>
-            This account is only debited depending on the time during which you
-            own the token and your selling price. Be careful, if you own the
-            token and your account reaches 0, others will be able to buy the
-            token from you for free.
-          </Text>
-          {externalAccount ? (
+          <Text>Choose the amount of {token?.name} you want to withraw.</Text>
+          {subscription.subscription?.currentOwner ===
+          wallet?.publicKey?.toString() ? (
             <Text color="crimson">
-              This account belongs to someone else, are you sure you want to
-              deposit?
+              Withdrawing everything you have might will make your subscription
+              claimable by anyone for{" "}
+              {numeral(subscription?.saloon?.config.minimumSellPrice)
+                .divide(10 ** token?.decimals)
+                .format("0.0a")}{" "}
+              ${token?.symbol}
             </Text>
           ) : null}
         </Flex>
@@ -180,8 +114,11 @@ export default function DepositFundsModal({
                 Amount
               </Text>
               <Text weight="light">
-                Your balance: {subscription.userBalance || 0} $
-                {token?.symbol || "???"}
+                Deposited balance:{" "}
+                {numeral(subscription?.bidState?.amount || 0)
+                  .divide(10 ** token.decimals)
+                  .format("0.00a")}{" "}
+                ${token?.symbol || "???"}
               </Text>
             </Flex>
             <TextField.Input
@@ -207,11 +144,11 @@ export default function DepositFundsModal({
           <Dialog.Close>
             <WaitingButton
               color="green"
-              onClick={handleDeposit}
+              onClick={handleWithdraw}
               disabled={!amount}
               loading={isWaiting}
             >
-              Deposit
+              Withdraw
             </WaitingButton>
           </Dialog.Close>
         </Flex>
