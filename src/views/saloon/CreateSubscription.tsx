@@ -17,7 +17,7 @@ const CreateSubscription: React.FC<{
 }> = ({ saloon }) => {
   const router = useRouter();
   const wallet = useWallet();
-  const { isSignedIn, token, user } = useUser();
+  const { token } = useUser();
   const { connection } = useConnection();
   const provider = useMemo(
     () =>
@@ -48,6 +48,7 @@ const CreateSubscription: React.FC<{
         name,
         external_uri: "",
       };
+      const collectionMint = new PublicKey(saloon.collectionMint);
       tx.add(
         await rentBuilders
           .createToken({
@@ -59,9 +60,31 @@ const CreateSubscription: React.FC<{
                 .values(),
             ],
             name,
-            collectionMint: new PublicKey(saloon.collectionMint),
+            collectionMint,
             tokenMint: tokenMintKeypair.publicKey,
             authoritiesGroup: new PublicKey(saloon.authoritiesGroup),
+          })
+          .builder.transaction()
+      );
+      tx.add(
+        await rentBuilders
+          .createBid({
+            provider,
+            collectionMint,
+            authoritiesGroup: new PublicKey(saloon.authoritiesGroup),
+            tokenMint: tokenMintKeypair.publicKey,
+          })
+          .builder.transaction()
+      );
+      tx.add(
+        await rentBuilders
+          .claimToken({
+            provider,
+            newSellPrice: new BN(0),
+            oldOwner: wallet.publicKey,
+            newOwner: wallet.publicKey,
+            collectionMint: new PublicKey(saloon.collectionMint),
+            tokenMint: tokenMintKeypair.publicKey,
           })
           .builder.transaction()
       );

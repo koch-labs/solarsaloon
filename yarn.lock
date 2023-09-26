@@ -549,10 +549,10 @@
     "@solana/spl-token" "^0.3.8"
     "@solana/web3.js" "1.78.4"
 
-"@koch-labs/rent-nft@0.0.7":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@koch-labs/rent-nft/-/rent-nft-0.0.7.tgz#5f3010d208c56c0960b90f348ccee93f0b0fbace"
-  integrity sha512-go/AcG0J/4SsjwwKgUhSNsdMbphb5R15NdlAeGexM+nT7nxIzVMmTyTA8biY1e/Pq2ShxF4wrEVQV6VPTij27g==
+"@koch-labs/rent-nft@0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@koch-labs/rent-nft/-/rent-nft-0.0.8.tgz#1912fcc1a095b514a953bb298e1af07136393a5f"
+  integrity sha512-ODoNQtUXTIZ0wkeoj83KhiXH7Bk9sZFsDTbCgNR/0qa3ABzlGeJesmyZQGldaowsx05tspQTezSrew+JC0EAmw==
   dependencies:
     "@coral-xyz/anchor" "0.28.1-beta.2"
     "@coral-xyz/borsh" "^0.28.0"

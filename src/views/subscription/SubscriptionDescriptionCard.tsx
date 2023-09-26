@@ -23,6 +23,7 @@ import { Fetchable } from "../../hooks/useSaloon";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { builders } from "@koch-labs/rent-nft";
+import SetSellingPriceModal from "./SetSellingPriceModal";
 
 export default function SubscriptionDescriptionCard({
   subscription,
@@ -41,6 +42,7 @@ export default function SubscriptionDescriptionCard({
     [wallet, connection]
   );
   const [openBuy, setOpenBuy] = useState(false);
+  const [openPrice, setOpenPrice] = useState(false);
 
   const handleUpdate = useCallback(async () => {
     if (!wallet.sendTransaction) return;
@@ -129,14 +131,14 @@ export default function SubscriptionDescriptionCard({
             : null}
         </Text>
         <Flex className="justify-around">
-          <Button onClick={handleUpdate} className="w-36">
+          <Button onClick={handleUpdate} className="w-42">
             Update bids
           </Button>
           {user &&
           subscription.subscription?.currentOwner !== user.publicKey ? (
             <Button
               color="green"
-              className="w-36"
+              className="w-42"
               disabled={(new BN(subscription.bidState?.amount) || new BN(0)).lt(
                 new BN(
                   subscription.tokenState?.ownerBidState
@@ -149,10 +151,21 @@ export default function SubscriptionDescriptionCard({
               Buy
             </Button>
           ) : null}
+          {user &&
+          subscription.subscription?.currentOwner === user.publicKey ? (
+            <Button className="w-42" onClick={() => setOpenPrice(true)}>
+              Update selling price
+            </Button>
+          ) : null}
         </Flex>
         <BuyTokenModal
           open={openBuy}
           setOpen={setOpenBuy}
+          subscription={subscription}
+        />
+        <SetSellingPriceModal
+          open={openPrice}
+          setOpen={setOpenPrice}
           subscription={subscription}
         />
       </Flex>

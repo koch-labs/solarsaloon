@@ -136,7 +136,7 @@ export default async function handler(
           // User is the creator
           const postsQuery = await sql`
           SELECT * FROM posts JOIN saloons ON posts.collectionMint = saloons.collectionMint
-          WHERE collectionMint = ${saloon.collectionMint}
+          WHERE posts.collectionMint = ${saloon.collectionMint}
           ORDER BY creationTimestamp DESC
           LIMIT ${limit} OFFSET ${limit * page}
           `;
