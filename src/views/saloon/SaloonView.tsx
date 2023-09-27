@@ -82,7 +82,6 @@ const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({ saloon }) => {
             <Flex align="center" justify="center" direction="column">
               <Avatar src={saloon.metadata?.image} fallback="?" size="9" />
               <Heading align="center">
-                Saloon{" "}
                 {saloon.metadata?.name || shortKey(saloon.collectionMint)}
               </Heading>
               {saloon.metadata?.description ? (

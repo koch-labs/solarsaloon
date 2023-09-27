@@ -95,7 +95,7 @@ export default function SubscriptionDescriptionCard({
           {subscription?.ownerBidState ? (
             <Text>
               (+
-              {numeral(taxesPerYear.div(new BN(365)))
+              {numeral(taxesPerYear.div(new BN(365)).toString())
                 .divide(10 ** (token?.decimals || 0))
                 .format("0.000a")}{" "}
               {token?.symbol} per day )

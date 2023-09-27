@@ -1,4 +1,5 @@
 import { Button, Dialog, Flex, Text, TextField } from "@radix-ui/themes";
+import numeral from "numeral";
 import { tokens } from "../../utils/tokens";
 import { useCallback, useMemo, useState } from "react";
 import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
@@ -180,7 +181,8 @@ export default function DepositFundsModal({
                 Amount
               </Text>
               <Text weight="light">
-                Your balance: {subscription.userBalance || 0} $
+                Your balance:{" "}
+                {numeral(subscription.userBalance || 0).format("0.0a")} $
                 {token?.symbol || "???"}
               </Text>
             </Flex>

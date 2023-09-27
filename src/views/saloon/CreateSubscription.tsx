@@ -11,6 +11,7 @@ import { BASE_URL } from "../../utils/constants";
 import { Saloon } from "../../models/types";
 import { builders as rentBuilders } from "@koch-labs/rent-nft";
 import { Fetchable } from "../../hooks/useSaloon";
+import WaitingButton from "../../components/WaitingButton";
 
 const CreateSubscription: React.FC<{
   saloon: Fetchable<Saloon>;
@@ -117,9 +118,9 @@ const CreateSubscription: React.FC<{
     <Card>
       <Flex gap="2" direction="column" align="center">
         <Heading size="5">Create a subscription</Heading>
-        <Button onClick={handleCreateSubscription}>
+        <WaitingButton loading={isLoading} onClick={handleCreateSubscription}>
           Create a new subscription
-        </Button>
+        </WaitingButton>
         <Callout.Root>
           <Callout.Icon>
             <InfoCircledIcon />

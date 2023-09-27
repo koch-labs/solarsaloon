@@ -36,6 +36,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import numeral from "numeral";
 import { useUser } from "../../contexts/UserContextProvider";
+import WaitingButton from "../../components/WaitingButton";
 
 const CreateSaloon: React.FC = () => {
   const router = useRouter();
@@ -51,7 +52,7 @@ const CreateSaloon: React.FC = () => {
   const [name, setName] = useState<string>();
   const [description, setDescription] = useState<string>();
   const [taxToken, setTaxToken] = useState<Token>(tokens[0]);
-  const [taxRate, setTaxRate] = useState<number>(Math.log10(10000));
+  const [taxRate, setTaxRate] = useState<number>(Math.log10(100000));
   const [postCooldown, setPostCooldown] = useState<number>(86400000);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -76,7 +77,13 @@ const CreateSaloon: React.FC = () => {
   }, [postCooldown]);
 
   const handleCreate = useCallback(async () => {
-    if (!provider || !wallet.sendTransaction || !wallet.publicKey || !name)
+    if (
+      !provider ||
+      !wallet.sendTransaction ||
+      !wallet.publicKey ||
+      !name ||
+      !isSignedIn
+    )
       return;
 
     setIsLoading(true);
@@ -259,18 +266,48 @@ const CreateSaloon: React.FC = () => {
     token,
     postCooldown,
     description,
+    isSignedIn,
   ]);
 
   return (
     <Container className="content-center">
       <Flex gap="2" direction="column">
-        <Flex align="start" justify="between">
-          <Link href="/saloons">
-            <IconButton variant="ghost">
-              <ArrowLeftIcon width={32} height={32} strokeWidth={5} />
-            </IconButton>
-          </Link>
+        <Flex align="center" justify="center">
           <Card>
+            <Flex position="absolute" gap="2">
+              <Link href="/saloons">
+                <IconButton variant="ghost">
+                  <ArrowLeftIcon width={32} height={32} strokeWidth={5} />
+                </IconButton>
+              </Link>
+              <Popover.Root>
+                <Popover.Trigger>
+                  <IconButton variant="ghost">
+                    <QuestionMarkCircledIcon
+                      width={32}
+                      height={32}
+                      strokeWidth={5}
+                    />
+                  </IconButton>
+                </Popover.Trigger>
+                <Popover.Content style={{ width: 360 }}>
+                  <Flex gap="3" direction="column">
+                    <Text size="5">What are Saloons ?</Text>
+                    <Text size="2">
+                      Saloons are digital spaces that only subscribers can
+                      access.
+                      <br />
+                      The number of of available subscriptions can be increased
+                      at any time, but only a subscriber can burn a subscription
+                      so be carefull before minting too many.
+                    </Text>
+                    <Popover.Close>
+                      <Button size="1">OK</Button>
+                    </Popover.Close>
+                  </Flex>
+                </Popover.Content>
+              </Popover.Root>
+            </Flex>
             <Flex align="center" gap="2" direction="column">
               <Heading>Create a saloon</Heading>
               <Flex direction="column" width="100%">
@@ -311,7 +348,7 @@ const CreateSaloon: React.FC = () => {
                 <Text color="gray">Tax rate</Text>
                 <Slider
                   min={1}
-                  max={Math.log10(1000000)}
+                  max={Math.log10(5600 * 1000)}
                   step={0.01}
                   defaultValue={[taxRate]}
                   onValueChange={(e) => setTaxRate(10 ** e[0])}
@@ -329,7 +366,7 @@ const CreateSaloon: React.FC = () => {
                 <Text color="gray">Post cooldown</Text>
                 <Slider
                   min={3}
-                  max={Math.log10(86400000 * 21)}
+                  max={Math.log10(86400000 * 365)}
                   step={0.001}
                   defaultValue={[Math.log10(postCooldown)]}
                   onValueChange={(e) => setPostCooldown(Math.round(10 ** e[0]))}
@@ -339,40 +376,15 @@ const CreateSaloon: React.FC = () => {
                   being able to post again.
                 </Text>
               </Flex>
-              <Button
+              <WaitingButton
                 disabled={isLoading || !name || !wallet}
-                onClick={() => handleCreate()}
+                loading={isLoading}
+                onClick={handleCreate}
               >
                 Create
-              </Button>
+              </WaitingButton>
             </Flex>
           </Card>
-          <Popover.Root>
-            <Popover.Trigger>
-              <IconButton variant="ghost">
-                <QuestionMarkCircledIcon
-                  width={32}
-                  height={32}
-                  strokeWidth={5}
-                />
-              </IconButton>
-            </Popover.Trigger>
-            <Popover.Content style={{ width: 360 }}>
-              <Flex gap="3" direction="column">
-                <Text size="5">What are Saloons ?</Text>
-                <Text size="2">
-                  Saloons are digital spaces that only subscribers can access.
-                  <br />
-                  The number of of available subscriptions can be increased at
-                  any time, but only a subscriber can burn a subscription so be
-                  carefull before minting too many.
-                </Text>
-                <Popover.Close>
-                  <Button size="1">OK</Button>
-                </Popover.Close>
-              </Flex>
-            </Popover.Content>
-          </Popover.Root>
         </Flex>
       </Flex>
     </Container>
