@@ -13,7 +13,7 @@ import numeral from "numeral";
 import { Saloon } from "../../models/types";
 import { shortKey } from "../../utils";
 import { getExplorerUrl } from "../../utils/explorer";
-import Image from "next/image";
+import UserBadge from "../../components/UserBadge";
 
 export const SaloonsList = ({ saloons }: { saloons: Saloon[] }) => {
   return (
@@ -38,14 +38,7 @@ export const SaloonsList = ({ saloons }: { saloons: Saloon[] }) => {
                 </Flex>
               </Table.RowHeaderCell>
               <Table.Cell>
-                <Flex gap="2" align="center">
-                  <Text>{shortKey(s.owner.publicKey)}</Text>
-                  <Link href={getExplorerUrl(s.owner.publicKey)}>
-                    <IconButton variant="ghost">
-                      <ExternalLinkIcon />
-                    </IconButton>
-                  </Link>
-                </Flex>
+                <UserBadge publicKey={s.owner.publicKey} />
               </Table.Cell>
               <Table.Cell>
                 {numeral(s.config?.taxRate).divide(100).format("0.0a%")}
