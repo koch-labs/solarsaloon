@@ -24,6 +24,7 @@ import { PublicKey, Transaction } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { builders } from "@koch-labs/rent-nft";
 import SetSellingPriceModal from "./SetSellingPriceModal";
+import ClaimFeesButton from "./ClaimFeesButton";
 
 export default function SubscriptionDescriptionCard({
   subscription,
@@ -33,13 +34,6 @@ export default function SubscriptionDescriptionCard({
   const { user } = useUser();
   const token = tokens.find(
     (t) => t.publicKey.toString() === subscription?.saloon?.taxMint
-  );
-  const wallet = useWallet();
-  const { connection } = useConnection();
-  const provider = useMemo(
-    () =>
-      wallet ? new AnchorProvider(connection, wallet as any, {}) : undefined,
-    [wallet, connection]
   );
   const taxesPerYear = new BN(
     subscription?.tokenState?.currentSellingPrice || 0
@@ -84,41 +78,6 @@ export default function SubscriptionDescriptionCard({
     return () => clearInterval(interval);
   }, [token, subscription, taxesPerYear]);
 
-  const handleUpdate = useCallback(async () => {
-    if (!wallet.sendTransaction) return;
-
-    const tx = new Transaction(await connection.getLatestBlockhash());
-    tx.add(
-      await builders
-        .updateBid({
-          provider,
-          collectionMint: new PublicKey(subscription.saloon.collectionMint),
-          tokenMint: new PublicKey(subscription.subscription.tokenMint),
-        })
-        .builder.transaction()
-    );
-    if (
-      subscription.subscription?.currentOwner !== wallet?.publicKey?.toString()
-    ) {
-      tx.add(
-        await builders
-          .updateBid({
-            provider,
-            bidder: new PublicKey(subscription.subscription?.currentOwner),
-            collectionMint: new PublicKey(subscription.saloon.collectionMint),
-            tokenMint: new PublicKey(subscription.subscription.tokenMint),
-          })
-          .builder.transaction()
-      );
-    }
-
-    const conf = await wallet.sendTransaction(tx, connection, {
-      skipPreflight: true,
-    });
-    await connection.confirmTransaction(conf);
-    subscription.reload();
-  }, [connection, subscription, provider, wallet]);
-
   return (
     <Card>
       <Flex direction="column">
@@ -139,7 +98,7 @@ export default function SubscriptionDescriptionCard({
               {numeral(taxesPerYear.div(new BN(365)))
                 .divide(10 ** (token?.decimals || 0))
                 .format("0.000a")}{" "}
-              per day )
+              {token?.symbol} per day )
             </Text>
           ) : null}
         </Text>
@@ -180,9 +139,6 @@ export default function SubscriptionDescriptionCard({
             : null}
         </Text>
         <Flex className="justify-around">
-          <Button onClick={handleUpdate} className="w-42">
-            Update bids
-          </Button>
           {user &&
           subscription.subscription?.currentOwner !== user.publicKey ? (
             <Button
@@ -205,6 +161,9 @@ export default function SubscriptionDescriptionCard({
             <Button className="w-42" onClick={() => setOpenPrice(true)}>
               Update selling price
             </Button>
+          ) : null}
+          {user && subscription.saloon?.owner.publicKey === user.publicKey ? (
+            <ClaimFeesButton subscription={subscription} />
           ) : null}
         </Flex>
         <BuyTokenModal

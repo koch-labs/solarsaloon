@@ -10,6 +10,7 @@ import { FullSubscription } from "../../hooks/useSubscription";
 import { Fetchable } from "../../hooks/useSaloon";
 import {
   createAssociatedTokenAccountIdempotentInstruction,
+  createCloseAccountInstruction,
   createSyncNativeInstruction,
   getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
@@ -78,6 +79,24 @@ export default function WithdrawFundsModal({
           })
           .builder.transaction()
       );
+
+      if (subscription.saloon.taxMint === tokens[0].publicKey.toString()) {
+        // Closing wsol account to recover sol
+        tx.add(
+          createCloseAccountInstruction(
+            getAssociatedTokenAddressSync(
+              token.publicKey,
+              wallet.publicKey,
+              true,
+              token.tokenProgram
+            ),
+            wallet.publicKey,
+            wallet.publicKey,
+            [],
+            token.tokenProgram
+          )
+        );
+      }
 
       const conf = await wallet.sendTransaction(tx, connection);
       await connection.confirmTransaction(conf);
