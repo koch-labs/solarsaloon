@@ -14,7 +14,7 @@ import {
 import { shortKey } from "../../utils";
 import { AnchorProvider, BN } from "@coral-xyz/anchor";
 import { getExplorerUrl } from "../../utils/explorer";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { tokens } from "../../utils/tokens";
 import BuyTokenModal from "./BuyTokenModal";
 import { useUser } from "../../contexts/UserContextProvider";
@@ -41,8 +41,48 @@ export default function SubscriptionDescriptionCard({
       wallet ? new AnchorProvider(connection, wallet as any, {}) : undefined,
     [wallet, connection]
   );
+  const taxesPerYear = new BN(
+    subscription?.tokenState?.currentSellingPrice || 0
+  )
+    .mul(new BN(subscription?.saloon?.config?.taxRate || 0))
+    .div(new BN(10000));
   const [openBuy, setOpenBuy] = useState(false);
   const [openPrice, setOpenPrice] = useState(false);
+  const [taxes, setTaxes] = useState<string>(
+    numeral(subscription?.saloon?.config?.collectedTax || "0").format("0.00a")
+  );
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!subscription?.ownerBidState) {
+        setTaxes("0");
+        return;
+      }
+
+      setTaxes(
+        numeral(
+          new BN(subscription?.saloon?.config?.collectedTax || 0)
+            .add(
+              taxesPerYear
+                .mul(
+                  new BN(
+                    Math.round(
+                      Date.now() / 1000 -
+                        Number(subscription?.ownerBidState?.lastUpdate || 0)
+                    )
+                  )
+                )
+                .div(new BN(31536000))
+            )
+            .toString()
+        )
+          .divide(10 ** (token?.decimals || 0))
+          .format("0.000a")
+      );
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [token, subscription, taxesPerYear]);
 
   const handleUpdate = useCallback(async () => {
     if (!wallet.sendTransaction) return;
@@ -72,7 +112,11 @@ export default function SubscriptionDescriptionCard({
       );
     }
 
-    await wallet.sendTransaction(tx, connection, { skipPreflight: true });
+    const conf = await wallet.sendTransaction(tx, connection, {
+      skipPreflight: true,
+    });
+    await connection.confirmTransaction(conf);
+    subscription.reload();
   }, [connection, subscription, provider, wallet]);
 
   return (
@@ -88,11 +132,16 @@ export default function SubscriptionDescriptionCard({
           per year
         </Text>
         <Text>
-          Collected tax:{" "}
-          {numeral(subscription.saloon?.config.collectedTax || "0")
-            .divide(10 ** (token?.decimals || 0))
-            .format("0.00a")}{" "}
-          {token?.symbol}
+          Collected tax: {taxes} {token?.symbol}{" "}
+          {subscription?.ownerBidState ? (
+            <Text>
+              (+
+              {numeral(taxesPerYear.div(new BN(365)))
+                .divide(10 ** (token?.decimals || 0))
+                .format("0.000a")}{" "}
+              per day )
+            </Text>
+          ) : null}
         </Text>
         <Text>
           Total amount deposited:{" "}

@@ -37,6 +37,9 @@ export default function BuyTokenModal({
     [wallet, connection]
   );
   const [newPrice, setNewPrice] = useState(0);
+  const taxesPerYear = new BN(newPrice * 10 ** (token?.decimals || 0))
+    .mul(new BN(subscription?.saloon?.config?.taxRate || 0))
+    .div(new BN(10000));
 
   const handleBuy = useCallback(async () => {
     const tx = new Transaction();
@@ -97,7 +100,9 @@ export default function BuyTokenModal({
         await rentBuilders
           .claimToken({
             provider,
-            newSellPrice: new BN(Math.round(newPrice * 10 ** token.decimals)),
+            newSellPrice: new BN(
+              Math.round(newPrice * 10 ** (token?.decimals || 0))
+            ),
             newOwner: wallet.publicKey,
             oldOwner: new PublicKey(subscription.subscription.currentOwner),
             collectionMint,
@@ -122,7 +127,9 @@ export default function BuyTokenModal({
         await rentBuilders
           .buyToken({
             provider,
-            newSellPrice: new BN(Math.round(newPrice * 10 ** token.decimals)),
+            newSellPrice: new BN(
+              Math.round(newPrice * 10 ** (token?.decimals || 0))
+            ),
             owner: new PublicKey(subscription.subscription.currentOwner),
             collectionMint: new PublicKey(subscription.saloon.collectionMint),
             tokenMint: new PublicKey(subscription.tokenState.tokenMint),
@@ -171,7 +178,12 @@ export default function BuyTokenModal({
           )
             .divide(10 ** (token?.decimals || 0))
             .format("0.0a")}{" "}
-          ${token?.symbol || "???"}.
+          ${token?.symbol || "???"}. While you have the subscription, it will
+          cost you{" "}
+          {numeral(taxesPerYear.div(new BN(365)).toString())
+            .divide(10 ** (token?.decimals || 0))
+            .format("0.000a")}{" "}
+          ${token?.symbol} per day.
         </Dialog.Description>
         <Flex direction="column" gap="3">
           <label>

@@ -67,7 +67,7 @@ export default function WithdrawFundsModal({
         await rentBuilders
           .decreaseBid({
             provider,
-            amount: new BN(Math.round(amount * 10 ** token.decimals)),
+            amount: new BN(Math.round(amount * 10 ** (token?.decimals || 0))),
             collectionMint: new PublicKey(subscription.saloon.collectionMint),
             tokenMint: new PublicKey(subscription.subscription.tokenMint),
             authoritiesGroup: new PublicKey(
@@ -116,7 +116,7 @@ export default function WithdrawFundsModal({
               <Text weight="light">
                 Deposited balance:{" "}
                 {numeral(subscription?.bidState?.amount || 0)
-                  .divide(10 ** token.decimals)
+                  .divide(10 ** (token?.decimals || 0))
                   .format("0.00a")}{" "}
                 ${token?.symbol || "???"}
               </Text>

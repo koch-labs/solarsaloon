@@ -9,7 +9,6 @@ import { AnchorProvider, BN } from "@coral-xyz/anchor";
 import { FullSubscription } from "../../hooks/useSubscription";
 import { Fetchable } from "../../hooks/useSaloon";
 import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
-import { ReloadIcon } from "@radix-ui/react-icons";
 import WaitingButton from "../../components/WaitingButton";
 
 export default function SetSellingPriceModal({
@@ -31,8 +30,11 @@ export default function SetSellingPriceModal({
       wallet ? new AnchorProvider(connection, wallet as any, {}) : undefined,
     [wallet, connection]
   );
-  const [newPrice, setNewPrice] = useState(0);
-  const [isWaiting, setIsWaiting] = useState<boolean>();
+  const [newPrice, setNewPrice] = useState<number>(0);
+  const [isWaiting, setIsWaiting] = useState<boolean>(false);
+  const taxesPerYear = new BN(newPrice * 10 ** (token?.decimals || 0))
+    .mul(new BN(subscription?.saloon?.config?.taxRate || 0))
+    .div(new BN(10000));
 
   const handleBuy = useCallback(async () => {
     setIsWaiting(true);
@@ -99,7 +101,14 @@ export default function SetSellingPriceModal({
           )
             .divide(10 ** (token?.decimals || 0))
             .format("0.0a")}{" "}
-          ${token?.symbol || "???"}.
+          ${token?.symbol || "???"} to{" "}
+          {numeral(newPrice.toString()).format("0.0a")} $
+          {token?.symbol || "???"}. While you have the subscription, it will
+          cost you{" "}
+          {numeral(taxesPerYear.div(new BN(365)).toString())
+            .divide(10 ** (token?.decimals || 0))
+            .format("0.000a")}{" "}
+          ${token?.symbol} per day.
         </Dialog.Description>
         <Flex direction="column" gap="3">
           <label>
