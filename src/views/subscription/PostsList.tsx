@@ -9,6 +9,7 @@ import {
 } from "@radix-ui/themes";
 import { Post } from "../../models/types";
 import dynamic from "next/dynamic";
+import { shortKey } from "../../utils";
 
 const MarkdownPreview = dynamic(
   () => import("@uiw/react-markdown-preview").then((mod) => mod.default),
@@ -17,6 +18,7 @@ const MarkdownPreview = dynamic(
 
 export const PostsList = ({ posts }: { posts: Post[] }) => {
   document.documentElement.setAttribute("data-color-mode", "light");
+  console.log(posts);
   return (
     <Card>
       <Heading align="center" size="5">
@@ -35,7 +37,7 @@ export const PostsList = ({ posts }: { posts: Post[] }) => {
             <Table.Row key={`${p.id}-${p.creationTimestamp}`}>
               <Table.RowHeaderCell>
                 <Flex gap={"2"}>
-                  <Text>{p.creatorId}</Text>
+                  <Text>{shortKey(p.creator)}</Text>
                 </Flex>
               </Table.RowHeaderCell>
               <Table.Cell>

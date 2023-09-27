@@ -32,8 +32,8 @@ export interface Subscription {
 
 export interface Post {
   id: number;
-  creatorId: number;
-  saloonId: number;
+  creator: string;
+  collectionMint: string;
   content: string;
   draft: boolean;
   creationTimestamp: string;

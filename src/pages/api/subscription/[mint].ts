@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { sql } from "@vercel/postgres";
 import jwt from "jsonwebtoken";
-import { Saloon, Subscription, User } from "../../../models/types";
+import { Post, Saloon, Subscription, User } from "../../../models/types";
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import {
   BidState,
@@ -154,14 +154,16 @@ export default async function handler(
           `;
           posts = postsQuery.rows;
         }
-        posts = posts.map((r) => ({
-          id: r.id,
-          creatorId: r.creatorid,
-          saloonId: r.saloonid,
-          content: r.content,
-          draft: r.draft,
-          creationTimestamp: r.creationtimestamp,
-        }));
+        posts = posts.map(
+          (r): Post => ({
+            id: r.id,
+            creator: r.creator,
+            collectionMint: r.collectionMint,
+            content: r.content,
+            draft: r.draft,
+            creationTimestamp: r.creationtimestamp,
+          })
+        );
       }
 
       return response.status(200).json({

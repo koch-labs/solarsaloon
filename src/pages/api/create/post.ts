@@ -14,7 +14,7 @@ export default async function handler(
 
     // Check post cooldown for subscription
     const cdQuery = await sql`
-    SELECT COUNT(*) FROM subscriptions JOIN saloons ON subscriptions.saloonId = saloons.id
+    SELECT COUNT(*) FROM subscriptions JOIN saloons ON subscriptions.collectionMint = saloons.collectionMint
     WHERE
     subscriptions.tokenMint = ${tokenMint} AND
     subscriptions.lastPost + (saloons.postCooldown || ' milliseconds')::interval <= CURRENT_TIMESTAMP
@@ -23,7 +23,6 @@ export default async function handler(
     SELECT COUNT(*) FROM saloons
     WHERE collectionMint = ${collectionMint} AND owner = ${user.publicKey}
     `;
-    console.log(ownerQuery, cdQuery);
     if (cdQuery.rows[0].count === "0" && ownerQuery.rows[0].count === "0") {
       return response.status(425).json({});
     }
