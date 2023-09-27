@@ -14,7 +14,7 @@
     "@coral-xyz/anchor": "^0.28.1-beta.2",
     "@heroicons/react": "^1.0.5",
     "@koch-labs/metadata-standard": "0.0.14",
-    "@koch-labs/rent-nft": "0.0.8",
+    "@koch-labs/rent-nft": "0.0.9",
     "@noble/ed25519": "^1.7.1",
     "@radix-ui/react-icons": "^1.3.0",
     "@radix-ui/themes": "^1.1.2",
