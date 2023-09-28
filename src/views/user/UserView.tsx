@@ -18,16 +18,30 @@ import {
   TextFieldInput,
   Avatar,
 } from "@radix-ui/themes";
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
-import { useCurrentUser } from "../../contexts/UserContextProvider";
-import useSaloon, { Fetchable } from "../../hooks/useSaloon";
+import useUser from "../../hooks/useUser";
 import { shortKey } from "../../utils";
-import Image from "next/image";
-import { Saloon } from "../../models/types";
+import { SaloonsList } from "../home/SaloonsList";
+import { useCurrentUser } from "../../contexts/UserContextProvider";
 
 const UserView: React.FC<{ publicKey: string }> = ({ publicKey }) => {
-  const { user } = useCurrentUser();
+  const { user: currentUser, token } = useCurrentUser();
+  const { user, saloons, reload } = useUser(publicKey);
+  const [name, setName] = useState<string>();
+
+  const handleSetName = useCallback(async () => {
+    await fetch(`/api/user/change`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        username: name,
+      }),
+    });
+    reload();
+  }, [name, token, reload]);
 
   return (
     <Container className="content-center">
@@ -67,6 +81,26 @@ const UserView: React.FC<{ publicKey: string }> = ({ publicKey }) => {
                   </Flex>
                 </Popover.Content>
               </Popover.Root>
+            </Flex>
+            <Flex direction="column" align="center" gap="5">
+              <Heading>
+                {user?.username ? user.username : shortKey(user?.publicKey)}
+              </Heading>
+              {currentUser?.publicKey === publicKey ? (
+                <Card>
+                  <Flex direction="column" gap="2">
+                    <Text weight="bold" size="4">
+                      Change your name
+                    </Text>
+                    <TextFieldInput
+                      onChange={(e) => setName(e.target.value as string)}
+                      maxLength={20}
+                    />
+                    <Button onClick={handleSetName}>Change</Button>
+                  </Flex>
+                </Card>
+              ) : null}
+              <Flex>{saloons ? <SaloonsList saloons={saloons} /> : null}</Flex>
             </Flex>
           </Flex>
         </Card>

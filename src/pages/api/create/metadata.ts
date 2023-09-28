@@ -12,6 +12,8 @@ export default async function handler(
     const rawToken = request.headers.authorization.split("Bearer ")[1];
     const user = jwt.verify(rawToken, process.env.JWT_KEY) as User;
 
+    // TODO: Check object's existence betfore inserting metadata
+
     if (saloon) {
       await sql`
       INSERT INTO saloonMetadata (collectionMint, metadata)

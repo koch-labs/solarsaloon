@@ -76,12 +76,20 @@ export default async function handler(
           )
         ).owner.toString();
 
+        const ownerQuery = await sql`
+        SELECT * FROM users WHERE users.publicKey = ${currentOwner.toString()}
+        `;
+
         return {
           id: r.id,
           tokenMint: r.tokenmint,
           lastPost: r.lastpost,
           tokenState: tokenStates.find((s) => s.tokenMint === r.tokenmint),
-          currentOwner,
+          currentOwner: {
+            publicKey: ownerQuery.rows[0]?.publickey,
+            username: ownerQuery.rows[0]?.username,
+            lastLogin: ownerQuery.rows[0]?.lastlogin,
+          },
         };
       })
     );
@@ -91,6 +99,7 @@ export default async function handler(
     const saloon: Saloon = {
       owner: {
         publicKey: rawSaloon.publickey,
+        username: rawSaloon.username,
         lastLogin: rawSaloon.lastlogin,
       },
       collectionMint: rawSaloon.collectionmint,
