@@ -6,7 +6,7 @@ import { AnchorProvider, BN, utils } from "@coral-xyz/anchor";
 import { Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import toast from "react-hot-toast";
 import { useRouter } from "next/router";
-import { useUser } from "../../contexts/UserContextProvider";
+import { useCurrentUser } from "../../contexts/UserContextProvider";
 import { BASE_URL } from "../../utils/constants";
 import { Saloon } from "../../models/types";
 import { builders as rentBuilders } from "@koch-labs/rent-nft";
@@ -18,7 +18,7 @@ const CreateSubscription: React.FC<{
 }> = ({ saloon }) => {
   const router = useRouter();
   const wallet = useWallet();
-  const { token } = useUser();
+  const { token } = useCurrentUser();
   const { connection } = useConnection();
   const provider = useMemo(
     () =>

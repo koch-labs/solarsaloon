@@ -10,14 +10,14 @@ import {
 } from "@radix-ui/themes";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
-import { useUser } from "../../contexts/UserContextProvider";
+import { useCurrentUser } from "../../contexts/UserContextProvider";
 import useSaloon, { Fetchable } from "../../hooks/useSaloon";
 import Image from "next/image";
 import { Saloon } from "../../models/types";
 
 const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({ saloon }) => {
   const router = useRouter();
-  const { token } = useUser();
+  const { token } = useCurrentUser();
   const [url, setUrl] = useState<string>(saloon.metadata?.image);
   const [name, setName] = useState<string>(saloon.metadata?.name);
   const [description, setDescription] = useState<string>(

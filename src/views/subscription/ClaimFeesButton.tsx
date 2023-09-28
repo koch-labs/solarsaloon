@@ -20,7 +20,7 @@ import { useCallback, useMemo, useState } from "react";
 import { tokens } from "../../utils/tokens";
 import CreatePostCard from "./CreatePostCard";
 import { PostsList } from "./PostsList";
-import { useUser } from "../../contexts/UserContextProvider";
+import { useCurrentUser } from "../../contexts/UserContextProvider";
 import SubscriptionDescriptionCard from "./SubscriptionDescriptionCard";
 import WithdrawFundsModal from "./WithdrawFundsModal";
 import { Fetchable } from "../../hooks/useSaloon";

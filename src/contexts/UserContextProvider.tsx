@@ -26,11 +26,13 @@ export const UserContext = createContext<UserContextState>(
   {} as UserContextState
 );
 
-export function useUser(): UserContextState {
+export function useCurrentUser(): UserContextState {
   return useContext(UserContext);
 }
 
-export const UserProvider: FC<{ children: ReactNode }> = ({ children }) => {
+export const CurrentUserProvider: FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [defaultToken, setDefaultToken] = useLocalStorage<string>(
     "saloon_token",
     undefined

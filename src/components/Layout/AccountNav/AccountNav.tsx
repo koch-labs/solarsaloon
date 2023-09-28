@@ -4,7 +4,7 @@ import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { Button } from "@radix-ui/themes";
-import { useUser } from "../../../contexts/UserContextProvider";
+import { useCurrentUser } from "../../../contexts/UserContextProvider";
 import Link from "next/link";
 import { CheckCircledIcon, CrossCircledIcon } from "@radix-ui/react-icons";
 import { useNetworkConfiguration } from "../../../contexts/NetworkConfigurationProvider";
@@ -12,7 +12,7 @@ import { shortKey } from "../../../utils";
 
 const AccountNav: React.FC = () => {
   const { setNetworkConfiguration } = useNetworkConfiguration();
-  const { signIn, logOff, isSignedIn } = useUser();
+  const { signIn, logOff, isSignedIn } = useCurrentUser();
   const walletModal = useWalletModal();
   const wallet = useWallet();
 

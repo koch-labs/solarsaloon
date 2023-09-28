@@ -20,13 +20,13 @@ import { useState } from "react";
 import { tokens } from "../../utils/tokens";
 import CreatePostCard from "./CreatePostCard";
 import { PostsList } from "./PostsList";
-import { useUser } from "../../contexts/UserContextProvider";
+import { useCurrentUser } from "../../contexts/UserContextProvider";
 import SubscriptionDescriptionCard from "./SubscriptionDescriptionCard";
 import WithdrawFundsModal from "./WithdrawFundsModal";
 import UserBadge from "../../components/UserBadge";
 
 export default function ManageSubscription({ mint }: { mint: string }) {
-  const { user } = useUser();
+  const { user } = useCurrentUser();
   const subscription = useSubscription(mint as string);
   console.log(subscription);
   const token = tokens.find(

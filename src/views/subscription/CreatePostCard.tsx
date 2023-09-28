@@ -11,7 +11,7 @@ import dynamic from "next/dynamic";
 import { useCallback, useState } from "react";
 import { FullSubscription } from "../../hooks/useSubscription";
 import { Fetchable } from "../../hooks/useSaloon";
-import { useUser } from "../../contexts/UserContextProvider";
+import { useCurrentUser } from "../../contexts/UserContextProvider";
 
 const MDEditor = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default),
@@ -23,7 +23,7 @@ export default function CreatePostCard({
 }: {
   subscription: Fetchable<FullSubscription>;
 }) {
-  const { token } = useUser();
+  const { token } = useCurrentUser();
   const [content, setContent] = useState<string>();
 
   const handlePost = useCallback(async () => {

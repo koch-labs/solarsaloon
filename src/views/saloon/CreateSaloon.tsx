@@ -35,13 +35,13 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import numeral from "numeral";
-import { useUser } from "../../contexts/UserContextProvider";
+import { useCurrentUser } from "../../contexts/UserContextProvider";
 import WaitingButton from "../../components/WaitingButton";
 
 const CreateSaloon: React.FC = () => {
   const router = useRouter();
   const wallet = useWallet();
-  const { isSignedIn, token } = useUser();
+  const { isSignedIn, token } = useCurrentUser();
   const { connection } = useConnection();
   const provider = useMemo(
     () =>

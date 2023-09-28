@@ -14,7 +14,7 @@ export default function UserBadge({ user }: { user: User }) {
           <Text>
             {user.username ? user.username : shortKey(user.publicKey)}
           </Text>
-          <Link href={`/user/${user.publicKey}`} target="_blank">
+          <Link href={`/user/${user.publicKey}`}>
             <IconButton variant="ghost" size="1">
               <EnterIcon />
             </IconButton>

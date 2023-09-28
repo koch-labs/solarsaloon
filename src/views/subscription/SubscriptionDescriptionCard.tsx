@@ -17,7 +17,7 @@ import { getExplorerUrl } from "../../utils/explorer";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { tokens } from "../../utils/tokens";
 import BuyTokenModal from "./BuyTokenModal";
-import { useUser } from "../../contexts/UserContextProvider";
+import { useCurrentUser } from "../../contexts/UserContextProvider";
 import Link from "next/link";
 import { Fetchable } from "../../hooks/useSaloon";
 import { PublicKey, Transaction } from "@solana/web3.js";
@@ -32,7 +32,7 @@ export default function SubscriptionDescriptionCard({
 }: {
   subscription: Fetchable<FullSubscription>;
 }) {
-  const { user } = useUser();
+  const { user } = useCurrentUser();
   const token = tokens.find(
     (t) => t.publicKey.toString() === subscription?.saloon?.taxMint
   );

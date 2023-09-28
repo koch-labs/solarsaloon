@@ -14,7 +14,7 @@ import {
   createAssociatedTokenAccountIdempotentInstruction,
   getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
-import { useUser } from "../../contexts/UserContextProvider";
+import { useCurrentUser } from "../../contexts/UserContextProvider";
 
 export default function BuyTokenModal({
   setOpen,
@@ -29,7 +29,7 @@ export default function BuyTokenModal({
     (e) => e.publicKey.toString() === subscription?.saloon?.taxMint
   );
   const { connection } = useConnection();
-  const user = useUser();
+  const user = useCurrentUser();
   const wallet = useWallet();
   const provider = useMemo(
     () =>

@@ -20,7 +20,7 @@ import {
 } from "@radix-ui/themes";
 import React, { useMemo } from "react";
 import Link from "next/link";
-import { useUser } from "../../contexts/UserContextProvider";
+import { useCurrentUser } from "../../contexts/UserContextProvider";
 import CreateSubscription from "./CreateSubscription";
 import useSaloon, { Fetchable } from "../../hooks/useSaloon";
 import { SubscriptionsList } from "./SubscriptionsList";
@@ -29,7 +29,7 @@ import Image from "next/image";
 import { Saloon } from "../../models/types";
 
 const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({ saloon }) => {
-  const { user } = useUser();
+  const { user } = useCurrentUser();
 
   return (
     <Container className="content-center">
