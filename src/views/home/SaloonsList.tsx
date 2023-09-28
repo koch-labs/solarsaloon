@@ -1,18 +1,8 @@
-import {
-  Avatar,
-  Button,
-  Card,
-  Flex,
-  IconButton,
-  Table,
-  Text,
-} from "@radix-ui/themes";
-import { EnterIcon, ExternalLinkIcon } from "@radix-ui/react-icons";
+import { Avatar, Button, Card, Flex, Table, Text } from "@radix-ui/themes";
+import { EnterIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import numeral from "numeral";
 import { Saloon } from "../../models/types";
-import { shortKey } from "../../utils";
-import { getExplorerUrl } from "../../utils/explorer";
 import UserBadge from "../../components/UserBadge";
 
 export const SaloonsList = ({ saloons }: { saloons: Saloon[] }) => {
@@ -38,7 +28,7 @@ export const SaloonsList = ({ saloons }: { saloons: Saloon[] }) => {
                 </Flex>
               </Table.RowHeaderCell>
               <Table.Cell>
-                <UserBadge publicKey={s.owner.publicKey} />
+                <UserBadge user={s.owner} />
               </Table.Cell>
               <Table.Cell>
                 {numeral(s.config?.taxRate).divide(100).format("0.0a%")}

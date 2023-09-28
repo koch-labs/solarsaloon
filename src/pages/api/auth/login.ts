@@ -44,7 +44,7 @@ export default async function handler(
         const row = selectedUser.rows[0];
         return {
           publicKey: row.publickey,
-          username: row.publickey,
+          username: row.username,
           lastLogin: row.lastlogin,
         };
       };

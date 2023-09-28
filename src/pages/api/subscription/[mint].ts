@@ -74,11 +74,19 @@ export default async function handler(
       )
     ).owner;
 
+    const ownerQuery = await sql`
+    SELECT * FROM users WHERE users.publicKey = ${currentOwner.toString()}
+    `;
+
     const subscription: Subscription = {
       tokenMint: subscriptionRow.tokenmint,
       lastPost: subscriptionRow.lastpost,
       tokenState: tokenState,
-      currentOwner: currentOwner.toString(),
+      currentOwner: {
+        publicKey: ownerQuery.rows[0]?.publickey,
+        username: ownerQuery.rows[0]?.username,
+        lastLogin: ownerQuery.rows[0]?.lastlogin,
+      },
     };
     const saloon: Saloon = {
       owner: {
@@ -142,7 +150,7 @@ export default async function handler(
           LIMIT ${limit} OFFSET ${limit * page}
           `;
           posts = postsQuery.rows;
-        } else if (user.publicKey === subscription.currentOwner) {
+        } else if (user.publicKey === subscription.currentOwner.publicKey) {
           // The user is subscribed
           // Can only view post starting from the moment it joined
           const postsQuery = await sql`

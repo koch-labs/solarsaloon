@@ -114,7 +114,7 @@ export default function WithdrawFundsModal({
         <Dialog.Description size="2" mb="4"></Dialog.Description>
         <Flex direction="column" gap="1" className="text-sm">
           <Text>Choose the amount of {token?.name} you want to withraw.</Text>
-          {subscription.subscription?.currentOwner ===
+          {subscription.subscription?.currentOwner.publicKey ===
           wallet?.publicKey?.toString() ? (
             <Text color="crimson">
               Withdrawing everything you have might will make your subscription

@@ -37,7 +37,8 @@ export default function BuyTokenModal({
     [wallet, connection]
   );
   const [newPrice, setNewPrice] = useState(0);
-  const taxesPerYear = new BN(newPrice * 10 ** (token?.decimals || 0))
+  const taxesPerYear = new BN(newPrice)
+    .mul(new BN(10 ** (token?.decimals || 0)))
     .mul(new BN(subscription?.saloon?.config?.taxRate || 0))
     .div(new BN(10000));
 
@@ -104,7 +105,9 @@ export default function BuyTokenModal({
               Math.round(newPrice * 10 ** (token?.decimals || 0))
             ),
             newOwner: wallet.publicKey,
-            oldOwner: new PublicKey(subscription.subscription.currentOwner),
+            oldOwner: new PublicKey(
+              subscription.subscription.currentOwner.publicKey
+            ),
             collectionMint,
             tokenMint: tokenMint,
             tokenProgram: TOKEN_2022_PROGRAM_ID,
@@ -117,7 +120,9 @@ export default function BuyTokenModal({
         await rentBuilders
           .updateBid({
             provider,
-            bidder: new PublicKey(subscription.subscription.currentOwner),
+            bidder: new PublicKey(
+              subscription.subscription.currentOwner.publicKey
+            ),
             collectionMint,
             tokenMint,
           })
@@ -130,7 +135,9 @@ export default function BuyTokenModal({
             newSellPrice: new BN(
               Math.round(newPrice * 10 ** (token?.decimals || 0))
             ),
-            owner: new PublicKey(subscription.subscription.currentOwner),
+            owner: new PublicKey(
+              subscription.subscription.currentOwner.publicKey
+            ),
             collectionMint: new PublicKey(subscription.saloon.collectionMint),
             tokenMint: new PublicKey(subscription.tokenState.tokenMint),
             tokenProgram: TOKEN_2022_PROGRAM_ID,

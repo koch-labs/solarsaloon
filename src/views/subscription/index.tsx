@@ -23,6 +23,7 @@ import { PostsList } from "./PostsList";
 import { useUser } from "../../contexts/UserContextProvider";
 import SubscriptionDescriptionCard from "./SubscriptionDescriptionCard";
 import WithdrawFundsModal from "./WithdrawFundsModal";
+import UserBadge from "../../components/UserBadge";
 
 export default function ManageSubscription({ mint }: { mint: string }) {
   const { user } = useUser();
@@ -80,12 +81,10 @@ export default function ManageSubscription({ mint }: { mint: string }) {
               <Card>
                 <Flex direction="column">
                   <Heading size={"3"}>Your bid</Heading>
-                  <Text>
-                    Owner:
-                    <Link href={getExplorerUrl(user?.publicKey)}>
-                      <Badge color="blue">You</Badge>
-                    </Link>
-                  </Text>
+                  <Flex gap="2" align="center">
+                    <Text>Owner:</Text>
+                    <UserBadge user={user} />{" "}
+                  </Flex>
                   <Text>
                     Amount deposited:{" "}
                     {numeral(subscription.bidState?.amount || "0")
@@ -134,22 +133,12 @@ export default function ManageSubscription({ mint }: { mint: string }) {
               <Card>
                 <Flex direction="column">
                   <Heading size={"3"}>The owner&apos;s bid</Heading>
-                  <Text>
-                    Owner:
-                    {subscription.ownerBidState?.bidder === user?.publicKey ? (
-                      <Link href={getExplorerUrl(user?.publicKey)}>
-                        <Badge color="blue">You</Badge>
-                      </Link>
-                    ) : (
-                      <Link
-                        href={getExplorerUrl(
-                          subscription.ownerBidState?.bidder
-                        )}
-                      >
-                        {shortKey(subscription.ownerBidState?.bidder)}
-                      </Link>
-                    )}
-                  </Text>
+                  <Flex gap="2" align="center">
+                    <Text>Owner:</Text>
+                    <UserBadge
+                      user={subscription.subscription?.currentOwner}
+                    />{" "}
+                  </Flex>
                   <Text>
                     Amount deposited:{" "}
                     {numeral(subscription.ownerBidState?.amount || "0")
@@ -186,7 +175,8 @@ export default function ManageSubscription({ mint }: { mint: string }) {
             </Flex>
             {user?.publicKey &&
             ((subscription.subscription?.currentOwner &&
-              subscription.subscription.currentOwner === user.publicKey) ||
+              subscription.subscription.currentOwner.publicKey ===
+                user.publicKey) ||
               (subscription.saloon?.owner?.publicKey &&
                 subscription.saloon.owner.publicKey === user.publicKey)) ? (
               <CreatePostCard subscription={subscription} />

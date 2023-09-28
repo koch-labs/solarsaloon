@@ -28,7 +28,7 @@ export interface Subscription {
   tokenMint: string;
   lastPost: string;
   tokenState: TokenStateJSON;
-  currentOwner: string;
+  currentOwner: User;
 }
 
 export interface Post {

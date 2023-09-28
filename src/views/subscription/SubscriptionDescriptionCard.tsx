@@ -25,6 +25,7 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { builders } from "@koch-labs/rent-nft";
 import SetSellingPriceModal from "./SetSellingPriceModal";
 import ClaimFeesButton from "./ClaimFeesButton";
+import UserBadge from "../../components/UserBadge";
 
 export default function SubscriptionDescriptionCard({
   subscription,
@@ -120,18 +121,11 @@ export default function SubscriptionDescriptionCard({
             .format("0.0a")}{" "}
           {token?.symbol}
         </Text>
-        <Text>
-          Owner:{" "}
-          {subscription.subscription?.currentOwner === user?.publicKey ? (
-            <Link
-              href={getExplorerUrl(subscription.subscription?.currentOwner)}
-            >
-              <Badge color="blue">You</Badge>
-            </Link>
-          ) : (
-            shortKey(subscription.tokenState?.ownerBidState)
-          )}
-        </Text>
+        <Flex gap="2" align="center">
+          <Text>Owner:</Text>
+          <UserBadge user={subscription?.subscription?.currentOwner} />
+        </Flex>
+
         <Text>
           Subscription mint:{" "}
           {subscription.tokenState?.tokenMint
@@ -140,11 +134,12 @@ export default function SubscriptionDescriptionCard({
         </Text>
         <Flex className="justify-around">
           {user &&
-          subscription.subscription?.currentOwner !== user.publicKey ? (
+          subscription.subscription?.currentOwner.publicKey !==
+            user.publicKey ? (
             <Button
               color="green"
               className="w-42"
-              disabled={(new BN(subscription.bidState?.amount) || new BN(0)).lt(
+              disabled={new BN(subscription.bidState?.amount || 0).lte(
                 new BN(
                   subscription.tokenState?.ownerBidState
                     ? subscription.tokenState?.currentSellingPrice
@@ -157,7 +152,8 @@ export default function SubscriptionDescriptionCard({
             </Button>
           ) : null}
           {user &&
-          subscription.subscription?.currentOwner === user.publicKey ? (
+          subscription.subscription?.currentOwner.publicKey ===
+            user.publicKey ? (
             <Button className="w-42" onClick={() => setOpenPrice(true)}>
               Update selling price
             </Button>
