@@ -83,6 +83,7 @@ export default async function handler(
     const saloon: Saloon = {
       owner: {
         publicKey: subscriptionRow.publickey,
+        username: subscriptionRow.username,
         lastLogin: subscriptionRow.lastlogin,
       },
       collectionMint: subscriptionRow.collectionmint,

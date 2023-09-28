@@ -34,7 +34,7 @@ export default async function handler(
         const findUserQuery =
           await sql`SELECT * FROM users WHERE publicKey = ${publicKey.toString()};`;
         if (findUserQuery.rowCount === 0) {
-          await sql`INSERT INTO users (publicKey, lastLogin) VALUES (${publicKey.toString()}, CURRENT_TIMESTAMP);`;
+          await sql`INSERT INTO users (publicKey, username, lastLogin) VALUES (${publicKey.toString()}, ${publicKey.toString()}, CURRENT_TIMESTAMP);`;
         } else {
           await sql`UPDATE users SET lastLogin=CURRENT_TIMESTAMP;`;
         }
@@ -44,6 +44,7 @@ export default async function handler(
         const row = selectedUser.rows[0];
         return {
           publicKey: row.publickey,
+          username: row.publickey,
           lastLogin: row.lastlogin,
         };
       };

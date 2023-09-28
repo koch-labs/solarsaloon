@@ -17,6 +17,7 @@ export default async function handler(
       await sql`
     CREATE TABLE users (
       publicKey TEXT PRIMARY KEY,
+      username TEXT,
       lastLogin TIMESTAMP
     );
     `

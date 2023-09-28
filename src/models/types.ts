@@ -4,6 +4,7 @@ export type EndpointTypes = "mainnet" | "devnet" | "localnet";
 
 export interface User {
   publicKey: string;
+  username: string;
   lastLogin: string;
 }
 
