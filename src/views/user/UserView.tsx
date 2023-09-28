@@ -47,7 +47,12 @@ const UserView: React.FC<{ publicKey: string }> = ({ publicKey }) => {
     <Container className="content-center">
       <Flex gap="2" direction="column">
         <Card className="flex flex-col gap-4 items-stretch">
-          <Flex gap={"3"} direction={"column"}>
+          <Flex
+            gap={"3"}
+            direction={"column"}
+            width={"100%"}
+            className="w-auto"
+          >
             <Flex align="start" justify="between" position="absolute" gap={"3"}>
               <Link href="/users">
                 <IconButton variant="ghost">
@@ -82,7 +87,7 @@ const UserView: React.FC<{ publicKey: string }> = ({ publicKey }) => {
                 </Popover.Content>
               </Popover.Root>
             </Flex>
-            <Flex direction="column" align="center" gap="5">
+            <Flex direction="column" align="center" gap="5" className="w-full">
               <Heading>
                 {user?.username ? user.username : shortKey(user?.publicKey)}
               </Heading>
@@ -100,7 +105,9 @@ const UserView: React.FC<{ publicKey: string }> = ({ publicKey }) => {
                   </Flex>
                 </Card>
               ) : null}
-              <Flex>{saloons ? <SaloonsList saloons={saloons} /> : null}</Flex>
+              <Flex className="w-full" direction="column">
+                {saloons ? <SaloonsList saloons={saloons} /> : null}
+              </Flex>
             </Flex>
           </Flex>
         </Card>
