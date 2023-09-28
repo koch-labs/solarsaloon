@@ -19,6 +19,14 @@ const Header: React.FC = () => {
               Saloons
             </Link>
           </nav>
+          <nav className="hidden gap-6 md:flex">
+            <Link
+              className="flex items-center text-lg font-semibold text-slate-600 sm:text-sm"
+              href="/users"
+            >
+              Users
+            </Link>
+          </nav>
         </div>
         <AccountNav />
       </div>

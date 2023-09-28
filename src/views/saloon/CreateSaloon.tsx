@@ -37,6 +37,7 @@ import Link from "next/link";
 import numeral from "numeral";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
 import WaitingButton from "../../components/WaitingButton";
+import { formatTime } from "../../utils";
 
 const CreateSaloon: React.FC = () => {
   const router = useRouter();
@@ -56,25 +57,7 @@ const CreateSaloon: React.FC = () => {
   const [postCooldown, setPostCooldown] = useState<number>(86400000);
   const [isLoading, setIsLoading] = useState(false);
 
-  const formattedTime = useMemo(() => {
-    const seconds = postCooldown / 1000;
-    if (seconds < 60) {
-      return `${numeral(seconds).format("0.0a")} seconds`;
-    }
-
-    const minutes = seconds / 60;
-    if (minutes < 60) {
-      return `${numeral(minutes).format("0.0a")} minutes`;
-    }
-
-    const hours = minutes / 60;
-    if (hours < 24) {
-      return `${numeral(hours).format("0.0a")} hours`;
-    }
-
-    const days = hours / 24;
-    return `${numeral(days).format("0.0a")} days`;
-  }, [postCooldown]);
+  const formattedTime = formatTime(postCooldown);
 
   const handleCreate = useCallback(async () => {
     if (

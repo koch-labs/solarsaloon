@@ -49,7 +49,7 @@ const UserView: React.FC<{ publicKey: string }> = ({ publicKey }) => {
         <Card className="flex flex-col gap-4 items-stretch">
           <Flex gap={"3"} direction={"column"}>
             <Flex align="start" justify="between" position="absolute" gap={"3"}>
-              <Link href="/saloons">
+              <Link href="/users">
                 <IconButton variant="ghost">
                   <ArrowLeftIcon width={32} height={32} strokeWidth={5} />
                 </IconButton>

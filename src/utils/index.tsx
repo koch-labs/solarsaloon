@@ -1,5 +1,6 @@
 import { PublicKey } from "@solana/web3.js";
 import { format } from "date-fns";
+import numeral from "numeral";
 
 // Concatenates classes into a single className string
 const cn = (...args: string[]) => args.join(" ");
@@ -34,4 +35,25 @@ const shortKey = (key?: PublicKey | string) => {
     ? str.slice(0, 4) + "..." + str.slice(str.length - 4, str.length)
     : "???";
 };
-export { cn, formatDate, numberToCurrencyString, clamp, shortKey };
+
+const formatTime = (ms: number) => {
+  const seconds = ms / 1000;
+  if (seconds < 60) {
+    return `${numeral(seconds).format("0.00a")} seconds`;
+  }
+
+  const minutes = seconds / 60;
+  if (minutes < 60) {
+    return `${numeral(minutes).format("0.00a")} minutes`;
+  }
+
+  const hours = minutes / 60;
+  if (hours < 24) {
+    return `${numeral(hours).format("0.00a")} hours`;
+  }
+
+  const days = hours / 24;
+  return `${numeral(days).format("0.00a")} days`;
+};
+
+export { cn, formatDate, numberToCurrencyString, clamp, shortKey, formatTime };

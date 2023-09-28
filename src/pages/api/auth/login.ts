@@ -36,7 +36,7 @@ export default async function handler(
         if (findUserQuery.rowCount === 0) {
           await sql`INSERT INTO users (publicKey, username, lastLogin) VALUES (${publicKey.toString()}, ${publicKey.toString()}, CURRENT_TIMESTAMP);`;
         } else {
-          await sql`UPDATE users SET lastLogin=CURRENT_TIMESTAMP;`;
+          await sql`UPDATE users SET lastLogin=CURRENT_TIMESTAMP WHERE publicKey = ${publicKey.toString()};`;
         }
 
         const selectedUser =
