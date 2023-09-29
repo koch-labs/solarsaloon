@@ -39,9 +39,9 @@ export default async function handler(
       id: s.id,
       collectionMint: s.collectionmint,
       owner: {
-        id: s.ownerid,
-        lastLogin: s.lastlogin,
         publicKey: s.publickey,
+        username: s.username,
+        lastLogin: s.lastlogin,
       },
       taxMint: s.taxmint,
       authoritiesGroup: s.authoritiesgroup,
