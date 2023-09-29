@@ -1,5 +1,5 @@
 import React from "react";
-import { DropdownMenu, Text, Tooltip } from "@radix-ui/themes";
+import { DropdownMenu, Flex, Text, Tooltip } from "@radix-ui/themes";
 import { HamburgerMenuIcon } from "@radix-ui/react-icons";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
@@ -17,76 +17,81 @@ const AccountNav: React.FC = () => {
   const wallet = useWallet();
 
   return wallet.connected ? (
-    <div className="flex gap-2">
-      <DropdownMenu.Root>
-        <DropdownMenu.Trigger>
-          <Button variant="soft">
-            <HamburgerMenuIcon />
-            {isSignedIn ? (
-              <Tooltip content="You are signed in">
-                <CheckCircledIcon color="green" />
-              </Tooltip>
-            ) : (
-              <Tooltip content="You are not signed in">
-                <CrossCircledIcon color="crimson" />
-              </Tooltip>
-            )}
-          </Button>
-        </DropdownMenu.Trigger>
-        <DropdownMenu.Content>
-          <Link href="/profile">
-            <DropdownMenu.Item className="DropdownMenuItem">
-              Profile
-            </DropdownMenu.Item>
-          </Link>
+    isSignedIn ? (
+      <div className="flex gap-2">
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger>
+            <Button variant="soft">
+              <HamburgerMenuIcon />
+              {isSignedIn ? (
+                <Tooltip content="You are signed in">
+                  <CheckCircledIcon color="green" />
+                </Tooltip>
+              ) : (
+                <Tooltip content="You are not signed in">
+                  <CrossCircledIcon color="crimson" />
+                </Tooltip>
+              )}
+            </Button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content>
+            <Link href="/profile">
+              <DropdownMenu.Item className="DropdownMenuItem">
+                Profile
+              </DropdownMenu.Item>
+            </Link>
 
-          <DropdownMenu.Separator className="DropdownMenuSeparator" />
+            <DropdownMenu.Separator className="DropdownMenuSeparator" />
 
-          <DropdownMenu.Label className="DropdownMenuLabel">
-            Authentication <br />
-            {shortKey(wallet?.publicKey)}
-          </DropdownMenu.Label>
-          {isSignedIn ? (
+            <DropdownMenu.Label className="DropdownMenuLabel">
+              Authentication <br />
+              {shortKey(wallet?.publicKey)}
+            </DropdownMenu.Label>
             <DropdownMenu.Item color="crimson" onClick={() => logOff()}>
               Log off
             </DropdownMenu.Item>
-          ) : (
-            <DropdownMenu.Item color="green" onClick={() => signIn()}>
-              Sign In
+            <DropdownMenu.Item
+              color="crimson"
+              onClick={() => wallet.disconnect()}
+            >
+              Disconnect
             </DropdownMenu.Item>
-          )}
-          <DropdownMenu.Item
-            color="crimson"
-            onClick={() => wallet.disconnect()}
-          >
-            Disconnect
-          </DropdownMenu.Item>
 
-          <DropdownMenu.Separator className="DropdownMenuSeparator" />
+            <DropdownMenu.Separator className="DropdownMenuSeparator" />
 
-          <DropdownMenu.Sub>
-            <DropdownMenu.SubTrigger>Pick Network...</DropdownMenu.SubTrigger>
-            <DropdownMenu.SubContent>
-              <DropdownMenu.Item
-                onClick={(e) => setNetworkConfiguration("mainnet-beta")}
-              >
-                Mainnet
-              </DropdownMenu.Item>
-              <DropdownMenu.Item
-                onClick={(e) => setNetworkConfiguration("devnet")}
-              >
-                Devnet
-              </DropdownMenu.Item>
-              <DropdownMenu.Item
-                onClick={(e) => setNetworkConfiguration("testnet")}
-              >
-                Testnet
-              </DropdownMenu.Item>
-            </DropdownMenu.SubContent>
-          </DropdownMenu.Sub>
-        </DropdownMenu.Content>
-      </DropdownMenu.Root>
-    </div>
+            <DropdownMenu.Sub>
+              <DropdownMenu.SubTrigger>Pick Network...</DropdownMenu.SubTrigger>
+              <DropdownMenu.SubContent>
+                <DropdownMenu.Item
+                  onClick={(e) => setNetworkConfiguration("mainnet-beta")}
+                >
+                  Mainnet
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  onClick={(e) => setNetworkConfiguration("devnet")}
+                >
+                  Devnet
+                </DropdownMenu.Item>
+                <DropdownMenu.Item
+                  onClick={(e) => setNetworkConfiguration("testnet")}
+                >
+                  Testnet
+                </DropdownMenu.Item>
+              </DropdownMenu.SubContent>
+            </DropdownMenu.Sub>
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
+      </div>
+    ) : (
+      <Flex gap="1">
+        <Button color="green" onClick={() => signIn()}>
+          Sign in
+        </Button>
+        <Button color="crimson" onClick={() => wallet.disconnect()}>
+          Disconnect
+        </Button>
+      </Flex>
+    )
   ) : (
     <Button onClick={() => walletModal.setVisible(!walletModal.visible)}>
       Connect key
