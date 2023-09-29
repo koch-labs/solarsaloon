@@ -1,41 +1,22 @@
 import numeral from "numeral";
-import useSubscription, { FullSubscription } from "../../hooks/useSubscription";
-import {
-  Badge,
-  Button,
-  Card,
-  Container,
-  Flex,
-  Heading,
-  IconButton,
-  Popover,
-  Text,
-} from "@radix-ui/themes";
-import Link from "next/link";
-import { ArrowLeftIcon, QuestionMarkCircledIcon } from "@radix-ui/react-icons";
-import { shortKey } from "../../utils";
-import { getExplorerUrl } from "../../utils/explorer";
-import DepositFundsModal from "./DepositFundsModal";
+import { FullSubscription } from "../../hooks/useSubscription";
 import { useCallback, useMemo, useState } from "react";
 import { tokens } from "../../utils/tokens";
-import CreatePostCard from "./CreatePostCard";
-import { PostsList } from "./PostsList";
-import { useCurrentUser } from "../../contexts/UserContextProvider";
-import SubscriptionDescriptionCard from "./SubscriptionDescriptionCard";
-import WithdrawFundsModal from "./WithdrawFundsModal";
 import { Fetchable } from "../../hooks/useSaloon";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { builders } from "@koch-labs/rent-nft";
-import { AnchorProvider } from "@coral-xyz/anchor";
+import { AnchorProvider, BN } from "@coral-xyz/anchor";
 import WaitingButton from "../../components/WaitingButton";
 import {
-  TOKEN_2022_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountIdempotentInstruction,
   createCloseAccountInstruction,
+  createTransferCheckedInstruction,
   getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
+import { Flex, Text } from "@radix-ui/themes";
+import useCurrentFees from "../../hooks/useCurrentFees";
+import { TREASURY } from "../../utils/constants";
 
 export default function ClaimFeesButton({
   subscription,
@@ -52,6 +33,7 @@ export default function ClaimFeesButton({
   const token = tokens.find(
     (e) => e.publicKey.toString() === subscription?.saloon?.taxMint
   );
+  const { amount } = useCurrentFees({ subscription, token, increasing: true });
   const [isWaiting, setIsWaiting] = useState(false);
 
   const handleClaim = useCallback(async () => {
@@ -110,6 +92,33 @@ export default function ClaimFeesButton({
             token.tokenProgram
           )
         );
+        tx.add(
+          SystemProgram.transfer({
+            fromPubkey: wallet.publicKey,
+            toPubkey: TREASURY,
+            lamports: new BN(
+              Math.round((Number(amount) * 10 ** (token.decimals || 0)) / 100)
+            ).toNumber(),
+          })
+        );
+      } else {
+        tx.add(
+          createTransferCheckedInstruction(
+            tokenAccount,
+            new PublicKey(token.publicKey),
+            getAssociatedTokenAddressSync(
+              new PublicKey(token.publicKey),
+              TREASURY,
+              true,
+              token.tokenProgram
+            ),
+            wallet.publicKey,
+            new BN(
+              Math.round((Number(amount) * 10 ** (token.decimals || 0)) / 100)
+            ).toNumber(),
+            token.decimals
+          )
+        );
       }
 
       const conf = await wallet.sendTransaction(tx, connection, {
@@ -120,11 +129,14 @@ export default function ClaimFeesButton({
     } finally {
       setIsWaiting(false);
     }
-  }, [subscription, connection, provider, wallet, token]);
+  }, [subscription, connection, provider, wallet, token, amount]);
 
   return (
-    <WaitingButton color="green" loading={isWaiting} onClick={handleClaim}>
-      Claim fees
-    </WaitingButton>
+    <Flex direction="column" gap="1">
+      <WaitingButton color="green" loading={isWaiting} onClick={handleClaim}>
+        Claim fees
+      </WaitingButton>
+      <Text weight="light">A 1% fee is applied</Text>
+    </Flex>
   );
 }
