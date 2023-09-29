@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import ManageSubscription from "../../views/subscription";
+import ManageSubscription from "../../views/subscription/ManageSubscription";
 
 const ManageSubscriptionPage = () => {
   const router = useRouter();

@@ -1,6 +1,6 @@
 import { Button, Dialog, Flex, Text, TextField } from "@radix-ui/themes";
 import { tokens } from "../../utils/tokens";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { getConfigKey, builders as rentBuilders } from "@koch-labs/rent-nft";
@@ -38,6 +38,55 @@ export default function WithdrawFundsModal({
   );
   const [amount, setAmount] = useState(0);
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
+  const taxesPerYear = new BN(
+    subscription?.tokenState?.currentSellingPrice || 0
+  )
+    .mul(new BN(subscription?.saloon?.config?.taxRate || 0))
+    .div(new BN(10000));
+  const [amountLeft, setAmountLeft] = useState<string>(
+    numeral(subscription?.ownerBidState?.amount || "0").format("0.000a")
+  );
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!subscription?.bidState) {
+        setAmountLeft(numeral("0").format("0.000a"));
+        return;
+      } else if (
+        subscription?.ownerBidState?.bidder !== wallet?.publicKey?.toString()
+      ) {
+        setAmountLeft(
+          numeral(subscription.bidState?.amount)
+            .divide(10 ** (token?.decimals || 0))
+            .format("0.000a")
+        );
+        return;
+      }
+
+      setAmountLeft(
+        numeral(
+          new BN(subscription.ownerBidState?.amount || 0)
+            .sub(
+              taxesPerYear
+                .mul(
+                  new BN(
+                    Math.round(
+                      Date.now() / 1000 -
+                        Number(subscription?.ownerBidState?.lastUpdate || 0)
+                    )
+                  )
+                )
+                .div(new BN(31536000))
+            )
+            .toString()
+        )
+          .divide(10 ** (token?.decimals || 0))
+          .format("0.000a")
+      );
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [token, subscription, taxesPerYear, wallet.publicKey]);
 
   const handleWithdraw = useCallback(async () => {
     if (!amount) return;
@@ -133,17 +182,25 @@ export default function WithdrawFundsModal({
                 Amount
               </Text>
               <Text weight="light">
-                Deposited balance:{" "}
-                {numeral(subscription?.bidState?.amount || 0)
-                  .divide(10 ** (token?.decimals || 0))
-                  .format("0.00a")}{" "}
-                ${token?.symbol || "???"}
+                Deposited balance: {amountLeft} ${token?.symbol || "???"}
               </Text>
             </Flex>
-            <TextField.Input
-              placeholder="Enter the amount to deposit..."
-              onChange={(e) => setAmount(Number(e.target.value))}
-            />
+            <TextField.Root>
+              <TextField.Input
+                placeholder="Enter the amount to deposit..."
+                onChange={(e) => setAmount(Number(e.target.value))}
+                value={amount}
+              />
+              <TextField.Slot className="m-1">
+                <Button
+                  size="1"
+                  variant="ghost"
+                  onClick={() => setAmount(Number(amountLeft))}
+                >
+                  MAX
+                </Button>
+              </TextField.Slot>
+            </TextField.Root>
           </label>
         </Flex>
 
