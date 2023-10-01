@@ -22,11 +22,11 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
 import CreateSubscription from "./CreateSubscription";
-import useSaloon, { Fetchable } from "../../hooks/useSaloon";
+import useSaloon from "../../hooks/useSaloon";
 import { SubscriptionsList } from "./SubscriptionsList";
 import { shortKey } from "../../utils";
 import Image from "next/image";
-import { Saloon } from "../../models/types";
+import { Fetchable, Saloon } from "../../models/types";
 
 const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({ saloon }) => {
   const { user } = useCurrentUser();

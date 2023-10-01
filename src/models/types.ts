@@ -2,6 +2,10 @@ import { CollectionConfigJSON, TokenStateJSON } from "@koch-labs/rent-nft";
 
 export type EndpointTypes = "mainnet" | "devnet" | "localnet";
 
+export type Fetchable<T> = T & {
+  reload: () => Promise<void>;
+};
+
 export interface User {
   publicKey: string;
   username: string;

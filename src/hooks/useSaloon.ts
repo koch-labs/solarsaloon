@@ -1,12 +1,8 @@
 import { PublicKey } from "@solana/web3.js";
 import { useCallback, useEffect, useState } from "react";
-import { Saloon } from "../models/types";
+import { Fetchable, Saloon } from "../models/types";
 import toast from "react-hot-toast";
 import { useCurrentUser } from "../contexts/UserContextProvider";
-
-export type Fetchable<T> = T & {
-  reload: () => Promise<void>;
-};
 
 export default function useSaloon(saloonMint: string): Fetchable<Saloon> {
   const { token } = useCurrentUser();

@@ -38,6 +38,7 @@ import numeral from "numeral";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
 import WaitingButton from "../../components/WaitingButton";
 import { formatTime } from "../../utils";
+import NavigationPath from "../../components/NavigationPath";
 
 const CreateSaloon: React.FC = () => {
   const router = useRouter();

@@ -1,5 +1,5 @@
 import numeral from "numeral";
-import useSubscription from "../../hooks/useSubscription";
+import useSubscription, { FullSubscription } from "../../hooks/useSubscription";
 import {
   Badge,
   Button,
@@ -25,10 +25,14 @@ import SubscriptionDescriptionCard from "./SubscriptionDescriptionCard";
 import WithdrawFundsModal from "./WithdrawFundsModal";
 import UserBadge from "../../components/UserBadge";
 import { BN } from "@coral-xyz/anchor";
+import { Fetchable } from "../../models/types";
 
-export default function ManageSubscription({ mint }: { mint: string }) {
+export default function ManageSubscription({
+  subscription,
+}: {
+  subscription?: Fetchable<FullSubscription>;
+}) {
   const { user } = useCurrentUser();
-  const subscription = useSubscription(mint as string);
   console.log(subscription);
   const token = tokens.find(
     (t) => t.publicKey.toString() === subscription?.saloon?.taxMint
@@ -88,7 +92,9 @@ export default function ManageSubscription({ mint }: { mint: string }) {
                   <ArrowLeftIcon width={32} height={32} strokeWidth={5} />
                 </IconButton>
               </Link>
-              <Heading align="center">Subscription {shortKey(mint)}</Heading>
+              <Heading align="center">
+                Subscription {shortKey(subscription?.subscription.tokenMint)}
+              </Heading>
               <Popover.Root>
                 <Popover.Trigger>
                   <IconButton variant="ghost">

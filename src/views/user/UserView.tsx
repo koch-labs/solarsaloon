@@ -22,7 +22,7 @@ import React, { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import useUser from "../../hooks/useUser";
 import { shortKey } from "../../utils";
-import { SaloonsList } from "../home/SaloonsList";
+import { SaloonsList } from "../saloon/SaloonsList";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
 
 const UserView: React.FC<{ publicKey: string }> = ({ publicKey }) => {
