@@ -25,7 +25,6 @@ import CreateSubscription from "./CreateSubscription";
 import useSaloon from "../../hooks/useSaloon";
 import { SubscriptionsList } from "./SubscriptionsList";
 import { shortKey } from "../../utils";
-import Image from "next/image";
 import { Fetchable, Saloon } from "../../models/types";
 
 const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({ saloon }) => {
