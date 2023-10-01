@@ -15,8 +15,8 @@ const UserPage: React.FC = () => {
       <NavigationPath
         path={[
           { href: "/", name: "home" },
-          { href: "/saloons", name: "users list" },
-          { href: `/${publicKey}`, name: "user" },
+          { href: "/users", name: "users list" },
+          { href: `/user/${publicKey}`, name: "user" },
         ]}
       />
       <UserView publicKey={publicKey} />

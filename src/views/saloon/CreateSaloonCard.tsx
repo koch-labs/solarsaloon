@@ -5,7 +5,13 @@ export const CreateSaloonCard = () => {
   return (
     <Container size={"3"}>
       <Card>
-        <Flex direction="column" align="center" gap="2" my={"3"}>
+        <Flex
+          direction="column"
+          align="center"
+          gap="2"
+          my={"3"}
+          color="crimson"
+        >
           <Text align="center">
             Your saloon is the place where people come to hear about YOU.
             <br />
@@ -13,7 +19,7 @@ export const CreateSaloonCard = () => {
             paid members.
           </Text>
           <Link href="/saloon/create">
-            <Button>create a saloon</Button>
+            <Button className="bg-crimson-200">create a saloon</Button>
           </Link>
         </Flex>
       </Card>

@@ -10,8 +10,8 @@ import {
 import dynamic from "next/dynamic";
 import { useCallback, useState } from "react";
 import { FullSubscription } from "../../hooks/useSubscription";
-import { Fetchable } from "../../hooks/useSaloon";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
+import { Fetchable } from "../../models/types";
 
 const MDEditor = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default),
