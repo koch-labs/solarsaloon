@@ -5,10 +5,10 @@ import Link from "next/link";
 
 const Header: React.FC = () => {
   return (
-    <header className="sticky top-0 z-40 bg-white pz-4 px-4">
-      <div className="flex h-16 items-center justify-between border-b border-b-slate-200 py-4 ">
+    <header className="sticky top-0 z-40 bg-white pz-4">
+      <div className="flex h-16 items-center justify-between py-4 px-2 md:px-8">
         <Link className="items-center space-x-2" href="/">
-          <Heading>Solar Saloon</Heading>
+          <Heading>solar.saloon</Heading>
         </Link>
         <AccountNav />
       </div>

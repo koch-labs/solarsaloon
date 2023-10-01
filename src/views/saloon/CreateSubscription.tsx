@@ -8,9 +8,8 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/router";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
 import { BASE_URL } from "../../utils/constants";
-import { Saloon } from "../../models/types";
+import { Fetchable, Saloon } from "../../models/types";
 import { builders as rentBuilders } from "@koch-labs/rent-nft";
-import { Fetchable } from "../../hooks/useSaloon";
 import WaitingButton from "../../components/WaitingButton";
 
 const CreateSubscription: React.FC<{

@@ -17,12 +17,12 @@ const AccountNav: React.FC = () => {
       <Flex gap="4">
         <Button variant="ghost" onClick={() => logOff()}>
           <WalletIcon width="20" />
-          Log off
+          log off
         </Button>
         <Link href={`/user/${wallet?.publicKey.toString()}`}>
           <Button variant="ghost">
             <UserIcon width="20" />
-            Account
+            account
           </Button>
         </Link>
       </Flex>
@@ -30,11 +30,11 @@ const AccountNav: React.FC = () => {
       <Flex gap="4">
         <Button variant="ghost" onClick={() => wallet.disconnect()}>
           <WalletIcon width="20" />
-          Disconnect wallet
+          disconnect wallet
         </Button>
         <Button variant="ghost" onClick={() => signIn()}>
           <UserIcon width="20" />
-          Sign in
+          sign in
         </Button>
       </Flex>
     )
@@ -44,7 +44,7 @@ const AccountNav: React.FC = () => {
       onClick={() => walletModal.setVisible(!walletModal.visible)}
     >
       <WalletIcon width="20" />
-      <Text>Connect wallet</Text>
+      <Text>connect wallet</Text>
     </Button>
   );
 };

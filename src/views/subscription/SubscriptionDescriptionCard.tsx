@@ -19,13 +19,13 @@ import { tokens } from "../../utils/tokens";
 import BuyTokenModal from "./BuyTokenModal";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
 import Link from "next/link";
-import { Fetchable } from "../../hooks/useSaloon";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { builders } from "@koch-labs/rent-nft";
 import SetSellingPriceModal from "./SetSellingPriceModal";
 import ClaimFeesButton from "./ClaimFeesButton";
 import UserBadge from "../../components/UserBadge";
+import { Fetchable } from "../../models/types";
 
 export default function SubscriptionDescriptionCard({
   subscription,

@@ -7,7 +7,6 @@ import { getConfigKey, builders as rentBuilders } from "@koch-labs/rent-nft";
 import { AnchorProvider, BN } from "@coral-xyz/anchor";
 import numeral from "numeral";
 import { FullSubscription } from "../../hooks/useSubscription";
-import { Fetchable } from "../../hooks/useSaloon";
 import {
   createAssociatedTokenAccountIdempotentInstruction,
   createCloseAccountInstruction,
@@ -15,6 +14,7 @@ import {
   getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
 import WaitingButton from "../../components/WaitingButton";
+import { Fetchable } from "../../models/types";
 
 export default function WithdrawFundsModal({
   setOpen,

@@ -8,12 +8,12 @@ import {
   TextFieldInput,
   TextArea,
 } from "@radix-ui/themes";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useRouter } from "next/router";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
-import useSaloon, { Fetchable } from "../../hooks/useSaloon";
+import useSaloon from "../../hooks/useSaloon";
 import Image from "next/image";
-import { Saloon } from "../../models/types";
+import { Fetchable, Saloon } from "../../models/types";
 
 const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({ saloon }) => {
   const router = useRouter();

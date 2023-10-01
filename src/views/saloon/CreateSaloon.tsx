@@ -365,7 +365,7 @@ const CreateSaloon: React.FC = () => {
                 loading={isLoading}
                 onClick={handleCreate}
               >
-                Create
+                create
               </WaitingButton>
             </Flex>
           </Card>

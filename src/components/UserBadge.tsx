@@ -2,9 +2,16 @@ import { Badge, Flex, IconButton, Text } from "@radix-ui/themes";
 import { PublicKey } from "@solana/web3.js";
 import { shortKey } from "../utils";
 import Link from "next/link";
-import { EnterIcon, ExitIcon, ExternalLinkIcon } from "@radix-ui/react-icons";
+import {
+  EnterIcon,
+  ExitIcon,
+  ExternalLinkIcon,
+  Link1Icon,
+  Link2Icon,
+} from "@radix-ui/react-icons";
 import { getExplorerUrl } from "../utils/explorer";
 import { User } from "../models/types";
+import { LinkIcon, UserIcon } from "@heroicons/react/24/outline";
 
 export default function UserBadge({ user }: { user: User }) {
   return (
@@ -16,12 +23,12 @@ export default function UserBadge({ user }: { user: User }) {
           </Text>
           <Link href={`/user/${user.publicKey}`}>
             <IconButton variant="ghost" size="1">
-              <EnterIcon />
+              <UserIcon width="16" />
             </IconButton>
           </Link>
           <Link href={getExplorerUrl(user.publicKey)} target="_blank">
             <IconButton variant="ghost" size="1">
-              <ExitIcon />
+              <LinkIcon width="16" />
             </IconButton>
           </Link>
         </Flex>

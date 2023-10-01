@@ -11,7 +11,7 @@ export default function NavigationPath({
 } & ButtonProps &
   React.RefAttributes<HTMLButtonElement>) {
   return (
-    <Flex gap="1">
+    <Flex gap="1" className="px-2 md:px-8 py-4">
       {path.map(({ href, name }, i) => (
         <Link key={href} href={href}>
           {name} {i !== path.length - 1 ? " / " : ""}
