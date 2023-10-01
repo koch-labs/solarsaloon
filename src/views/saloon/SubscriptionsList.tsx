@@ -6,6 +6,7 @@ import {
   Text,
   Flex,
   Heading,
+  Box,
 } from "@radix-ui/themes";
 import { EnterIcon } from "@radix-ui/react-icons";
 import numeral from "numeral";
@@ -14,17 +15,21 @@ import { Saloon } from "../../models/types";
 import { shortKey } from "../../utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { tokens } from "../../utils/tokens";
+import {
+  MagnifyingGlassCircleIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
 
 export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
   const wallet = useWallet();
   const token = tokens.find((t) => t.publicKey.toString() === saloon.taxMint);
 
   return (
-    <Card>
+    <Box>
       <Heading align="center" size="5">
         Subscriptions
       </Heading>
-      <Table.Root>
+      <Table.Root className="bg-brand-gray-2">
         <Table.Header>
           <Table.Row>
             <Table.ColumnHeaderCell>Mint</Table.ColumnHeaderCell>
@@ -34,7 +39,7 @@ export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
           </Table.Row>
         </Table.Header>
 
-        <Table.Body className="align-middle">
+        <Table.Body className="align-middle bg-brand-gray">
           {saloon?.subscriptions
             ?.sort((a, b) =>
               a.tokenState?.currentSellingPrice >
@@ -68,7 +73,7 @@ export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
                 <Table.Cell>
                   <Link href={`/subscription/${s.tokenMint}`}>
                     <Button variant="soft">
-                      <EnterIcon />
+                      <MagnifyingGlassIcon width={16} />
                     </Button>
                   </Link>
                 </Table.Cell>
@@ -76,6 +81,6 @@ export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
             ))}
         </Table.Body>
       </Table.Root>
-    </Card>
+    </Box>
   );
 };

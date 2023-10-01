@@ -114,23 +114,23 @@ const CreateSubscription: React.FC<{
   }, [saloon, token, provider, connection, wallet]);
 
   return (
-    <Card>
-      <Flex gap="2" direction="column" align="center">
-        <Heading size="5">Create a subscription</Heading>
-        <WaitingButton loading={isLoading} onClick={handleCreateSubscription}>
-          Create a new subscription
-        </WaitingButton>
-        <Callout.Root>
-          <Callout.Icon>
-            <InfoCircledIcon />
-          </Callout.Icon>
-          <Callout.Text>
-            Subscriptions can only be created, not destroyed so be careful when
-            creating more.
-          </Callout.Text>
-        </Callout.Root>
+    <Flex gap="2" direction="column" align="center" p="5">
+      <Heading size="5">Create a subscription</Heading>
+      <WaitingButton
+        style={{ backgroundColor: "black" }}
+        loading={isLoading}
+        onClick={handleCreateSubscription}
+      >
+        <Text className="p-3">Create a new subscription</Text>
+      </WaitingButton>
+      <Flex align="center" gap="2">
+        <InfoCircledIcon />
+        <Text className="underline">
+          Subscriptions can only be created, not destroyed so be careful when
+          creating more.
+        </Text>
       </Flex>
-    </Card>
+    </Flex>
   );
 };
 
