@@ -38,18 +38,6 @@ export default function SetSellingPriceModal({
     .mul(new BN(subscription?.saloon?.config?.taxRate || 0))
     .div(new BN(10000));
 
-  console.log(
-    subscription,
-    newPrice * 10 ** (token?.decimals || 0),
-    taxesPerYear.toString(),
-    taxesPerYear.div(new BN(365)).toString(),
-    numeral(taxesPerYear.div(new BN(365)).toString()).divide(
-      10 ** (token?.decimals || 0)
-    ),
-    numeral(taxesPerYear.div(new BN(365)).toString())
-      .divide(10 ** (token?.decimals || 0))
-      .format("0.000a")
-  );
   const handleBuy = useCallback(async () => {
     setIsWaiting(true);
 

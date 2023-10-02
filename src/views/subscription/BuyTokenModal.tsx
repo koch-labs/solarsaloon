@@ -58,193 +58,199 @@ export default function BuyTokenModal({
     .div(new BN(10000));
 
   const handleBuy = useCallback(async () => {
-    const tx = new Transaction();
-    const {
-      value: { blockhash, lastValidBlockHeight },
-      context: { slot },
-    } = await connection.getLatestBlockhashAndContext();
-    tx.recentBlockhash = blockhash;
-    tx.lastValidBlockHeight = lastValidBlockHeight;
-    tx.feePayer = wallet.publicKey;
-    tx.minNonceContextSlot = slot;
+    setIsWaiting(true);
 
-    const taxMint = new PublicKey(subscription.saloon.taxMint);
-    const collectionMint = new PublicKey(subscription.saloon.collectionMint);
-    const tokenMint = new PublicKey(subscription.tokenState.tokenMint);
-    const amount = new BN(subscription?.ownerBidState?.sellingPrice || 0).add(
-      taxesPerYear
-        .mul(new BN(Math.round(prepaidDuration)))
-        .div(new BN(365 * 86400))
-    );
+    try {
+      const tx = new Transaction();
+      const {
+        value: { blockhash, lastValidBlockHeight },
+        context: { slot },
+      } = await connection.getLatestBlockhashAndContext();
+      tx.recentBlockhash = blockhash;
+      tx.lastValidBlockHeight = lastValidBlockHeight;
+      tx.feePayer = wallet.publicKey;
+      tx.minNonceContextSlot = slot;
 
-    tx.add(
-      createAssociatedTokenAccountIdempotentInstruction(
-        wallet.publicKey,
-        getAssociatedTokenAddressSync(
-          tokenMint,
-          wallet.publicKey,
-          true,
-          TOKEN_2022_PROGRAM_ID
-        ),
-        wallet.publicKey,
-        tokenMint,
-        TOKEN_2022_PROGRAM_ID
-      )
-    );
-
-    if (!subscription.bidState) {
-      tx.add(
-        await rentBuilders
-          .createBid({
-            provider,
-            collectionMint,
-            authoritiesGroup: new PublicKey(
-              subscription.saloon.authoritiesGroup
-            ),
-            tokenMint,
-          })
-          .builder.transaction()
+      const taxMint = new PublicKey(subscription.saloon.taxMint);
+      const collectionMint = new PublicKey(subscription.saloon.collectionMint);
+      const tokenMint = new PublicKey(subscription.tokenState.tokenMint);
+      const amount = new BN(subscription?.ownerBidState?.sellingPrice || 0).add(
+        taxesPerYear
+          .mul(new BN(Math.round(prepaidDuration)))
+          .div(new BN(365 * 86400))
       );
-    }
 
-    tx.add(
-      await rentBuilders
-        .updateBid({
-          provider,
-          collectionMint,
-          tokenMint,
-        })
-        .builder.transaction()
-    );
-
-    // Deposit the initial amount
-    // Wrap the needed SOL
-    if (token.publicKey === tokens[0].publicKey) {
-      const wrappedSolAccount = getAssociatedTokenAddressSync(
-        token.publicKey,
-        wallet.publicKey,
-        true,
-        token.tokenProgram
-      );
       tx.add(
         createAssociatedTokenAccountIdempotentInstruction(
           wallet.publicKey,
-          wrappedSolAccount,
+          getAssociatedTokenAddressSync(
+            tokenMint,
+            wallet.publicKey,
+            true,
+            TOKEN_2022_PROGRAM_ID
+          ),
           wallet.publicKey,
-          token.publicKey,
-          token.tokenProgram
+          tokenMint,
+          TOKEN_2022_PROGRAM_ID
         )
       );
-      tx.add(
-        SystemProgram.transfer({
-          fromPubkey: wallet.publicKey,
-          toPubkey: wrappedSolAccount,
-          lamports: amount.toNumber(),
-        })
-      );
-      tx.add(createSyncNativeInstruction(wrappedSolAccount));
-    }
 
-    tx.add(
-      createAssociatedTokenAccountIdempotentInstruction(
-        wallet.publicKey,
-        getAssociatedTokenAddressSync(
-          token.publicKey,
-          getConfigKey(new PublicKey(subscription.saloon.collectionMint)),
-          true,
-          token.tokenProgram
-        ),
-        getConfigKey(new PublicKey(subscription.saloon.collectionMint)),
-        token.publicKey,
-        token.tokenProgram
-      )
-    );
+      if (!subscription.bidState) {
+        tx.add(
+          await rentBuilders
+            .createBid({
+              provider,
+              collectionMint,
+              authoritiesGroup: new PublicKey(
+                subscription.saloon.authoritiesGroup
+              ),
+              tokenMint,
+            })
+            .builder.transaction()
+        );
+      }
 
-    tx.add(
-      await rentBuilders
-        .increaseBid({
-          provider,
-          amount,
-          taxMint,
-          collectionMint,
-          tokenMint,
-          authoritiesGroup: new PublicKey(
-            subscription?.saloon?.authoritiesGroup
-          ),
-          tokenProgram: new PublicKey(token?.tokenProgram),
-        })
-        .builder.transaction()
-    );
-
-    if (!subscription.ownerBidState) {
-      // Token has no owner, claim it
-      tx.add(
-        await rentBuilders
-          .claimToken({
-            provider,
-            newSellPrice: new BN(
-              Math.round(newPrice * 10 ** (token?.decimals || 0))
-            ),
-            newOwner: wallet.publicKey,
-            oldOwner: new PublicKey(
-              subscription.subscription.currentOwner.publicKey
-            ),
-            collectionMint,
-            tokenMint: tokenMint,
-            tokenProgram: TOKEN_2022_PROGRAM_ID,
-          })
-          .builder.transaction()
-      );
-    } else {
-      // Buy token from current owner
       tx.add(
         await rentBuilders
           .updateBid({
             provider,
-            bidder: new PublicKey(
-              subscription.subscription.currentOwner.publicKey
-            ),
             collectionMint,
             tokenMint,
           })
           .builder.transaction()
       );
+
+      // Deposit the initial amount
+      // Wrap the needed SOL
+      if (token.publicKey === tokens[0].publicKey) {
+        const wrappedSolAccount = getAssociatedTokenAddressSync(
+          token.publicKey,
+          wallet.publicKey,
+          true,
+          token.tokenProgram
+        );
+        tx.add(
+          createAssociatedTokenAccountIdempotentInstruction(
+            wallet.publicKey,
+            wrappedSolAccount,
+            wallet.publicKey,
+            token.publicKey,
+            token.tokenProgram
+          )
+        );
+        tx.add(
+          SystemProgram.transfer({
+            fromPubkey: wallet.publicKey,
+            toPubkey: wrappedSolAccount,
+            lamports: amount.toNumber(),
+          })
+        );
+        tx.add(createSyncNativeInstruction(wrappedSolAccount));
+      }
+
+      tx.add(
+        createAssociatedTokenAccountIdempotentInstruction(
+          wallet.publicKey,
+          getAssociatedTokenAddressSync(
+            token.publicKey,
+            getConfigKey(new PublicKey(subscription.saloon.collectionMint)),
+            true,
+            token.tokenProgram
+          ),
+          getConfigKey(new PublicKey(subscription.saloon.collectionMint)),
+          token.publicKey,
+          token.tokenProgram
+        )
+      );
+
       tx.add(
         await rentBuilders
-          .buyToken({
+          .increaseBid({
             provider,
-            newSellPrice: new BN(
-              Math.round(newPrice * 10 ** (token?.decimals || 0))
+            amount,
+            taxMint,
+            collectionMint,
+            tokenMint,
+            authoritiesGroup: new PublicKey(
+              subscription?.saloon?.authoritiesGroup
             ),
-            owner: new PublicKey(
-              subscription.subscription.currentOwner.publicKey
-            ),
-            collectionMint: new PublicKey(subscription.saloon.collectionMint),
-            tokenMint: new PublicKey(subscription.tokenState.tokenMint),
-            tokenProgram: TOKEN_2022_PROGRAM_ID,
+            tokenProgram: new PublicKey(token?.tokenProgram),
           })
           .builder.transaction()
       );
+
+      if (!subscription.ownerBidState) {
+        // Token has no owner, claim it
+        tx.add(
+          await rentBuilders
+            .claimToken({
+              provider,
+              newSellPrice: new BN(
+                Math.round(newPrice * 10 ** (token?.decimals || 0))
+              ),
+              newOwner: wallet.publicKey,
+              oldOwner: new PublicKey(
+                subscription.subscription.currentOwner.publicKey
+              ),
+              collectionMint,
+              tokenMint: tokenMint,
+              tokenProgram: TOKEN_2022_PROGRAM_ID,
+            })
+            .builder.transaction()
+        );
+      } else {
+        // Buy token from current owner
+        tx.add(
+          await rentBuilders
+            .updateBid({
+              provider,
+              bidder: new PublicKey(
+                subscription.subscription.currentOwner.publicKey
+              ),
+              collectionMint,
+              tokenMint,
+            })
+            .builder.transaction()
+        );
+        tx.add(
+          await rentBuilders
+            .buyToken({
+              provider,
+              newSellPrice: new BN(
+                Math.round(newPrice * 10 ** (token?.decimals || 0))
+              ),
+              owner: new PublicKey(
+                subscription.subscription.currentOwner.publicKey
+              ),
+              collectionMint: new PublicKey(subscription.saloon.collectionMint),
+              tokenMint: new PublicKey(subscription.tokenState.tokenMint),
+              tokenProgram: TOKEN_2022_PROGRAM_ID,
+            })
+            .builder.transaction()
+        );
+      }
+
+      const conf = await wallet.sendTransaction(tx, connection, {
+        skipPreflight: true,
+      });
+      await connection.confirmTransaction(conf);
+
+      await fetch("/api/subscription/change", {
+        method: "POST",
+        body: JSON.stringify({
+          tokenMint: subscription.subscription.tokenMint,
+          currentPrice: newPrice,
+        }),
+        headers: {
+          authorization: `Bearer ${user.token}`,
+        },
+      });
+
+      subscription.reload();
+      setOpen(false);
+    } finally {
+      setIsWaiting(false);
     }
-
-    const conf = await wallet.sendTransaction(tx, connection, {
-      skipPreflight: true,
-    });
-    await connection.confirmTransaction(conf);
-
-    await fetch("/api/subscription/change", {
-      method: "POST",
-      body: JSON.stringify({
-        tokenMint: subscription.subscription.tokenMint,
-        currentPrice: newPrice,
-      }),
-      headers: {
-        authorization: `Bearer ${user.token}`,
-      },
-    });
-
-    subscription.reload();
-    setOpen(false);
   }, [
     connection,
     wallet,

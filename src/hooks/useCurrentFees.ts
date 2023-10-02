@@ -19,6 +19,17 @@ export default function useCurrentFees({
   )
     .mul(new BN(subscription?.saloon?.config?.taxRate || 0))
     .div(new BN(10000));
+  const timeLeft = !taxesPerYear.eq(new BN(0))
+    ? Number(
+        numeral(
+          new BN(subscription?.ownerBidState?.amount)
+            .mul(new BN(31536000000))
+            .toString()
+        )
+          .divide(taxesPerYear.toString())
+          .format("0.0")
+      )
+    : 0;
   const [amount, setAmount] = useState<string>(
     numeral(subscription?.ownerBidState?.amount || "0").format("0.000a")
   );
@@ -64,5 +75,5 @@ export default function useCurrentFees({
     return () => clearInterval(interval);
   }, [token, subscription, taxesPerYear, wallet.publicKey]);
 
-  return { amount, taxesPerYear };
+  return { amount, taxesPerYear, timeLeft };
 }

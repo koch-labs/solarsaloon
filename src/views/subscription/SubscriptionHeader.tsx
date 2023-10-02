@@ -11,7 +11,7 @@ import {
   Popover,
   Text,
 } from "@radix-ui/themes";
-import { shortKey } from "../../utils";
+import { formatTime, shortKey } from "../../utils";
 import { AnchorProvider, BN } from "@coral-xyz/anchor";
 import { getExplorerUrl } from "../../utils/explorer";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -28,6 +28,8 @@ import UserBadge from "../../components/UserBadge";
 import { Fetchable, FullSubscription } from "../../models/types";
 import { PencilIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import { format } from "path";
+import useCurrentFees from "../../hooks/useCurrentFees";
 
 export default function SubscriptionHeader({
   subscription,
@@ -40,6 +42,11 @@ export default function SubscriptionHeader({
   );
   const [openBuy, setOpenBuy] = useState(false);
   const [openPrice, setOpenPrice] = useState(false);
+  const { timeLeft } = useCurrentFees({
+    subscription,
+    token,
+    increasing: false,
+  });
 
   return (
     <Flex align="center" className="justify-around grid grid-cols-4" m="5">
@@ -62,13 +69,14 @@ export default function SubscriptionHeader({
             <Text>{subscription?.saloon?.metadata.description}</Text>
           ) : null}
           <Flex gap="2" align="center">
-            <Text>Creator:</Text>
+            <Text>creator:</Text>
             <UserBadge user={subscription?.saloon?.owner} />
           </Flex>
           <Flex gap="2" align="center">
-            <Text>Owner:</Text>
+            <Text>owner:</Text>
             <UserBadge user={subscription?.subscription?.currentOwner} />
           </Flex>
+          <Flex>current owner has {formatTime(timeLeft)}</Flex>
           {subscription?.saloon?.owner?.publicKey === user?.publicKey ? (
             <Button variant="ghost" color="gray" className="w-44 m-1">
               <Flex gap="2">
@@ -84,7 +92,11 @@ export default function SubscriptionHeader({
             user?.publicKey ||
             subscription?.ownerBidState?.bidder !== user?.publicKey) ? (
             <Button onClick={() => setOpenBuy(true)}>
-              buy this subscription
+              buy this subscription (
+              {numeral(subscription?.ownerBidState?.sellingPrice)
+                .divide(10 ** (token?.decimals || 0))
+                .format("0.00a")}{" "}
+              ${token?.symbol})
             </Button>
           ) : null}
           {user && subscription?.ownerBidState?.bidder === user?.publicKey ? (
