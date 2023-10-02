@@ -7,7 +7,7 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { getConfigKey, builders as rentBuilders } from "@koch-labs/rent-nft";
 import { AnchorProvider, BN } from "@coral-xyz/anchor";
 import { FullSubscription } from "../../hooks/useSubscription";
-import { Fetchable } from "../../hooks/useSaloon";
+import { Fetchable } from "../../models/types";
 import {
   createAssociatedTokenAccountIdempotentInstruction,
   createSyncNativeInstruction,

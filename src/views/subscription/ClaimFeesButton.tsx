@@ -2,7 +2,7 @@ import numeral from "numeral";
 import { FullSubscription } from "../../hooks/useSubscription";
 import { useCallback, useMemo, useState } from "react";
 import { tokens } from "../../utils/tokens";
-import { Fetchable } from "../../hooks/useSaloon";
+import { Fetchable } from "../../models/types";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { builders } from "@koch-labs/rent-nft";
