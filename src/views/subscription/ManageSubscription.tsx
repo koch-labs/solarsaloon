@@ -35,7 +35,6 @@ export default function ManageSubscription({
   subscription?: Fetchable<FullSubscription>;
 }) {
   const { user } = useCurrentUser();
-  console.log(subscription);
   const token = tokens.find(
     (t) => t.publicKey.toString() === subscription?.saloon?.taxMint
   );
@@ -89,100 +88,6 @@ export default function ManageSubscription({
         <SubscriptionHeader subscription={subscription} />
       </Container>
       <Flex gap={"3"} direction={"column"}>
-        <Flex wrap={"wrap"} className="justify-around">
-          <Card>
-            <Flex direction="column">
-              <Heading size={"3"}>Your bid</Heading>
-              <Flex gap="2" align="center">
-                <Text>Owner:</Text>
-                <UserBadge user={user} />{" "}
-              </Flex>
-              <Text>
-                Amount deposited:{" "}
-                {user?.publicKey === subscription?.ownerBidState?.bidder
-                  ? taxes
-                  : numeral(subscription.bidState?.amount || "0")
-                      .divide(10 ** (token?.decimals || 0))
-                      .format("0.00a")}{" "}
-                {token?.symbol}
-              </Text>
-              <Text>
-                Last update:{" "}
-                {subscription.bidState?.lastUpdate
-                  ? new Date(
-                      Number(subscription.bidState.lastUpdate) * 1000
-                    ).toLocaleString()
-                  : "never"}
-              </Text>
-              {user ? (
-                <Flex justify="center" gap="4">
-                  <Button
-                    color="green"
-                    onClick={() => setOpenSelfDeposit(true)}
-                  >
-                    Deposit funds
-                  </Button>
-                  <Button
-                    color="crimson"
-                    onClick={() => setOpenSelfWithdraw(true)}
-                    disabled={!subscription.bidState?.amount}
-                  >
-                    Withdraw funds
-                  </Button>
-                </Flex>
-              ) : null}
-            </Flex>
-            <DepositFundsModal
-              setOpen={setOpenSelfDeposit}
-              open={openSelfDeposit}
-              subscription={subscription}
-              externalAccount={false}
-            />
-            <WithdrawFundsModal
-              setOpen={setOpenSelfWithdraw}
-              open={openSelfWithdraw}
-              subscription={subscription}
-            />
-          </Card>
-          <Card>
-            <Flex direction="column">
-              <Heading size={"3"}>The owner&apos;s bid</Heading>
-              <Flex gap="2" align="center">
-                <Text>Owner:</Text>
-                <UserBadge
-                  user={subscription.subscription?.currentOwner}
-                />{" "}
-              </Flex>
-              <Text>
-                Amount deposited: {taxes} {token?.symbol}
-              </Text>
-              <Text>
-                Last update:{" "}
-                {subscription.ownerBidState?.lastUpdate
-                  ? new Date(
-                      Number(subscription.ownerBidState.lastUpdate) * 1000
-                    ).toLocaleString()
-                  : "Never"}
-              </Text>
-              {user ? (
-                <Flex justify="center" gap="4">
-                  <Button
-                    color="crimson"
-                    onClick={() => setOpenOwnerDeposit(true)}
-                  >
-                    Deposit funds
-                  </Button>
-                </Flex>
-              ) : null}
-            </Flex>
-            <DepositFundsModal
-              setOpen={setOpenOwnerDeposit}
-              open={openOwnerDeposit}
-              subscription={subscription}
-              externalAccount
-            />
-          </Card>
-        </Flex>
         {user?.publicKey &&
         ((subscription.subscription?.currentOwner &&
           subscription.subscription.currentOwner.publicKey ===

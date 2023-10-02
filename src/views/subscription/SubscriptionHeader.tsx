@@ -30,6 +30,8 @@ import { PencilIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { format } from "path";
 import useCurrentFees from "../../hooks/useCurrentFees";
+import DepositFundsModal from "./DepositFundsModal";
+import WithdrawFundsModal from "./WithdrawFundsModal";
 
 export default function SubscriptionHeader({
   subscription,
@@ -42,6 +44,8 @@ export default function SubscriptionHeader({
   );
   const [openBuy, setOpenBuy] = useState(false);
   const [openPrice, setOpenPrice] = useState(false);
+  const [openDeposit, setOpenDeposit] = useState(false);
+  const [openWithdraw, setOpenWithdraw] = useState(false);
   const { timeLeft } = useCurrentFees({
     subscription,
     token,
@@ -100,9 +104,38 @@ export default function SubscriptionHeader({
             </Button>
           ) : null}
           {user && subscription?.ownerBidState?.bidder === user?.publicKey ? (
-            <Button onClick={() => setOpenPrice(true)}>
-              update selling price
-            </Button>
+            <>
+              <Button onClick={() => setOpenPrice(true)}>
+                update selling price
+              </Button>
+              <Button
+                style={{ backgroundColor: "white", color: "black" }}
+                onClick={() => setOpenDeposit(true)}
+                className="border border-solid"
+              >
+                deposit more
+              </Button>
+              <Button
+                style={{ backgroundColor: "black" }}
+                onClick={() => setOpenWithdraw(true)}
+              >
+                withdraw funds (up to{" "}
+                {numeral(subscription?.ownerBidState?.amount)
+                  .divide(10 ** (token?.decimals || 0))
+                  .format("0.0a")}{" "}
+                ${token?.symbol})
+              </Button>
+              <DepositFundsModal
+                setOpen={setOpenDeposit}
+                open={openDeposit}
+                subscription={subscription}
+              />
+              <WithdrawFundsModal
+                setOpen={setOpenWithdraw}
+                open={openWithdraw}
+                subscription={subscription}
+              />
+            </>
           ) : null}
           {user && subscription.saloon?.owner.publicKey === user?.publicKey ? (
             <ClaimFeesButton subscription={subscription} />

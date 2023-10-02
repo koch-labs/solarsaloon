@@ -115,13 +115,13 @@ const CreateSubscription: React.FC<{
 
   return (
     <Flex gap="2" direction="column" align="center" p="5">
-      <Heading size="5">Create a subscription</Heading>
+      <Heading size="5">create a subscription</Heading>
       <WaitingButton
         style={{ backgroundColor: "black" }}
         loading={isLoading}
         onClick={handleCreateSubscription}
       >
-        <Text className="p-3">Create a new subscription</Text>
+        <Text className="p-3">create a new subscription</Text>
       </WaitingButton>
       <Flex align="center" gap="2">
         <InfoCircledIcon />
