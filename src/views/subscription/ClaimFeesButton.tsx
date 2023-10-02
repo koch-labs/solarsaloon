@@ -1,5 +1,5 @@
 import numeral from "numeral";
-import { FullSubscription } from "../../hooks/useSubscription";
+import { FullSubscription } from "../../models/types";
 import { useCallback, useMemo, useState } from "react";
 import { tokens } from "../../utils/tokens";
 import { Fetchable } from "../../models/types";
@@ -17,6 +17,7 @@ import {
 import { Flex, Text } from "@radix-ui/themes";
 import useCurrentFees from "../../hooks/useCurrentFees";
 import { TREASURY } from "../../utils/constants";
+import useTaxPerPeriod from "../../hooks/useTaxPerPeriod";
 
 export default function ClaimFeesButton({
   subscription,
@@ -33,6 +34,12 @@ export default function ClaimFeesButton({
   const token = tokens.find(
     (e) => e.publicKey.toString() === subscription?.saloon?.taxMint
   );
+  const { taxes, taxesPerYear } = useTaxPerPeriod({
+    taxRate: subscription?.saloon?.config?.taxRate,
+    collectedTax: subscription?.saloon?.config?.collectedTax,
+    currentPrice: subscription?.ownerBidState?.sellingPrice,
+    lastUpdate: subscription?.ownerBidState?.lastUpdate,
+  });
   const { amount } = useCurrentFees({ subscription, token, increasing: true });
   const [isWaiting, setIsWaiting] = useState(false);
 
@@ -132,11 +139,24 @@ export default function ClaimFeesButton({
   }, [subscription, connection, provider, wallet, token, amount]);
 
   return (
-    <Flex direction="column" gap="1">
+    <Flex direction="row" gap="2" align="center">
       <WaitingButton color="green" loading={isWaiting} onClick={handleClaim}>
-        Claim fees
+        claim fees
       </WaitingButton>
-      <Text weight="light">A 1% fee is applied</Text>
+      <Flex direction="column" gap="0" justify="center">
+        <Text weight="light" color="gray" size="2">
+          {numeral(taxes?.toString() || 0).format("0.00a")}
+        </Text>
+        <Text weight="light" color="gray" size="1">
+          -{" "}
+        </Text>
+      </Flex>
+      <Flex gap="1">
+        <Text weight="bold" size="4">
+          ${token?.symbol}
+        </Text>
+        <Text>available</Text>
+      </Flex>
     </Flex>
   );
 }

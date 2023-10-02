@@ -1,19 +1,16 @@
 import { PublicKey } from "@solana/web3.js";
 import { useCallback, useEffect, useState } from "react";
-import { Fetchable, Post, Saloon, Subscription } from "../models/types";
+import {
+  Fetchable,
+  FullSubscription,
+  Post,
+  Saloon,
+  Subscription,
+} from "../models/types";
 import toast from "react-hot-toast";
 import { useCurrentUser } from "../contexts/UserContextProvider";
 import { BidStateJSON, TokenStateJSON } from "@koch-labs/rent-nft";
 
-export interface FullSubscription {
-  subscription: Subscription;
-  saloon: Saloon;
-  tokenState: TokenStateJSON;
-  bidState?: BidStateJSON;
-  ownerBidState?: BidStateJSON;
-  userBalance?: number;
-  posts?: Post[];
-}
 export default function useSubscription(
   tokenMint: string
 ): Fetchable<FullSubscription> {

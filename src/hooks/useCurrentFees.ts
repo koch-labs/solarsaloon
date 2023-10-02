@@ -1,9 +1,9 @@
 import { BN } from "@coral-xyz/anchor";
 import { Token } from "../utils/tokens";
-import { FullSubscription } from "./useSubscription";
 import { useEffect, useState } from "react";
 import numeral from "numeral";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { FullSubscription } from "../models/types";
 
 export default function useCurrentFees({
   token,

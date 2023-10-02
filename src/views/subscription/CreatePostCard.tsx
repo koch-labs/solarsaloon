@@ -9,7 +9,7 @@ import {
 } from "@radix-ui/themes";
 import dynamic from "next/dynamic";
 import { useCallback, useState } from "react";
-import { FullSubscription } from "../../hooks/useSubscription";
+import { FullSubscription } from "../../models/types";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
 import { Fetchable } from "../../models/types";
 
@@ -43,14 +43,14 @@ export default function CreatePostCard({
   }, [subscription, content, token]);
 
   return (
-    <Card>
-      <Flex direction="column" gap="2">
-        <Heading size={"3"}>Create a post</Heading>
-        <MDEditor value={content} onChange={setContent} />
-        <Flex justify="center" gap="4">
-          <Button onClick={handlePost}>Create post</Button>
-        </Flex>
+    <Flex m="5" direction="column" gap="2">
+      <Heading size={"3"}>write your next post:</Heading>
+      <Card>
+        <MDEditor value={content} onChange={setContent} color="gray" />
+      </Card>
+      <Flex justify="center" gap="4">
+        <Button onClick={handlePost}>create a post</Button>
       </Flex>
-    </Card>
+    </Flex>
   );
 }

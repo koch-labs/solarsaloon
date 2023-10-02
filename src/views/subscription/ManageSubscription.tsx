@@ -1,5 +1,5 @@
 import numeral from "numeral";
-import useSubscription, { FullSubscription } from "../../hooks/useSubscription";
+import useSubscription from "../../hooks/useSubscription";
 import {
   Badge,
   Button,
@@ -21,11 +21,13 @@ import { tokens } from "../../utils/tokens";
 import CreatePostCard from "./CreatePostCard";
 import { PostsList } from "./PostsList";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
-import SubscriptionDescriptionCard from "./SubscriptionDescriptionCard";
 import WithdrawFundsModal from "./WithdrawFundsModal";
 import UserBadge from "../../components/UserBadge";
 import { BN } from "@coral-xyz/anchor";
-import { Fetchable } from "../../models/types";
+import { Fetchable, FullSubscription } from "../../models/types";
+import Image from "next/image";
+import { PencilIcon } from "@heroicons/react/24/outline";
+import SubscriptionHeader from "./SubscriptionHeader";
 
 export default function ManageSubscription({
   subscription,
@@ -82,156 +84,117 @@ export default function ManageSubscription({
   }, [token, subscription, taxesPerYear]);
 
   return (
-    <Container className="content-center">
-      <Flex gap="2" direction="column">
-        <Card className="flex flex-col gap-4 items-stretch">
-          <Flex gap={"3"} direction={"column"}>
-            <Flex align="start" justify="between">
-              <Link href={`/saloon/${subscription.saloon?.collectionMint}`}>
-                <IconButton variant="ghost">
-                  <ArrowLeftIcon width={32} height={32} strokeWidth={5} />
-                </IconButton>
-              </Link>
-              <Heading align="center">
-                Subscription {shortKey(subscription?.subscription.tokenMint)}
-              </Heading>
-              <Popover.Root>
-                <Popover.Trigger>
-                  <IconButton variant="ghost">
-                    <QuestionMarkCircledIcon
-                      width={32}
-                      height={32}
-                      strokeWidth={5}
-                    />
-                  </IconButton>
-                </Popover.Trigger>
-                <Popover.Content style={{ width: 360 }}>
-                  <Flex gap="3" direction="column">
-                    <Text size="5">What are Saloons ?</Text>
-                    <Text size="2">
-                      Saloons are digital spaces that only subscribers can
-                      access.
-                      <br />
-                      The number of of available subscriptions can be increased
-                      at any time, but only a subscriber can burn a subscription
-                      so be carefull before minting too many.
-                    </Text>
-                    <Popover.Close>
-                      <Button size="1">OK</Button>
-                    </Popover.Close>
-                  </Flex>
-                </Popover.Content>
-              </Popover.Root>
-            </Flex>
-            <SubscriptionDescriptionCard subscription={subscription} />
-            <Flex wrap={"wrap"} className="justify-around">
-              <Card>
-                <Flex direction="column">
-                  <Heading size={"3"}>Your bid</Heading>
-                  <Flex gap="2" align="center">
-                    <Text>Owner:</Text>
-                    <UserBadge user={user} />{" "}
-                  </Flex>
-                  <Text>
-                    Amount deposited:{" "}
-                    {user?.publicKey === subscription?.ownerBidState?.bidder
-                      ? taxes
-                      : numeral(subscription.bidState?.amount || "0")
-                          .divide(10 ** (token?.decimals || 0))
-                          .format("0.00a")}{" "}
-                    {token?.symbol}
-                  </Text>
-                  <Text>
-                    Last update:{" "}
-                    {subscription.bidState?.lastUpdate
-                      ? new Date(
-                          Number(subscription.bidState.lastUpdate) * 1000
-                        ).toLocaleString()
-                      : "never"}
-                  </Text>
-                  {user ? (
-                    <Flex justify="center" gap="4">
-                      <Button
-                        color="green"
-                        onClick={() => setOpenSelfDeposit(true)}
-                      >
-                        Deposit funds
-                      </Button>
-                      <Button
-                        color="crimson"
-                        onClick={() => setOpenSelfWithdraw(true)}
-                        disabled={!subscription.bidState?.amount}
-                      >
-                        Withdraw funds
-                      </Button>
-                    </Flex>
-                  ) : null}
+    <Flex gap="2" direction="column">
+      <Container>
+        <SubscriptionHeader subscription={subscription} />
+      </Container>
+      <Flex gap={"3"} direction={"column"}>
+        <Flex wrap={"wrap"} className="justify-around">
+          <Card>
+            <Flex direction="column">
+              <Heading size={"3"}>Your bid</Heading>
+              <Flex gap="2" align="center">
+                <Text>Owner:</Text>
+                <UserBadge user={user} />{" "}
+              </Flex>
+              <Text>
+                Amount deposited:{" "}
+                {user?.publicKey === subscription?.ownerBidState?.bidder
+                  ? taxes
+                  : numeral(subscription.bidState?.amount || "0")
+                      .divide(10 ** (token?.decimals || 0))
+                      .format("0.00a")}{" "}
+                {token?.symbol}
+              </Text>
+              <Text>
+                Last update:{" "}
+                {subscription.bidState?.lastUpdate
+                  ? new Date(
+                      Number(subscription.bidState.lastUpdate) * 1000
+                    ).toLocaleString()
+                  : "never"}
+              </Text>
+              {user ? (
+                <Flex justify="center" gap="4">
+                  <Button
+                    color="green"
+                    onClick={() => setOpenSelfDeposit(true)}
+                  >
+                    Deposit funds
+                  </Button>
+                  <Button
+                    color="crimson"
+                    onClick={() => setOpenSelfWithdraw(true)}
+                    disabled={!subscription.bidState?.amount}
+                  >
+                    Withdraw funds
+                  </Button>
                 </Flex>
-                <DepositFundsModal
-                  setOpen={setOpenSelfDeposit}
-                  open={openSelfDeposit}
-                  subscription={subscription}
-                  externalAccount={false}
-                />
-                <WithdrawFundsModal
-                  setOpen={setOpenSelfWithdraw}
-                  open={openSelfWithdraw}
-                  subscription={subscription}
-                />
-              </Card>
-              <Card>
-                <Flex direction="column">
-                  <Heading size={"3"}>The owner&apos;s bid</Heading>
-                  <Flex gap="2" align="center">
-                    <Text>Owner:</Text>
-                    <UserBadge
-                      user={subscription.subscription?.currentOwner}
-                    />{" "}
-                  </Flex>
-                  <Text>
-                    Amount deposited: {taxes} {token?.symbol}
-                  </Text>
-                  <Text>
-                    Last update:{" "}
-                    {subscription.ownerBidState?.lastUpdate
-                      ? new Date(
-                          Number(subscription.ownerBidState.lastUpdate) * 1000
-                        ).toLocaleString()
-                      : "Never"}
-                  </Text>
-                  {user ? (
-                    <Flex justify="center" gap="4">
-                      <Button
-                        color="crimson"
-                        onClick={() => setOpenOwnerDeposit(true)}
-                      >
-                        Deposit funds
-                      </Button>
-                    </Flex>
-                  ) : null}
-                </Flex>
-                <DepositFundsModal
-                  setOpen={setOpenOwnerDeposit}
-                  open={openOwnerDeposit}
-                  subscription={subscription}
-                  externalAccount
-                />
-              </Card>
+              ) : null}
             </Flex>
-            {user?.publicKey &&
-            ((subscription.subscription?.currentOwner &&
-              subscription.subscription.currentOwner.publicKey ===
-                user.publicKey) ||
-              (subscription.saloon?.owner?.publicKey &&
-                subscription.saloon.owner.publicKey === user.publicKey)) ? (
-              <CreatePostCard subscription={subscription} />
-            ) : null}
-            {subscription?.posts && subscription.posts.length > 0 ? (
-              <PostsList posts={subscription.posts} />
-            ) : null}
-          </Flex>
-        </Card>
+            <DepositFundsModal
+              setOpen={setOpenSelfDeposit}
+              open={openSelfDeposit}
+              subscription={subscription}
+              externalAccount={false}
+            />
+            <WithdrawFundsModal
+              setOpen={setOpenSelfWithdraw}
+              open={openSelfWithdraw}
+              subscription={subscription}
+            />
+          </Card>
+          <Card>
+            <Flex direction="column">
+              <Heading size={"3"}>The owner&apos;s bid</Heading>
+              <Flex gap="2" align="center">
+                <Text>Owner:</Text>
+                <UserBadge
+                  user={subscription.subscription?.currentOwner}
+                />{" "}
+              </Flex>
+              <Text>
+                Amount deposited: {taxes} {token?.symbol}
+              </Text>
+              <Text>
+                Last update:{" "}
+                {subscription.ownerBidState?.lastUpdate
+                  ? new Date(
+                      Number(subscription.ownerBidState.lastUpdate) * 1000
+                    ).toLocaleString()
+                  : "Never"}
+              </Text>
+              {user ? (
+                <Flex justify="center" gap="4">
+                  <Button
+                    color="crimson"
+                    onClick={() => setOpenOwnerDeposit(true)}
+                  >
+                    Deposit funds
+                  </Button>
+                </Flex>
+              ) : null}
+            </Flex>
+            <DepositFundsModal
+              setOpen={setOpenOwnerDeposit}
+              open={openOwnerDeposit}
+              subscription={subscription}
+              externalAccount
+            />
+          </Card>
+        </Flex>
+        {user?.publicKey &&
+        ((subscription.subscription?.currentOwner &&
+          subscription.subscription.currentOwner.publicKey ===
+            user.publicKey) ||
+          (subscription.saloon?.owner?.publicKey &&
+            subscription.saloon.owner.publicKey === user.publicKey)) ? (
+          <CreatePostCard subscription={subscription} />
+        ) : null}
+        {subscription?.posts && subscription.posts.length > 0 ? (
+          <PostsList posts={subscription.posts} />
+        ) : null}
       </Flex>
-    </Container>
+    </Flex>
   );
 }

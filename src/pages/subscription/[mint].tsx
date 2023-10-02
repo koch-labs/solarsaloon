@@ -11,14 +11,21 @@ const ManageSubscriptionPage = () => {
   return (
     <>
       <Head>
-        <title>Create a saloon | Solar Saloon</title>
+        <title>Manage subscription | Solar Saloon</title>
         <meta name="description" content="Solar Saloon" />
       </Head>
       <NavigationPath
         path={[
           { href: "/", name: "home" },
           { href: "/saloons", name: "saloons list" },
-          { href: "/create", name: "create" },
+          {
+            href: `/saloon/${subscription?.saloon?.collectionMint}`,
+            name: `${subscription?.saloon?.metadata?.name}`,
+          },
+          {
+            href: `/subscription/${subscription?.subscription?.tokenMint}`,
+            name: `${subscription?.subscription?.tokenMint}`,
+          },
         ]}
       />
       <ManageSubscription subscription={subscription} />

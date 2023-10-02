@@ -6,7 +6,7 @@ import { PublicKey, Transaction } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { builders as rentBuilders } from "@koch-labs/rent-nft";
 import { AnchorProvider, BN } from "@coral-xyz/anchor";
-import { FullSubscription } from "../../hooks/useSubscription";
+import { FullSubscription } from "../../models/types";
 import { Fetchable } from "../../models/types";
 import {
   TOKEN_2022_PROGRAM_ID,
@@ -15,6 +15,7 @@ import {
   getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
+import WaitingButton from "../../components/WaitingButton";
 
 export default function BuyTokenModal({
   setOpen,
@@ -36,6 +37,7 @@ export default function BuyTokenModal({
       wallet ? new AnchorProvider(connection, wallet as any, {}) : undefined,
     [wallet, connection]
   );
+  const [isWaiting, setIsWaiting] = useState(false);
   const [newPrice, setNewPrice] = useState(0);
   const taxesPerYear = new BN(newPrice)
     .mul(new BN(10 ** (token?.decimals || 0)))
@@ -209,13 +211,18 @@ export default function BuyTokenModal({
         <Flex gap="3" mt="4" justify="end">
           <Dialog.Close>
             <Button variant="soft" color="gray" onClick={() => setOpen(false)}>
-              Cancel
+              cancel
             </Button>
           </Dialog.Close>
           <Dialog.Close>
-            <Button color="green" onClick={handleBuy} disabled={newPrice === 0}>
-              Buy
-            </Button>
+            <WaitingButton
+              loading={isWaiting}
+              color="green"
+              onClick={handleBuy}
+              disabled={newPrice === 0}
+            >
+              buy
+            </WaitingButton>
           </Dialog.Close>
         </Flex>
       </Dialog.Content>
