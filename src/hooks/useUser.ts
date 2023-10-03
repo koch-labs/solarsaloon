@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { Saloon, User } from "../models/types";
+import { Fetchable, Saloon, User } from "../models/types";
 import toast from "react-hot-toast";
-
-export type Fetchable<T> = T & {
-  reload: () => Promise<void>;
-};
 
 export type ExtendedUser = { user: User; saloons: Saloon[] };
 

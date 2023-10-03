@@ -1,20 +1,19 @@
 import { Button, Dialog, Flex, Text, TextField } from "@radix-ui/themes";
 import { tokens } from "../../utils/tokens";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { getConfigKey, builders as rentBuilders } from "@koch-labs/rent-nft";
 import { AnchorProvider, BN } from "@coral-xyz/anchor";
 import numeral from "numeral";
-import { FullSubscription } from "../../hooks/useSubscription";
-import { Fetchable } from "../../hooks/useSaloon";
+import { FullSubscription } from "../../models/types";
 import {
-  createAssociatedTokenAccountIdempotentInstruction,
   createCloseAccountInstruction,
-  createSyncNativeInstruction,
   getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
 import WaitingButton from "../../components/WaitingButton";
+import { Fetchable } from "../../models/types";
+import useCurrentFees from "../../hooks/useCurrentFees";
 
 export default function WithdrawFundsModal({
   setOpen,
@@ -38,6 +37,12 @@ export default function WithdrawFundsModal({
   );
   const [amount, setAmount] = useState(0);
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
+  const { amount: amountLeft } = useCurrentFees({
+    token,
+    subscription,
+    bidState: subscription?.bidState,
+    increasing: false,
+  });
 
   const handleWithdraw = useCallback(async () => {
     if (!amount) return;
@@ -133,17 +138,25 @@ export default function WithdrawFundsModal({
                 Amount
               </Text>
               <Text weight="light">
-                Deposited balance:{" "}
-                {numeral(subscription?.bidState?.amount || 0)
-                  .divide(10 ** (token?.decimals || 0))
-                  .format("0.00a")}{" "}
-                ${token?.symbol || "???"}
+                Deposited balance: {amountLeft} ${token?.symbol || "???"}
               </Text>
             </Flex>
-            <TextField.Input
-              placeholder="Enter the amount to deposit..."
-              onChange={(e) => setAmount(Number(e.target.value))}
-            />
+            <TextField.Root>
+              <TextField.Input
+                placeholder="Enter the amount to withdraw..."
+                onChange={(e) => setAmount(Number(e.target.value))}
+                value={amount}
+              />
+              <TextField.Slot className="m-1">
+                <Button
+                  size="1"
+                  variant="ghost"
+                  onClick={() => setAmount(Number(amountLeft))}
+                >
+                  MAX
+                </Button>
+              </TextField.Slot>
+            </TextField.Root>
           </label>
         </Flex>
 
@@ -162,7 +175,6 @@ export default function WithdrawFundsModal({
           </Dialog.Close>
           <Dialog.Close>
             <WaitingButton
-              color="green"
               onClick={handleWithdraw}
               disabled={!amount}
               loading={isWaiting}

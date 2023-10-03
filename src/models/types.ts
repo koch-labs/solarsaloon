@@ -1,6 +1,14 @@
-import { CollectionConfigJSON, TokenStateJSON } from "@koch-labs/rent-nft";
+import {
+  BidStateJSON,
+  CollectionConfigJSON,
+  TokenStateJSON,
+} from "@koch-labs/rent-nft";
 
 export type EndpointTypes = "mainnet" | "devnet" | "localnet";
+
+export type Fetchable<T> = T & {
+  reload: () => Promise<void>;
+};
 
 export interface User {
   publicKey: string;
@@ -29,6 +37,16 @@ export interface Subscription {
   lastPost: string;
   tokenState: TokenStateJSON;
   currentOwner: User;
+}
+
+export interface FullSubscription {
+  subscription: Subscription;
+  saloon: Saloon;
+  tokenState: TokenStateJSON;
+  bidState?: BidStateJSON;
+  ownerBidState?: BidStateJSON;
+  userBalance?: number;
+  posts?: Post[];
 }
 
 export interface Post {

@@ -6,8 +6,8 @@ import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { getConfigKey, builders as rentBuilders } from "@koch-labs/rent-nft";
 import { AnchorProvider, BN } from "@coral-xyz/anchor";
-import { FullSubscription } from "../../hooks/useSubscription";
-import { Fetchable } from "../../hooks/useSaloon";
+import { FullSubscription } from "../../models/types";
+import { Fetchable } from "../../models/types";
 import {
   createAssociatedTokenAccountIdempotentInstruction,
   createSyncNativeInstruction,
@@ -186,10 +186,23 @@ export default function DepositFundsModal({
                 {token?.symbol || "???"}
               </Text>
             </Flex>
-            <TextField.Input
-              placeholder="Enter the amount to deposit..."
-              onChange={(e) => setAmount(Number(e.target.value))}
-            />
+
+            <TextField.Root>
+              <TextField.Input
+                placeholder="Enter the amount to deposit..."
+                value={amount}
+                onChange={(e) => setAmount(Number(e.target.value))}
+              />
+              <TextField.Slot className="m-1">
+                <Button
+                  size="1"
+                  variant="ghost"
+                  onClick={() => setAmount(Number(subscription?.userBalance))}
+                >
+                  MAX
+                </Button>
+              </TextField.Slot>
+            </TextField.Root>
           </label>
         </Flex>
 
@@ -208,7 +221,6 @@ export default function DepositFundsModal({
           </Dialog.Close>
           <Dialog.Close>
             <WaitingButton
-              color="green"
               onClick={handleDeposit}
               disabled={!amount}
               loading={isWaiting}
