@@ -6,42 +6,82 @@ import {
   Text,
   Flex,
   Heading,
+  Box,
+  Container,
 } from "@radix-ui/themes";
-import { Post } from "../../models/types";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { Fetchable, FullSubscription, Post } from "../../models/types";
 import dynamic from "next/dynamic";
-import { shortKey } from "../../utils";
+import { formatTime, shortKey } from "../../utils";
+import { useCurrentUser } from "../../contexts/UserContextProvider";
+import UserBadge from "../../components/UserBadge";
 
 const MarkdownPreview = dynamic(
   () => import("@uiw/react-markdown-preview").then((mod) => mod.default),
   { ssr: false }
 );
 
-export const PostsList = ({ posts }: { posts: Post[] }) => {
+export const PostsList = ({
+  subscription,
+}: {
+  subscription: Fetchable<FullSubscription>;
+}) => {
   document.documentElement.setAttribute("data-color-mode", "light");
-  console.log(posts);
-  return (
-    <Table.Root>
-      <Table.Header>
-        <Table.Row>
-          <Table.ColumnHeaderCell>Sender</Table.ColumnHeaderCell>
-          <Table.ColumnHeaderCell>Content</Table.ColumnHeaderCell>
-        </Table.Row>
-      </Table.Header>
+  const { user } = useCurrentUser();
+  const posts = subscription.posts;
 
-      <Table.Body className="align-middle">
-        {posts.map((p) => (
-          <Table.Row key={`${p.id}-${p.creationTimestamp}`}>
-            <Table.RowHeaderCell>
-              <Flex gap={"2"}>
-                <Text>{shortKey(p.creator)}</Text>
+  return (
+    <>
+      <InfiniteScroll
+        dataLength={posts?.length} //This is important field to render the next data
+        next={subscription.fetchNextPage}
+        hasMore={true}
+        loader={<h4>Loading...</h4>}
+        endMessage={
+          <p style={{ textAlign: "center" }}>
+            <b>Yay! You have seen it all</b>
+          </p>
+        }
+        // below props only if you need pull down functionality
+        // refreshFunction={this.refresh}
+        // pullDownToRefresh
+        // pullDownToRefreshThreshold={50}
+        // pullDownToRefreshContent={
+        //   <h3 style={{ textAlign: "center" }}>&#8595; Pull down to refresh</h3>
+        // }
+        // releaseToRefreshContent={
+        //   <h3 style={{ textAlign: "center" }}>&#8593; Release to refresh</h3>
+        // }
+      >
+        {posts.map((post) => (
+          <Flex
+            key={post.id + post.creationTimestamp}
+            direction="column"
+            align={
+              post?.creator.publicKey !== user?.publicKey ? "start" : "end"
+            }
+          >
+            <Container color="red" m={"3"} size={"3"}>
+              <Flex direction="column" gap="2">
+                <MarkdownPreview
+                  source={post.content}
+                  className="bg-brand-gray-2 p-5 rounded-xl"
+                />
+                <Flex gap="1" align="center">
+                  <UserBadge user={post.creator} />
+                  <Text size={"2"}>
+                    {formatTime(
+                      Date.now() -
+                        (new Date(post.creationTimestamp).valueOf() + 7200000)
+                    )}{" "}
+                    ago
+                  </Text>
+                </Flex>
               </Flex>
-            </Table.RowHeaderCell>
-            <Table.Cell>
-              <MarkdownPreview source={p.content || ""} />
-            </Table.Cell>
-          </Table.Row>
+            </Container>
+          </Flex>
         ))}
-      </Table.Body>
-    </Table.Root>
+      </InfiniteScroll>
+    </>
   );
 };

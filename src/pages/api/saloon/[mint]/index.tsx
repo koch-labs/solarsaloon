@@ -42,7 +42,7 @@ export default async function handler(
     FULL JOIN (
       SELECT * FROM 
       saloons AS sa
-      JOIN subscriptions AS su 
+      JOIN subscriptions AS su
       USING (collectionMint)
     ) as s
     USING (tokenMint)
@@ -50,7 +50,6 @@ export default async function handler(
     LIMIT ${limit} OFFSET ${limit * page};
     `;
 
-    console.log(subscriptionsQuery.rows);
     // Fetch token states for each subscription
     const connection = new Connection(
       (process.env.SOLANA_NETWORK === "devnet"

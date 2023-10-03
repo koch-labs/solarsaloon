@@ -24,6 +24,7 @@ export default async function handler(
       { limit: 20, page: 0 },
       request.query
     );
+    console.log(`querying subscription page=${page} limit=${limit}`);
 
     const subQuery = await sql`
     SELECT * FROM 
@@ -166,7 +167,11 @@ export default async function handler(
         posts = posts.map(
           (r): Post => ({
             id: r.id,
-            creator: r.creator,
+            creator: {
+              username: r.username,
+              lastLogin: r.lastlogin,
+              publicKey: r.creator,
+            },
             collectionMint: r.collectionMint,
             content: r.content,
             draft: r.draft,

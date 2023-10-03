@@ -52,26 +52,33 @@ export default function SubscriptionHeader({
     bidState: subscription?.bidState,
     increasing: false,
   });
-
+  console.log(subscription);
   return (
     <Flex align="center" className="justify-around grid grid-cols-4" m="5">
       <Image
-        src={subscription?.saloon?.metadata?.image}
+        src={
+          subscription?.subscription?.metadata?.image ||
+          subscription?.saloon?.metadata?.image
+        }
         width={250}
         height={250}
         alt="Saloon's picture"
         className="w-56 h-56 object-center object-cover rounded-xl"
       />
-      {/* <Avatar src={saloon.metadata?.image} fallback="?" size="9" /> */}
       <Flex direction="column" className="grid grid-cols-3 col-span-3 gap-1">
         <Flex direction="column" className="col-span-2" gap="1">
           <Heading>
-            {subscription?.saloon?.metadata?.name ||
+            {subscription?.subscription?.metadata?.name ||
+              subscription?.saloon?.metadata?.name ||
               shortKey(subscription?.saloon?.collectionMint)}
           </Heading>
           <hr className="w-48" />
-          {subscription?.saloon?.metadata?.description ? (
-            <Text>{subscription?.saloon?.metadata.description}</Text>
+          {subscription?.subscription?.metadata?.description ||
+          subscription?.saloon?.metadata?.description ? (
+            <Text>
+              {subscription?.subscription?.metadata?.description ||
+                subscription?.saloon?.metadata.description}
+            </Text>
           ) : null}
           <Flex gap="2" align="center">
             <Text>creator:</Text>
@@ -93,7 +100,7 @@ export default function SubscriptionHeader({
         </Flex>
         <Flex gap="2" direction="column">
           {user &&
-          (amount === "0.000" ||
+          (timeLeft === 0 ||
             subscription.subscription?.currentOwner?.publicKey !==
               user?.publicKey ||
             subscription?.ownerBidState?.bidder !== user?.publicKey) ? (

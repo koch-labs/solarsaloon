@@ -29,6 +29,7 @@ import { shortKey } from "../../utils";
 import { Fetchable, Saloon } from "../../models/types";
 import Image from "next/image";
 import { PencilIcon } from "@heroicons/react/24/outline";
+import UserBadge from "../../components/UserBadge";
 
 const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({ saloon }) => {
   const { user } = useCurrentUser();
@@ -53,6 +54,10 @@ const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({ saloon }) => {
             {saloon.metadata?.description ? (
               <Text>{saloon.metadata.description}</Text>
             ) : null}
+            <Flex gap="1">
+              <Text>creator: </Text>
+              <UserBadge user={saloon?.owner} />
+            </Flex>
             <Button variant="ghost" color="gray" className="w-40">
               <Flex gap="2">
                 <PencilIcon width="16" />

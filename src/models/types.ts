@@ -8,6 +8,7 @@ export type EndpointTypes = "mainnet" | "devnet" | "localnet";
 
 export type Fetchable<T> = T & {
   reload: () => Promise<void>;
+  fetchNextPage?: () => Promise<void>;
 };
 
 export interface User {
@@ -52,7 +53,7 @@ export interface FullSubscription {
 
 export interface Post {
   id: number;
-  creator: string;
+  creator: User;
   collectionMint: string;
   content: string;
   draft: boolean;
