@@ -26,7 +26,7 @@ import SetSellingPriceModal from "./SetSellingPriceModal";
 import ClaimFeesButton from "./ClaimFeesButton";
 import UserBadge from "../../components/UserBadge";
 import { Fetchable, FullSubscription } from "../../models/types";
-import { PencilIcon } from "@heroicons/react/24/outline";
+import { MinusIcon, PencilIcon, PlusIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { format } from "path";
 import useCurrentFees from "../../hooks/useCurrentFees";
@@ -46,9 +46,10 @@ export default function SubscriptionHeader({
   const [openPrice, setOpenPrice] = useState(false);
   const [openDeposit, setOpenDeposit] = useState(false);
   const [openWithdraw, setOpenWithdraw] = useState(false);
-  const { timeLeft } = useCurrentFees({
+  const { timeLeft, amount } = useCurrentFees({
     subscription,
     token,
+    bidState: subscription?.bidState,
     increasing: false,
   });
 
@@ -92,39 +93,52 @@ export default function SubscriptionHeader({
         </Flex>
         <Flex gap="2" direction="column">
           {user &&
-          (subscription.subscription?.currentOwner?.publicKey !==
-            user?.publicKey ||
+          (amount === "0.000" ||
+            subscription.subscription?.currentOwner?.publicKey !==
+              user?.publicKey ||
             subscription?.ownerBidState?.bidder !== user?.publicKey) ? (
             <Button onClick={() => setOpenBuy(true)}>
               buy this subscription (
-              {numeral(subscription?.ownerBidState?.sellingPrice)
-                .divide(10 ** (token?.decimals || 0))
-                .format("0.00a")}{" "}
+              {amount === "0.000"
+                ? numeral(subscription?.saloon?.config?.minimumSellPrice)
+                    .divide(10 ** (token?.decimals || 0))
+                    .format("0.00a")
+                : numeral(subscription?.ownerBidState?.sellingPrice)
+                    .divide(10 ** (token?.decimals || 0))
+                    .format("0.00a")}{" "}
               ${token?.symbol})
             </Button>
           ) : null}
           {user && subscription?.ownerBidState?.bidder === user?.publicKey ? (
+            <Button variant="soft" onClick={() => setOpenPrice(true)}>
+              update selling price
+            </Button>
+          ) : null}
+          {user && subscription?.bidState?.amount !== "0" ? (
             <>
-              <Button onClick={() => setOpenPrice(true)}>
-                update selling price
-              </Button>
-              <Button
-                style={{ backgroundColor: "white", color: "black" }}
-                onClick={() => setOpenDeposit(true)}
-                className="border border-solid"
-              >
-                deposit more
-              </Button>
-              <Button
-                style={{ backgroundColor: "black" }}
-                onClick={() => setOpenWithdraw(true)}
-              >
-                withdraw funds (up to{" "}
-                {numeral(subscription?.ownerBidState?.amount)
-                  .divide(10 ** (token?.decimals || 0))
-                  .format("0.0a")}{" "}
-                ${token?.symbol})
-              </Button>
+              <Flex align="center" gap="1" justify="between">
+                <Flex direction="column">
+                  <Text>
+                    {amount} ${token?.symbol} deposited
+                  </Text>
+                  <Text weight="light" size="1">
+                    {formatTime(timeLeft)} left
+                  </Text>
+                </Flex>
+                <IconButton
+                  variant="surface"
+                  onClick={() => setOpenDeposit(true)}
+                >
+                  <PlusIcon width="16" />
+                </IconButton>
+                <IconButton
+                  variant="outline"
+                  color="gray"
+                  onClick={() => setOpenWithdraw(true)}
+                >
+                  <MinusIcon width="16" />
+                </IconButton>
+              </Flex>
               <DepositFundsModal
                 setOpen={setOpenDeposit}
                 open={openDeposit}

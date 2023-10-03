@@ -40,7 +40,12 @@ export default function ClaimFeesButton({
     currentPrice: subscription?.ownerBidState?.sellingPrice,
     lastUpdate: subscription?.ownerBidState?.lastUpdate,
   });
-  const { amount } = useCurrentFees({ subscription, token, increasing: true });
+  const { amount } = useCurrentFees({
+    subscription,
+    token,
+    bidState: subscription?.ownerBidState,
+    increasing: true,
+  });
   const [isWaiting, setIsWaiting] = useState(false);
 
   const handleClaim = useCallback(async () => {

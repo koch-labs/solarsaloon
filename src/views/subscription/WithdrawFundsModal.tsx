@@ -8,13 +8,12 @@ import { AnchorProvider, BN } from "@coral-xyz/anchor";
 import numeral from "numeral";
 import { FullSubscription } from "../../models/types";
 import {
-  createAssociatedTokenAccountIdempotentInstruction,
   createCloseAccountInstruction,
-  createSyncNativeInstruction,
   getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
 import WaitingButton from "../../components/WaitingButton";
 import { Fetchable } from "../../models/types";
+import useCurrentFees from "../../hooks/useCurrentFees";
 
 export default function WithdrawFundsModal({
   setOpen,
@@ -38,55 +37,12 @@ export default function WithdrawFundsModal({
   );
   const [amount, setAmount] = useState(0);
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
-  const taxesPerYear = new BN(
-    subscription?.tokenState?.currentSellingPrice || 0
-  )
-    .mul(new BN(subscription?.saloon?.config?.taxRate || 0))
-    .div(new BN(10000));
-  const [amountLeft, setAmountLeft] = useState<string>(
-    numeral(subscription?.ownerBidState?.amount || "0").format("0.000a")
-  );
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!subscription?.bidState) {
-        setAmountLeft(numeral("0").format("0.000a"));
-        return;
-      } else if (
-        subscription?.ownerBidState?.bidder !== wallet?.publicKey?.toString()
-      ) {
-        setAmountLeft(
-          numeral(subscription.bidState?.amount)
-            .divide(10 ** (token?.decimals || 0))
-            .format("0.000a")
-        );
-        return;
-      }
-
-      setAmountLeft(
-        numeral(
-          new BN(subscription.ownerBidState?.amount || 0)
-            .sub(
-              taxesPerYear
-                .mul(
-                  new BN(
-                    Math.round(
-                      Date.now() / 1000 -
-                        Number(subscription?.ownerBidState?.lastUpdate || 0)
-                    )
-                  )
-                )
-                .div(new BN(31536000))
-            )
-            .toString()
-        )
-          .divide(10 ** (token?.decimals || 0))
-          .format("0.000a")
-      );
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, [token, subscription, taxesPerYear, wallet.publicKey]);
+  const { amount: amountLeft } = useCurrentFees({
+    token,
+    subscription,
+    bidState: subscription?.bidState,
+    increasing: false,
+  });
 
   const handleWithdraw = useCallback(async () => {
     if (!amount) return;
@@ -187,7 +143,7 @@ export default function WithdrawFundsModal({
             </Flex>
             <TextField.Root>
               <TextField.Input
-                placeholder="Enter the amount to deposit..."
+                placeholder="Enter the amount to withdraw..."
                 onChange={(e) => setAmount(Number(e.target.value))}
                 value={amount}
               />
@@ -219,7 +175,6 @@ export default function WithdrawFundsModal({
           </Dialog.Close>
           <Dialog.Close>
             <WaitingButton
-              color="green"
               onClick={handleWithdraw}
               disabled={!amount}
               loading={isWaiting}

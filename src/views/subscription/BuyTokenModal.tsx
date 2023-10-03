@@ -28,6 +28,7 @@ import {
 import { useCurrentUser } from "../../contexts/UserContextProvider";
 import WaitingButton from "../../components/WaitingButton";
 import { formatTime } from "../../utils";
+import useCurrentFees from "../../hooks/useCurrentFees";
 
 export default function BuyTokenModal({
   setOpen,
@@ -51,12 +52,20 @@ export default function BuyTokenModal({
   );
   const [isWaiting, setIsWaiting] = useState(false);
   const [newPrice, setNewPrice] = useState(0);
-  const [prepaidDuration, setPrepaidDuration] = useState(0);
-  const taxesPerYear = new BN(newPrice)
-    .mul(new BN(10 ** (token?.decimals || 0)))
-    .mul(new BN(subscription?.saloon?.config?.taxRate || 0))
-    .div(new BN(10000));
-
+  const [prepaidDuration, setPrepaidDuration] = useState(Math.log10(3600));
+  const { taxesPerYear, amount: amountLeft } = useCurrentFees({
+    token,
+    subscription,
+    bidState: subscription?.ownerBidState,
+    increasing: false,
+  });
+  const currentPrice = useMemo(
+    () =>
+      amountLeft === "0.000"
+        ? new BN(subscription?.saloon?.config?.minimumSellPrice || 0)
+        : new BN(subscription?.ownerBidState?.sellingPrice || 0),
+    [subscription, amountLeft]
+  );
   const handleBuy = useCallback(async () => {
     setIsWaiting(true);
 
@@ -74,7 +83,7 @@ export default function BuyTokenModal({
       const taxMint = new PublicKey(subscription.saloon.taxMint);
       const collectionMint = new PublicKey(subscription.saloon.collectionMint);
       const tokenMint = new PublicKey(subscription.tokenState.tokenMint);
-      const amount = new BN(subscription?.ownerBidState?.sellingPrice || 0).add(
+      const amount = currentPrice.add(
         taxesPerYear
           .mul(new BN(Math.round(prepaidDuration)))
           .div(new BN(365 * 86400))
@@ -262,19 +271,16 @@ export default function BuyTokenModal({
     taxesPerYear,
     setOpen,
     user,
+    currentPrice,
   ]);
-  console.log(subscription);
+
   return (
     <Dialog.Root open={open}>
       <Dialog.Content style={{ maxWidth: 450 }}>
         <Dialog.Title>buy a subscription</Dialog.Title>
         <Dialog.Description size="2" mb="4">
           pay{" "}
-          {numeral(
-            subscription.tokenState?.ownerBidState
-              ? subscription.tokenState?.currentSellingPrice
-              : "0"
-          )
+          {numeral(currentPrice.toString() || 0)
             .divide(10 ** (token?.decimals || 0))
             .format("0.000a")}{" "}
           ${token?.symbol || "???"} upfront, to acquire the subscription from
@@ -341,7 +347,6 @@ export default function BuyTokenModal({
             <Dialog.Close>
               <WaitingButton
                 loading={isWaiting}
-                color="green"
                 onClick={handleBuy}
                 disabled={
                   newPrice === 0 ||
