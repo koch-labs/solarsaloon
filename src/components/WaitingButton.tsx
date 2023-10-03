@@ -14,7 +14,7 @@ export default function WaitingButton({
   React.RefAttributes<HTMLButtonElement>) {
   return (
     <Button {...props} disabled={props.disabled || loading}>
-      <Flex gap="2">
+      <Flex gap="2" align="center">
         {loading ? <ReloadIcon className="animate-spin" /> : null}
         {children}
       </Flex>
