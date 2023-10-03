@@ -34,12 +34,6 @@ export default function ClaimFeesButton({
   const token = tokens.find(
     (e) => e.publicKey.toString() === subscription?.saloon?.taxMint
   );
-  const { taxes, taxesPerYear } = useTaxPerPeriod({
-    taxRate: subscription?.saloon?.config?.taxRate,
-    collectedTax: subscription?.saloon?.config?.collectedTax,
-    currentPrice: subscription?.ownerBidState?.sellingPrice,
-    lastUpdate: subscription?.ownerBidState?.lastUpdate,
-  });
   const { amount } = useCurrentFees({
     subscription,
     token,
@@ -148,19 +142,11 @@ export default function ClaimFeesButton({
       <WaitingButton color="green" loading={isWaiting} onClick={handleClaim}>
         claim fees
       </WaitingButton>
-      <Flex direction="column" gap="0" justify="center">
-        <Text weight="light" color="gray" size="2">
-          {numeral(taxes?.toString() || 0).format("0.00a")}
-        </Text>
-        <Text weight="light" color="gray" size="1">
-          -{" "}
-        </Text>
-      </Flex>
       <Flex gap="1">
-        <Text weight="bold" size="4">
-          ${token?.symbol}
+        <Text weight="bold" size="2">
+          {amount} ${token?.symbol}
         </Text>
-        <Text>available</Text>
+        <Text size="2">available</Text>
       </Flex>
     </Flex>
   );

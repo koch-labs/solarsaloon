@@ -43,12 +43,12 @@ export default function useCurrentFees({
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (!subscription?.bidState) {
+      if (!bidState) {
         setAmount(numeral("0").format("0.000a"));
         return;
       } else if (bidState?.bidder !== wallet?.publicKey?.toString()) {
         setAmount(
-          numeral(subscription.bidState?.amount)
+          numeral(bidState?.amount)
             .divide(10 ** (token?.decimals || 0))
             .format("0.000a")
         );
