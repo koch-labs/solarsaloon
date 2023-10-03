@@ -142,11 +142,16 @@ export default function ClaimFeesButton({
       <WaitingButton color="green" loading={isWaiting} onClick={handleClaim}>
         claim fees
       </WaitingButton>
-      <Flex gap="1">
-        <Text weight="bold" size="2">
-          {amount} ${token?.symbol}
+      <Flex direction="column">
+        <Flex gap="1">
+          <Text weight="bold" size="2">
+            {amount} ${token?.symbol}
+          </Text>
+          <Text size="2">available</Text>
+        </Flex>
+        <Text size="1" color="gray">
+          {numeral(amount).divide(100).format("0.000a")} ${token?.symbol} fee
         </Text>
-        <Text size="2">available</Text>
       </Flex>
     </Flex>
   );
