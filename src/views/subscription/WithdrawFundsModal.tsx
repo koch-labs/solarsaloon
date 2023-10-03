@@ -13,7 +13,7 @@ import {
 } from "@solana/spl-token";
 import WaitingButton from "../../components/WaitingButton";
 import { Fetchable } from "../../models/types";
-import useCurrentFees from "../../hooks/useCurrentFees";
+import useFees from "../../hooks/useFees";
 
 export default function WithdrawFundsModal({
   setOpen,
@@ -37,11 +37,19 @@ export default function WithdrawFundsModal({
   );
   const [amount, setAmount] = useState(0);
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
-  const { amount: amountLeft } = useCurrentFees({
-    token,
-    subscription,
-    bidState: subscription?.bidState,
-    increasing: false,
+  const { amount: amountLeft } = useFees({
+    price: Number(
+      numeral(subscription?.tokenState?.currentSellingPrice || 0)
+        .divide(10 ** (token?.decimals || 0))
+        .format("0.000")
+    ),
+    taxRate: Number(subscription?.saloon?.config?.taxRate),
+    lastUpdate: Number(subscription?.bidState?.lastUpdate),
+    depositAmount: Number(
+      numeral(subscription?.bidState?.amount)
+        .divide(10 ** (token?.decimals || 0))
+        .format("0.000")
+    ),
   });
 
   const handleWithdraw = useCallback(async () => {
@@ -138,7 +146,8 @@ export default function WithdrawFundsModal({
                 Amount
               </Text>
               <Text weight="light">
-                Deposited balance: {amountLeft} ${token?.symbol || "???"}
+                Deposited balance: {numeral(amountLeft).format("0.000")} $
+                {token?.symbol || "???"}
               </Text>
             </Flex>
             <TextField.Root>

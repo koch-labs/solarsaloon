@@ -1,4 +1,4 @@
-import numeral from "numeral";
+import numeral, { Numeral } from "numeral";
 import useSubscription from "../../hooks/useSubscription";
 import {
   Badge,
@@ -29,9 +29,9 @@ import { Fetchable, FullSubscription } from "../../models/types";
 import { MinusIcon, PencilIcon, PlusIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { format } from "path";
-import useCurrentFees from "../../hooks/useCurrentFees";
 import DepositFundsModal from "./DepositFundsModal";
 import WithdrawFundsModal from "./WithdrawFundsModal";
+import useFees from "../../hooks/useFees";
 
 export default function SubscriptionHeader({
   subscription,
@@ -46,13 +46,22 @@ export default function SubscriptionHeader({
   const [openPrice, setOpenPrice] = useState(false);
   const [openDeposit, setOpenDeposit] = useState(false);
   const [openWithdraw, setOpenWithdraw] = useState(false);
-  const { timeLeft, amount } = useCurrentFees({
-    subscription,
-    token,
-    bidState: subscription?.bidState,
-    increasing: false,
+  const { timeLeft, amount } = useFees({
+    price: Number(
+      numeral(subscription?.tokenState?.currentSellingPrice)
+        .divide(10 ** (token?.decimals || 0))
+        .format("0.000")
+    ),
+    taxRate: Number(subscription?.saloon?.config?.taxRate),
+    depositAmount: Number(
+      numeral(subscription?.ownerBidState?.amount)
+        .divide(10 ** (token?.decimals || 0))
+        .format("0.000")
+    ),
+    lastUpdate: Number(subscription?.ownerBidState?.lastUpdate),
+    increaseDeposit: false,
   });
-  console.log(subscription);
+
   return (
     <Flex align="center" className="justify-around grid grid-cols-4" m="5">
       <Image
@@ -106,7 +115,7 @@ export default function SubscriptionHeader({
             subscription?.ownerBidState?.bidder !== user?.publicKey) ? (
             <Button onClick={() => setOpenBuy(true)}>
               buy this subscription (
-              {amount === "0.000"
+              {amount <= 0
                 ? numeral(subscription?.saloon?.config?.minimumSellPrice)
                     .divide(10 ** (token?.decimals || 0))
                     .format("0.00a")
@@ -126,7 +135,8 @@ export default function SubscriptionHeader({
               <Flex align="center" gap="1" justify="between">
                 <Flex direction="column">
                   <Text>
-                    {amount} ${token?.symbol} deposited
+                    {numeral(amount).format("0.000a")} ${token?.symbol}{" "}
+                    deposited
                   </Text>
                   <Text weight="light" size="1">
                     {formatTime(timeLeft)} left

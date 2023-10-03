@@ -64,7 +64,7 @@ export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
                     .format("0.0a")}
                 </Table.Cell>
                 <Table.Cell>
-                  {new Date(s.lastPost).valueOf() === -3600000
+                  {new Date(s.lastPost).valueOf() <= 0
                     ? "never"
                     : new Date(s.lastPost).toLocaleDateString()}
                 </Table.Cell>

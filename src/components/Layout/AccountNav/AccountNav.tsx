@@ -32,7 +32,7 @@ const AccountNav: React.FC = () => {
           <WalletIcon width="20" />
           disconnect wallet
         </Button>
-        <Button variant="ghost" onClick={() => signIn()}>
+        <Button color="green" variant="ghost" onClick={() => signIn()}>
           <UserIcon width="20" />
           sign in
         </Button>

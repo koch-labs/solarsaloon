@@ -15,9 +15,8 @@ import {
   getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
 import { Flex, Text } from "@radix-ui/themes";
-import useCurrentFees from "../../hooks/useCurrentFees";
 import { TREASURY } from "../../utils/constants";
-import useTaxPerPeriod from "../../hooks/useTaxPerPeriod";
+import useFees from "../../hooks/useFees";
 
 export default function ClaimFeesButton({
   subscription,
@@ -34,11 +33,16 @@ export default function ClaimFeesButton({
   const token = tokens.find(
     (e) => e.publicKey.toString() === subscription?.saloon?.taxMint
   );
-  const { amount } = useCurrentFees({
-    subscription,
-    token,
-    bidState: subscription?.ownerBidState,
-    increasing: true,
+  const { amount } = useFees({
+    price: Number(
+      numeral(subscription?.ownerBidState?.sellingPrice)
+        .divide(10 ** (token?.decimals || 0))
+        .format("0.000")
+    ),
+    taxRate: Number(subscription?.saloon?.config?.taxRate),
+    lastUpdate: Number(subscription?.ownerBidState?.lastUpdate),
+    depositAmount: Number(subscription?.saloon?.config?.collectedTax),
+    increaseDeposit: true,
   });
   const [isWaiting, setIsWaiting] = useState(false);
 
@@ -145,7 +149,7 @@ export default function ClaimFeesButton({
       <Flex direction="column">
         <Flex gap="1">
           <Text weight="bold" size="2">
-            {amount} ${token?.symbol}
+            {numeral(amount).format("0.000a")} ${token?.symbol}
           </Text>
           <Text size="2">available</Text>
         </Flex>

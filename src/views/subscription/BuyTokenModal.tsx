@@ -20,7 +20,6 @@ import { FullSubscription } from "../../models/types";
 import { Fetchable } from "../../models/types";
 import {
   TOKEN_2022_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountIdempotentInstruction,
   createSyncNativeInstruction,
   getAssociatedTokenAddressSync,
@@ -28,7 +27,7 @@ import {
 import { useCurrentUser } from "../../contexts/UserContextProvider";
 import WaitingButton from "../../components/WaitingButton";
 import { formatTime } from "../../utils";
-import useCurrentFees from "../../hooks/useCurrentFees";
+import useFees from "../../hooks/useFees";
 
 export default function BuyTokenModal({
   setOpen,
@@ -53,19 +52,20 @@ export default function BuyTokenModal({
   const [isWaiting, setIsWaiting] = useState(false);
   const [newPrice, setNewPrice] = useState(0);
   const [prepaidDuration, setPrepaidDuration] = useState(Math.log10(3600));
-  const { taxesPerYear, amount: amountLeft } = useCurrentFees({
-    token,
-    subscription,
-    bidState: subscription?.ownerBidState,
-    increasing: false,
+  const { taxesPerYear, amount: amountLeft } = useFees({
+    price: newPrice,
+    taxRate: Number(subscription?.saloon?.config?.taxRate),
+    lastUpdate: Date.now(),
+    depositAmount: Number(subscription?.saloon?.config?.taxRate),
   });
   const currentPrice = useMemo(
     () =>
-      amountLeft === "0.000"
+      amountLeft === 0
         ? new BN(subscription?.saloon?.config?.minimumSellPrice || 0)
         : new BN(subscription?.ownerBidState?.sellingPrice || 0),
     [subscription, amountLeft]
   );
+
   const handleBuy = useCallback(async () => {
     setIsWaiting(true);
 
@@ -84,7 +84,7 @@ export default function BuyTokenModal({
       const collectionMint = new PublicKey(subscription.saloon.collectionMint);
       const tokenMint = new PublicKey(subscription.tokenState.tokenMint);
       const amount = currentPrice.add(
-        taxesPerYear
+        new BN(taxesPerYear * 10 ** (token?.decimals || 0))
           .mul(new BN(Math.round(prepaidDuration)))
           .div(new BN(365 * 86400))
       );
@@ -296,11 +296,8 @@ export default function BuyTokenModal({
               onChange={(e) => setNewPrice(Number(e.target.value))}
             />
             <Text size="1" color="gray">
-              you will pay{" "}
-              {numeral(taxesPerYear.div(new BN(365)).toString())
-                .divide(10 ** (token?.decimals || 0))
-                .format("0.000a")}{" "}
-              ${token?.symbol} every day you own the subscription.
+              you will pay {numeral(taxesPerYear / 365).format("0.000a")} $
+              {token?.symbol} every day you own the subscription.
             </Text>
           </Flex>
           <Flex direction="column">
@@ -320,13 +317,8 @@ export default function BuyTokenModal({
             <Text size="1" color="gray">
               you will deposit{" "}
               {numeral(
-                taxesPerYear
-                  .mul(new BN(Math.round(prepaidDuration)))
-                  .div(new BN(365 * 86400))
-                  .toString()
-              )
-                .divide(10 ** (token?.decimals || 0))
-                .format("0.000a")}{" "}
+                (taxesPerYear * Math.round(prepaidDuration)) / (365 * 86400)
+              ).format("0.000a")}{" "}
               ${token?.symbol}, but can withdraw the remaining at anytime
             </Text>
           </Flex>
@@ -353,10 +345,8 @@ export default function BuyTokenModal({
                   subscription?.userBalance <
                     Number(
                       numeral(
-                        taxesPerYear
-                          .mul(new BN(Math.round(prepaidDuration)))
-                          .div(new BN(365 * 86400))
-                          .toString()
+                        (taxesPerYear * Math.round(prepaidDuration)) /
+                          (365 * 86400)
                       )
                         .divide(10 ** (token?.decimals || 0))
                         .format("0.000")
