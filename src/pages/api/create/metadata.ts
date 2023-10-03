@@ -19,7 +19,7 @@ export default async function handler(
       INSERT INTO saloonMetadata (collectionMint, metadata)
       VALUES (${mint}, ${saloon});
       `;
-    } else if (saloon) {
+    } else if (subscription) {
       await sql`
       INSERT INTO subscriptionMetadata (tokenMint, metadata)
       VALUES (${mint}, ${subscription});

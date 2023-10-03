@@ -8,17 +8,13 @@ import {
   Heading,
   Box,
 } from "@radix-ui/themes";
-import { EnterIcon } from "@radix-ui/react-icons";
 import numeral from "numeral";
 import Link from "next/link";
 import { Saloon } from "../../models/types";
 import { shortKey } from "../../utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { tokens } from "../../utils/tokens";
-import {
-  MagnifyingGlassCircleIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
   const wallet = useWallet();
@@ -32,7 +28,7 @@ export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
       <Table.Root className="bg-brand-gray-2">
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell>Mint</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Current price</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Last post</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
@@ -57,7 +53,9 @@ export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
                     ) : s.tokenState?.ownerBidState === null ? (
                       <Badge color="green">Claimable</Badge>
                     ) : null}
-                    <Text>{shortKey(s.tokenMint)}</Text>
+                    <Text>
+                      {s?.metadata ? s.metadata.name : shortKey(s.tokenMint)}
+                    </Text>
                   </Flex>
                 </Table.RowHeaderCell>
                 <Table.Cell>

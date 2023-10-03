@@ -82,6 +82,7 @@ export default function ManageSubscription({
     return () => clearInterval(interval);
   }, [token, subscription, taxesPerYear]);
 
+  console.log(subscription);
   return (
     <Flex gap="2" direction="column">
       <Container>

@@ -37,11 +37,20 @@ export default async function handler(
     }
 
     const subscriptionsQuery = await sql`
-    SELECT * FROM saloons AS sa JOIN subscriptions AS su ON sa.collectionMint = su.collectionMint
-    WHERE sa.collectionMint = ${collectionMint}
+    SELECT * FROM 
+    subscriptionMetadata AS m
+    FULL JOIN (
+      SELECT * FROM 
+      saloons AS sa
+      JOIN subscriptions AS su 
+      USING (collectionMint)
+    ) as s
+    USING (tokenMint)
+    WHERE s.collectionMint = ${collectionMint}
     LIMIT ${limit} OFFSET ${limit * page};
     `;
 
+    console.log(subscriptionsQuery.rows);
     // Fetch token states for each subscription
     const connection = new Connection(
       (process.env.SOLANA_NETWORK === "devnet"
@@ -90,6 +99,13 @@ export default async function handler(
             username: ownerQuery.rows[0]?.username,
             lastLogin: ownerQuery.rows[0]?.lastlogin,
           },
+          metadata: r.metadata
+            ? {
+                image: r.metadata.image,
+                name: r.metadata.name,
+                description: r.metadata.description,
+              }
+            : undefined,
         };
       })
     );

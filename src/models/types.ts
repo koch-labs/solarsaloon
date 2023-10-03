@@ -37,6 +37,7 @@ export interface Subscription {
   lastPost: string;
   tokenState: TokenStateJSON;
   currentOwner: User;
+  metadata?: DigitalAssetStandardMetadata;
 }
 
 export interface FullSubscription {
