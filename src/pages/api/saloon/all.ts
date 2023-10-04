@@ -47,6 +47,7 @@ export default async function handler(
       authoritiesGroup: s.authoritiesgroup,
       config: configDict[s.collectionmint],
       postCooldown: s.postcooldown,
+      tags: s.tags,
       metadata: s.metadata,
     }));
     return response.status(200).json({

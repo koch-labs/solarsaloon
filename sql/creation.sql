@@ -16,6 +16,7 @@ CREATE TABLE saloons (
   authoritiesGroup TEXT NOT NULL,
   taxMint TEXT NOT NULL,
   postCooldown integer NOT NULL,
+  tags TEXT[],
   CONSTRAINT fk_owner FOREIGN KEY (owner) REFERENCES users (publicKey) ON DELETE CASCADE
 );
 CREATE TABLE subscriptions (

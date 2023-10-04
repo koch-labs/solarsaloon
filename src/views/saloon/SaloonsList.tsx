@@ -5,6 +5,7 @@ import numeral from "numeral";
 import { Saloon } from "../../models/types";
 import UserBadge from "../../components/UserBadge";
 import { formatTime } from "../../utils";
+import TagsPicker from "../../components/TagsPicker";
 
 export const SaloonsList = ({ saloons }: { saloons: Saloon[] }) => {
   return (
@@ -30,7 +31,10 @@ export const SaloonsList = ({ saloons }: { saloons: Saloon[] }) => {
               <Table.RowHeaderCell>
                 <Flex gap="2" align="center" className="pl-2">
                   <Avatar src={s.metadata.image} fallback="?" />
-                  <Text weight={"bold"}>{s.metadata.name}</Text>
+                  <Flex direction="column" gap="1">
+                    <Text weight={"bold"}>{s.metadata.name}</Text>
+                    <TagsPicker tags={s?.tags || []} />
+                  </Flex>
                 </Flex>
               </Table.RowHeaderCell>
               <Table.Cell>

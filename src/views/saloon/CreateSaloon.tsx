@@ -37,6 +37,9 @@ import Link from "next/link";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
 import WaitingButton from "../../components/WaitingButton";
 import { formatTime } from "../../utils";
+import TagsPicker from "../../components/TagsPicker";
+import useFees from "../../hooks/useFees";
+import numeral from "numeral";
 
 const CreateSaloon: React.FC = () => {
   const router = useRouter();
@@ -54,7 +57,15 @@ const CreateSaloon: React.FC = () => {
   const [taxToken, setTaxToken] = useState<Token>(tokens[0]);
   const [taxRate, setTaxRate] = useState<number>(Math.log10(100000));
   const [postCooldown, setPostCooldown] = useState<number>(86400000);
+  const [tags, setTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { taxesPerYear } = useFees({
+    price: 10,
+    taxRate,
+    lastUpdate: Date.now(),
+    depositAmount: 10,
+  });
 
   const formattedTime = formatTime(postCooldown);
 
@@ -175,6 +186,7 @@ const CreateSaloon: React.FC = () => {
           authoritiesGroup,
           taxMint: taxToken.publicKey.toString(),
           postCooldown,
+          tags,
         }),
         headers: {
           Authorization: `Bearer ${token}`,
@@ -245,6 +257,7 @@ const CreateSaloon: React.FC = () => {
     postCooldown,
     description,
     isSignedIn,
+    tags,
   ]);
 
   return (
@@ -270,12 +283,12 @@ const CreateSaloon: React.FC = () => {
                 </Popover.Trigger>
                 <Popover.Content style={{ width: 360 }}>
                   <Flex gap="3" direction="column">
-                    <Text size="5">What are Saloons ?</Text>
+                    <Text size="5">what are Saloons ?</Text>
                     <Text size="2">
-                      Saloons are digital spaces that only subscribers can
+                      saloons are digital spaces that only subscribers can
                       access.
                       <br />
-                      The number of of available subscriptions can be increased
+                      the number of of available subscriptions can be increased
                       at any time, but only a subscriber can burn a subscription
                       so be carefull before minting too many.
                     </Text>
@@ -287,23 +300,27 @@ const CreateSaloon: React.FC = () => {
               </Popover.Root>
             </Flex>
             <Flex align="center" gap="2" direction="column">
-              <Heading>Create a saloon</Heading>
+              <Heading>create a saloon</Heading>
               <Flex direction="column" width="100%">
-                <Text color="gray">Saloon&apos;s name</Text>
+                <Text color="gray">saloon&apos;s name</Text>
                 <TextFieldInput
                   placeholder="My Cool Saloon"
                   onChange={(e) => setName(e.target.value)}
                 />
               </Flex>
               <Flex direction="column" width="100%">
-                <Text color="gray">Saloon&apos;s description</Text>
+                <Text color="gray">saloon&apos;s description</Text>
                 <TextArea
                   placeholder="A short description of what happens in this saloon..."
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </Flex>
               <Flex direction="column" width="100%">
-                <Text color="gray">Tax token</Text>
+                <Text color="gray">saloon&apos;s tags</Text>
+                <TagsPicker edit tags={tags} setTags={setTags} />
+              </Flex>
+              <Flex direction="column" width="100%">
+                <Text color="gray">tax token</Text>
                 <Select.Root
                   defaultValue={taxToken.name}
                   onValueChange={(tokenName) =>
@@ -323,7 +340,7 @@ const CreateSaloon: React.FC = () => {
                 </Select.Root>
               </Flex>
               <Flex direction="column" width="100%" wrap={"wrap"}>
-                <Text color="gray">Tax rate</Text>
+                <Text color="gray">tax rate</Text>
                 <Slider
                   min={1}
                   max={Math.log10(5600 * 1000)}
@@ -332,12 +349,14 @@ const CreateSaloon: React.FC = () => {
                   onValueChange={(e) => setTaxRate(10 ** e[0])}
                 />
                 <Text weight="light" size="2" color="gray">
-                  Holders will pay {(taxRate / 100).toFixed(2)}% of their
+                  holders will pay {(taxRate / 100).toFixed(2)}% of their
                   selling price every year, {(taxRate / 5600).toFixed(2)}% every
                   week.
                   <br />
-                  Speculators will be rinsed within{" "}
-                  {(100 / (taxRate / 5600)).toFixed(2)} weeks.
+                  example: someone buys your subscription and sets a price of 10
+                  ${taxToken.symbol} will pay{" "}
+                  {numeral(taxesPerYear / 365).format("0.000")}$
+                  {taxToken.symbol} every day
                 </Text>
               </Flex>
               <Flex direction="column" width="100%" wrap={"wrap"}>
@@ -350,7 +369,7 @@ const CreateSaloon: React.FC = () => {
                   onValueChange={(e) => setPostCooldown(Math.round(10 ** e[0]))}
                 />
                 <Text weight="light" size="2" color="gray">
-                  Subscribers will have to wait at least {formattedTime} before
+                  subscribers will have to wait at least {formattedTime} before
                   being able to post again.
                 </Text>
               </Flex>

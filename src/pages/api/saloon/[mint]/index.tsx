@@ -125,6 +125,7 @@ export default async function handler(
       config,
       metadata: rawSaloon.metadata,
       postCooldown: rawSaloon.postcooldown,
+      tags: rawSaloon.tags,
       subscriptions,
     };
 

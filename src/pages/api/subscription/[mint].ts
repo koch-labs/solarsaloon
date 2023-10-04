@@ -102,6 +102,7 @@ export default async function handler(
       authoritiesGroup: subscriptionRow.authoritiesgroup,
       config,
       postCooldown: subscriptionRow.postcooldown,
+      tags: subscriptionRow.tags,
       metadata: subscriptionRow.metadata,
     };
 

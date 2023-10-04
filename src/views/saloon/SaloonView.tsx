@@ -30,6 +30,7 @@ import { Fetchable, Saloon } from "../../models/types";
 import Image from "next/image";
 import { PencilIcon } from "@heroicons/react/24/outline";
 import UserBadge from "../../components/UserBadge";
+import TagsPicker from "../../components/TagsPicker";
 
 const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({ saloon }) => {
   const { user } = useCurrentUser();
@@ -54,6 +55,7 @@ const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({ saloon }) => {
             {saloon.metadata?.description ? (
               <Text>{saloon.metadata.description}</Text>
             ) : null}
+            <TagsPicker tags={saloon?.tags || []} />
             <Flex gap="1" align="center">
               <Text>creator: </Text>
               <UserBadge user={saloon?.owner} />

@@ -30,6 +30,7 @@ export interface Saloon {
   authoritiesGroup: string;
   config: CollectionConfigJSON;
   postCooldown: number;
+  tags: string[];
   metadata: DigitalAssetStandardMetadata;
   subscriptions?: Subscription[];
 }
