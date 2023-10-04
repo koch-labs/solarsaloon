@@ -14,6 +14,7 @@ import {
 import WaitingButton from "../../components/WaitingButton";
 import { Fetchable } from "../../models/types";
 import useFees from "../../hooks/useFees";
+import { useCurrentUser } from "../../contexts/UserContextProvider";
 
 export default function WithdrawFundsModal({
   setOpen,
@@ -29,6 +30,7 @@ export default function WithdrawFundsModal({
     (e) => e.publicKey.toString() === subscription?.saloon?.taxMint
   );
   const { connection } = useConnection();
+  const user = useCurrentUser();
   const wallet = useWallet();
   const provider = useMemo(
     () =>
@@ -37,7 +39,7 @@ export default function WithdrawFundsModal({
   );
   const [amount, setAmount] = useState(0);
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
-  const { amount: amountLeft } = useFees({
+  const { amount: amountLeft, timeLeft } = useFees({
     price: Number(
       numeral(subscription?.tokenState?.currentSellingPrice || 0)
         .divide(10 ** (token?.decimals || 0))
@@ -113,12 +115,37 @@ export default function WithdrawFundsModal({
 
       const conf = await wallet.sendTransaction(tx, connection);
       await connection.confirmTransaction(conf);
+
+      await fetch("/api/subscription/change", {
+        method: "POST",
+        body: JSON.stringify({
+          tokenMint: subscription.subscription.tokenMint,
+          currentPrice: numeral(subscription.ownerBidState.sellingPrice || 0)
+            .divide(10 ** (token?.decimals || 0))
+            .format("0.000"),
+          expirationDate: new Date(Date.now() + timeLeft),
+        }),
+        headers: {
+          authorization: `Bearer ${user.token}`,
+        },
+      });
+
       subscription.reload();
       setOpen(false);
     } finally {
       setIsWaiting(false);
     }
-  }, [connection, wallet, amount, provider, subscription, token, setOpen]);
+  }, [
+    connection,
+    wallet,
+    amount,
+    provider,
+    subscription,
+    token,
+    setOpen,
+    timeLeft,
+    user,
+  ]);
 
   return (
     <Dialog.Root open={open}>
@@ -154,6 +181,7 @@ export default function WithdrawFundsModal({
               <TextField.Input
                 placeholder="Enter the amount to withdraw..."
                 onChange={(e) => setAmount(Number(e.target.value))}
+                type="number"
                 value={amount}
               />
               <TextField.Slot className="m-1">

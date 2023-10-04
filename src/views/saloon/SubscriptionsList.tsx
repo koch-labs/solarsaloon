@@ -11,7 +11,7 @@ import {
 import numeral from "numeral";
 import Link from "next/link";
 import { Saloon } from "../../models/types";
-import { shortKey } from "../../utils";
+import { formatTime, shortKey } from "../../utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { tokens } from "../../utils/tokens";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
@@ -64,9 +64,14 @@ export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
                     .format("0.0a")}
                 </Table.Cell>
                 <Table.Cell>
-                  {new Date(s.lastPost).valueOf() <= 0
-                    ? "never"
-                    : new Date(s.lastPost).toLocaleDateString()}
+                  {new Date(s.lastPost).valueOf() <= 0 ? (
+                    "never"
+                  ) : (
+                    <Text>
+                      {formatTime(Date.now() - new Date(s.lastPost).valueOf())}{" "}
+                      ago
+                    </Text>
+                  )}
                 </Table.Cell>
                 <Table.Cell>
                   <Link href={`/subscription/${s.tokenMint}`}>

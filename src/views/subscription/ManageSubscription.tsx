@@ -1,4 +1,4 @@
-import { Container, Flex, Heading } from "@radix-ui/themes";
+import { Container, Flex, Heading, Text } from "@radix-ui/themes";
 import CreatePostCard from "./CreatePostCard";
 import { PostsList } from "./PostsList";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
@@ -31,7 +31,11 @@ export default function ManageSubscription({
         ) : null}
         {subscription?.posts && subscription.posts.length > 0 ? (
           <PostsList subscription={subscription} />
-        ) : null}
+        ) : (
+          <Text size="5" align="center" m="5">
+            Buy this subscription to see posts
+          </Text>
+        )}
       </Flex>
     </Flex>
   );

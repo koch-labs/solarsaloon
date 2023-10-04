@@ -11,6 +11,7 @@ import { Fetchable } from "../../models/types";
 import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 import WaitingButton from "../../components/WaitingButton";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
+import useFees from "../../hooks/useFees";
 
 export default function SetSellingPriceModal({
   setOpen,
@@ -34,9 +35,17 @@ export default function SetSellingPriceModal({
   );
   const [newPrice, setNewPrice] = useState<number>(0);
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
-  const taxesPerYear = new BN(newPrice * 10 ** (token?.decimals || 0))
-    .mul(new BN(subscription?.saloon?.config?.taxRate || 0))
-    .div(new BN(10000));
+  const { taxesPerYear, timeLeft } = useFees({
+    price: newPrice,
+    taxRate: Number(subscription?.saloon?.config?.taxRate || 0),
+    lastUpdate: Date.now(),
+    depositAmount: Number(
+      numeral(subscription?.bidState?.amount || 0)
+        .divide(10 ** (token?.decimals || 0))
+        .format("0.000a")
+    ),
+    increaseDeposit: false,
+  });
 
   const handleBuy = useCallback(async () => {
     setIsWaiting(true);
@@ -92,6 +101,7 @@ export default function SetSellingPriceModal({
         body: JSON.stringify({
           tokenMint: subscription.subscription.tokenMint,
           currentPrice: newPrice,
+          expirationDate: new Date(Date.now() + timeLeft),
         }),
         headers: {
           authorization: `Bearer ${user.token}`,
@@ -112,6 +122,7 @@ export default function SetSellingPriceModal({
     token,
     user,
     setOpen,
+    timeLeft,
   ]);
 
   return (
@@ -131,7 +142,7 @@ export default function SetSellingPriceModal({
           {numeral(newPrice.toString()).format("0.0a")} $
           {token?.symbol || "???"}. While you have the subscription, it will
           cost you{" "}
-          {numeral(taxesPerYear.div(new BN(365)).toString())
+          {numeral(taxesPerYear / 365)
             .divide(10 ** (token?.decimals || 0))
             .format("0.00a")
             .replace("NaN", "0")}{" "}

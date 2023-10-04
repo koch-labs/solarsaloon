@@ -14,6 +14,8 @@ import {
   getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
 import WaitingButton from "../../components/WaitingButton";
+import { useCurrentUser } from "../../contexts/UserContextProvider";
+import useFees from "../../hooks/useFees";
 
 export default function DepositFundsModal({
   setOpen,
@@ -26,6 +28,7 @@ export default function DepositFundsModal({
   subscription: Fetchable<FullSubscription>;
   externalAccount?: boolean;
 }) {
+  const user = useCurrentUser();
   const token = tokens.find(
     (e) => e.publicKey.toString() === subscription?.saloon?.taxMint
   );
@@ -37,6 +40,22 @@ export default function DepositFundsModal({
     [wallet, connection]
   );
   const [amount, setAmount] = useState(0);
+  const { timeLeft } = useFees({
+    price: Number(
+      numeral(subscription?.ownerBidState?.sellingPrice || 0)
+        .divide(10 ** (token?.decimals || 0))
+        .format("0.000")
+    ),
+    taxRate: Number(subscription?.saloon?.config?.taxRate),
+    lastUpdate: Date.now(),
+    depositAmount:
+      Number(
+        numeral(subscription?.bidState?.amount || 0)
+          .divide(10 ** (token?.decimals || 0))
+          .format("0.000")
+      ) + amount,
+    increaseDeposit: false,
+  });
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
 
   const handleDeposit = useCallback(async () => {
@@ -138,12 +157,37 @@ export default function DepositFundsModal({
 
       const conf = await wallet.sendTransaction(tx, connection);
       await connection.confirmTransaction(conf);
+
+      await fetch("/api/subscription/change", {
+        method: "POST",
+        body: JSON.stringify({
+          tokenMint: subscription.subscription.tokenMint,
+          currentPrice: numeral(subscription.ownerBidState.sellingPrice || 0)
+            .divide(10 ** (token?.decimals || 0))
+            .format("0.000"),
+          expirationDate: new Date(Date.now() + timeLeft),
+        }),
+        headers: {
+          authorization: `Bearer ${user.token}`,
+        },
+      });
+
       subscription.reload();
       setOpen(false);
     } finally {
       setIsWaiting(false);
     }
-  }, [connection, wallet, amount, provider, subscription, token, setOpen]);
+  }, [
+    connection,
+    wallet,
+    amount,
+    provider,
+    subscription,
+    token,
+    setOpen,
+    user,
+    timeLeft,
+  ]);
 
   return (
     <Dialog.Root open={open}>

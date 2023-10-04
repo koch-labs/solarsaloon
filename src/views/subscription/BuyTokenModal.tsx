@@ -52,7 +52,11 @@ export default function BuyTokenModal({
   const [isWaiting, setIsWaiting] = useState(false);
   const [newPrice, setNewPrice] = useState(0);
   const [prepaidDuration, setPrepaidDuration] = useState(Math.log10(3600));
-  const { taxesPerYear, amount: amountLeft } = useFees({
+  const {
+    taxesPerYear,
+    amount: amountLeft,
+    timeLeft,
+  } = useFees({
     price: newPrice,
     taxRate: Number(subscription?.saloon?.config?.taxRate),
     lastUpdate: Date.now(),
@@ -249,6 +253,7 @@ export default function BuyTokenModal({
         body: JSON.stringify({
           tokenMint: subscription.subscription.tokenMint,
           currentPrice: newPrice,
+          expirationDate: new Date(Date.now() + timeLeft),
         }),
         headers: {
           authorization: `Bearer ${user.token}`,
@@ -272,6 +277,7 @@ export default function BuyTokenModal({
     setOpen,
     user,
     currentPrice,
+    timeLeft,
   ]);
 
   return (

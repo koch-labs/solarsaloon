@@ -23,6 +23,7 @@ CREATE TABLE subscriptions (
   collectionMint TEXT NOT NULL,
   lastPost TIMESTAMP,
   ownerChangedTimestamp TIMESTAMP,
+  expirationTimestamp TIMESTAMP,
   currentPrice DOUBLE PRECISION,
   CONSTRAINT fk_saloon FOREIGN KEY (collectionMint) REFERENCES saloons (collectionMint) ON DELETE CASCADE
 );

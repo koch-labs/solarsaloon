@@ -39,6 +39,8 @@ export interface Subscription {
   lastPost: string;
   tokenState: TokenStateJSON;
   currentOwner: User;
+  ownerChangedTimestamp: string;
+  expirationTimestamp: string;
   metadata?: DigitalAssetStandardMetadata;
 }
 

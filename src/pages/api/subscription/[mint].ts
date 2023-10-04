@@ -88,6 +88,8 @@ export default async function handler(
         username: ownerQuery.rows[0]?.username,
         lastLogin: ownerQuery.rows[0]?.lastlogin,
       },
+      ownerChangedTimestamp: subscriptionRow.ownerchangedtimestamp,
+      expirationTimestamp: subscriptionRow.expirationtimestamp,
     };
     const saloon: Saloon = {
       owner: {

@@ -54,7 +54,7 @@ const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({ saloon }) => {
             {saloon.metadata?.description ? (
               <Text>{saloon.metadata.description}</Text>
             ) : null}
-            <Flex gap="1">
+            <Flex gap="1" align="center">
               <Text>creator: </Text>
               <UserBadge user={saloon?.owner} />
             </Flex>

@@ -49,6 +49,7 @@ export async function getSaloonByCollectionMint({
     taxMint: rawSaloon.taxmint,
     authoritiesGroup: rawSaloon.authoritiesgroup,
     config,
+    postCooldown: rawSaloon.postcooldown,
     metadata: rawSaloon.metadata,
   };
 
@@ -119,6 +120,8 @@ export async function getSubscriptionsByCollectionMint({
           username: ownerQuery.rows[0]?.username,
           lastLogin: ownerQuery.rows[0]?.lastlogin,
         },
+        ownerChangedTimestamp: r.ownerchangedtimestamp,
+        expirationTimestamp: r.expirationtimestamp,
       };
     })
   );
@@ -166,6 +169,7 @@ export async function getSaloons({
     taxMint: s.taxmint,
     authoritiesGroup: s.authoritiesgroup,
     config: configDict[s.collectionmint],
+    postCooldown: s.postcooldown,
     metadata: s.metadata,
   }));
 

@@ -98,6 +98,8 @@ export default async function handler(
             username: ownerQuery.rows[0]?.username,
             lastLogin: ownerQuery.rows[0]?.lastlogin,
           },
+          ownerChangedTimestamp: r.ownerchangedtimestamp,
+          expirationTimestamp: r.expirationtimestamp,
           metadata: r.metadata
             ? {
                 image: r.metadata.image,
