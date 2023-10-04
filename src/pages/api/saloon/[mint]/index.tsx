@@ -122,6 +122,7 @@ export default async function handler(
       authoritiesGroup: rawSaloon.authoritiesgroup,
       config,
       metadata: rawSaloon.metadata,
+      postCooldown: rawSaloon.postcooldown,
       subscriptions,
     };
 

@@ -7,31 +7,21 @@ import {
   Container,
   Flex,
   Heading,
-  IconButton,
-  Popover,
   Text,
 } from "@radix-ui/themes";
 import { formatTime, shortKey } from "../../utils";
-import { AnchorProvider, BN } from "@coral-xyz/anchor";
-import { getExplorerUrl } from "../../utils/explorer";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { tokens } from "../../utils/tokens";
 import BuyTokenModal from "./BuyTokenModal";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
-import Link from "next/link";
-import { PublicKey, Transaction } from "@solana/web3.js";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { builders } from "@koch-labs/rent-nft";
 import SetSellingPriceModal from "./SetSellingPriceModal";
 import ClaimFeesButton from "./ClaimFeesButton";
 import UserBadge from "../../components/UserBadge";
 import { Fetchable, FullSubscription } from "../../models/types";
-import { MinusIcon, PencilIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { PencilIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import { format } from "path";
-import DepositFundsModal from "./DepositFundsModal";
-import WithdrawFundsModal from "./WithdrawFundsModal";
 import useFees from "../../hooks/useFees";
+import DepositWidget from "./DepositWidget";
 
 export default function SubscriptionHeader({
   subscription,
@@ -44,8 +34,6 @@ export default function SubscriptionHeader({
   );
   const [openBuy, setOpenBuy] = useState(false);
   const [openPrice, setOpenPrice] = useState(false);
-  const [openDeposit, setOpenDeposit] = useState(false);
-  const [openWithdraw, setOpenWithdraw] = useState(false);
   const { timeLeft, amount } = useFees({
     price: Number(
       numeral(subscription?.tokenState?.currentSellingPrice)
@@ -131,42 +119,7 @@ export default function SubscriptionHeader({
             </Button>
           ) : null}
           {user && subscription?.bidState?.amount !== "0" ? (
-            <>
-              <Flex align="center" gap="1" justify="between">
-                <Flex direction="column">
-                  <Text>
-                    {numeral(amount).format("0.000a")} ${token?.symbol}{" "}
-                    deposited
-                  </Text>
-                  <Text weight="light" size="1">
-                    {formatTime(timeLeft)} left
-                  </Text>
-                </Flex>
-                <IconButton
-                  variant="surface"
-                  onClick={() => setOpenDeposit(true)}
-                >
-                  <PlusIcon width="16" />
-                </IconButton>
-                <IconButton
-                  variant="outline"
-                  color="gray"
-                  onClick={() => setOpenWithdraw(true)}
-                >
-                  <MinusIcon width="16" />
-                </IconButton>
-              </Flex>
-              <DepositFundsModal
-                setOpen={setOpenDeposit}
-                open={openDeposit}
-                subscription={subscription}
-              />
-              <WithdrawFundsModal
-                setOpen={setOpenWithdraw}
-                open={openWithdraw}
-                subscription={subscription}
-              />
-            </>
+            <DepositWidget subscription={subscription} />
           ) : null}
           {user && subscription.saloon?.owner.publicKey === user?.publicKey ? (
             <ClaimFeesButton subscription={subscription} />

@@ -29,6 +29,7 @@ export interface Saloon {
   taxMint: string;
   authoritiesGroup: string;
   config: CollectionConfigJSON;
+  postCooldown: number;
   metadata: DigitalAssetStandardMetadata;
   subscriptions?: Subscription[];
 }

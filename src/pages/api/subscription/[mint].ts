@@ -99,6 +99,7 @@ export default async function handler(
       taxMint: subscriptionRow.taxmint,
       authoritiesGroup: subscriptionRow.authoritiesgroup,
       config,
+      postCooldown: subscriptionRow.postcooldown,
       metadata: subscriptionRow.metadata,
     };
 

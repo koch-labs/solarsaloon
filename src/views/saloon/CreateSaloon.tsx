@@ -34,11 +34,9 @@ import { Token, tokens } from "../../utils/tokens";
 import toast from "react-hot-toast";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import numeral from "numeral";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
 import WaitingButton from "../../components/WaitingButton";
 import { formatTime } from "../../utils";
-import NavigationPath from "../../components/NavigationPath";
 
 const CreateSaloon: React.FC = () => {
   const router = useRouter();
@@ -73,11 +71,7 @@ const CreateSaloon: React.FC = () => {
     setIsLoading(true);
     try {
       const collectionMintKeypair = Keypair.generate();
-      const txs: Transaction[] = [];
-      const {
-        value: { blockhash, lastValidBlockHeight },
-        context: { slot },
-      } = await connection.getLatestBlockhashAndContext();
+      const { blockhash } = await connection.getLatestBlockhash();
 
       const tx = new Transaction();
       tx.recentBlockhash = blockhash;

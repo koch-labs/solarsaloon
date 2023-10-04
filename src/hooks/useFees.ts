@@ -38,10 +38,13 @@ export default function useFees({
         );
       } else {
         setAmount(
-          depositAmount -
-            (taxesPerYear *
-              Math.round(Date.now() / 1000 - Number(lastUpdate || 0))) /
-              31536000
+          Math.max(
+            0,
+            depositAmount -
+              (taxesPerYear *
+                Math.round(Date.now() / 1000 - Number(lastUpdate || 0))) /
+                31536000
+          )
         );
       }
     }, 500);

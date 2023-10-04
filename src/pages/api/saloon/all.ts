@@ -46,6 +46,7 @@ export default async function handler(
       taxMint: s.taxmint,
       authoritiesGroup: s.authoritiesgroup,
       config: configDict[s.collectionmint],
+      postCooldown: s.postcooldown,
       metadata: s.metadata,
     }));
     return response.status(200).json({

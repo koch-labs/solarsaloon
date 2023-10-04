@@ -41,7 +41,11 @@ export default function ClaimFeesButton({
     ),
     taxRate: Number(subscription?.saloon?.config?.taxRate),
     lastUpdate: Number(subscription?.ownerBidState?.lastUpdate),
-    depositAmount: Number(subscription?.saloon?.config?.collectedTax),
+    depositAmount: Number(
+      numeral(subscription?.saloon?.config?.collectedTax)
+        .divide(10 ** (token?.decimals || 0))
+        .format("0.000")
+    ),
     increaseDeposit: true,
   });
   const [isWaiting, setIsWaiting] = useState(false);

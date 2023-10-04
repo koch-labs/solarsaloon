@@ -4,6 +4,7 @@ import Link from "next/link";
 import numeral from "numeral";
 import { Saloon } from "../../models/types";
 import UserBadge from "../../components/UserBadge";
+import { formatTime } from "../../utils";
 
 export const SaloonsList = ({ saloons }: { saloons: Saloon[] }) => {
   return (
@@ -13,8 +14,11 @@ export const SaloonsList = ({ saloons }: { saloons: Saloon[] }) => {
           <Table.Row className="pl-2">
             <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Owner</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell className="hidden sm:block">
+            <Table.ColumnHeaderCell className="hidden sm:table-cell">
               Tax rate
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell className="hidden sm:table-cell">
+              Post period
             </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Actions</Table.ColumnHeaderCell>
           </Table.Row>
@@ -34,6 +38,9 @@ export const SaloonsList = ({ saloons }: { saloons: Saloon[] }) => {
               </Table.Cell>
               <Table.Cell className="hidden sm:table-cell">
                 {numeral(s.config?.taxRate).divide(100).format("0.0a%")}
+              </Table.Cell>
+              <Table.Cell className="hidden sm:table-cell">
+                every {formatTime(s.postCooldown)}
               </Table.Cell>
               <Table.Cell>
                 <Link href={`/saloon/${s.collectionMint}`}>
