@@ -20,11 +20,17 @@ const ManageSubscriptionPage = () => {
           { href: "/saloons", name: "saloons list" },
           {
             href: `/saloon/${subscription?.saloon?.collectionMint}`,
-            name: `${subscription?.saloon?.metadata?.name}`,
+            name: `${
+              subscription?.saloon?.metadata?.name ||
+              subscription?.saloon?.collectionMint
+            }`,
           },
           {
             href: `/subscription/${subscription?.subscription?.tokenMint}`,
-            name: `${subscription?.subscription?.tokenMint}`,
+            name: `${
+              subscription?.subscription?.metadata?.name ||
+              subscription?.subscription?.tokenMint
+            }`,
           },
         ]}
       />

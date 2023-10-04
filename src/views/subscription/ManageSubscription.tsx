@@ -29,7 +29,8 @@ export default function ManageSubscription({
             subscription.saloon.owner.publicKey === user.publicKey)) ? (
           <CreatePostCard subscription={subscription} />
         ) : null}
-        {subscription?.posts && subscription.posts.length > 0 ? (
+        {user.publicKey === subscription?.ownerBidState?.bidder ||
+        user.publicKey === subscription?.saloon?.owner.publicKey ? (
           <PostsList subscription={subscription} />
         ) : (
           <Text size="5" align="center" m="5">
