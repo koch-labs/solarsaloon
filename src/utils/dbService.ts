@@ -50,6 +50,7 @@ export async function getSaloonByCollectionMint({
     authoritiesGroup: rawSaloon.authoritiesgroup,
     config,
     postCooldown: rawSaloon.postcooldown,
+    tags: rawSaloon.tags,
     metadata: rawSaloon.metadata,
   };
 
@@ -170,6 +171,7 @@ export async function getSaloons({
     authoritiesGroup: s.authoritiesgroup,
     config: configDict[s.collectionmint],
     postCooldown: s.postcooldown,
+    tags: s.tags,
     metadata: s.metadata,
   }));
 

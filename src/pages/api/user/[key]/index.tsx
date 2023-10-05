@@ -68,6 +68,7 @@ export default async function handler(
         config: configs[r.collectionmint],
         postCooldown: r.postcooldown,
         metadata: r.metadata,
+        tags: r.tags,
       };
     });
 
