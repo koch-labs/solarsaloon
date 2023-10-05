@@ -244,7 +244,7 @@ export default function CreateSubscriptionModal({
               disabled={!name}
               loading={isWaiting}
             >
-              deposit
+              create
             </WaitingButton>
           </Dialog.Close>
         </Flex>

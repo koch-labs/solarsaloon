@@ -44,7 +44,7 @@ import numeral from "numeral";
 const CreateSaloon: React.FC = () => {
   const router = useRouter();
   const wallet = useWallet();
-  const { isSignedIn, token } = useCurrentUser();
+  const { isSignedIn, token, user } = useCurrentUser();
   const { connection } = useConnection();
   const provider = useMemo(
     () =>
@@ -360,7 +360,7 @@ const CreateSaloon: React.FC = () => {
                 </Text>
               </Flex>
               <Flex direction="column" width="100%" wrap={"wrap"}>
-                <Text color="gray">Post cooldown</Text>
+                <Text color="gray">post cooldown</Text>
                 <Slider
                   min={3}
                   max={Math.log10(86400000 * 365)}
@@ -374,7 +374,7 @@ const CreateSaloon: React.FC = () => {
                 </Text>
               </Flex>
               <WaitingButton
-                disabled={isLoading || !name || !wallet}
+                disabled={isLoading || !name || !wallet || !user}
                 loading={isLoading}
                 onClick={handleCreate}
               >
