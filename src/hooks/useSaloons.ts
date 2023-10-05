@@ -1,4 +1,3 @@
-import { PublicKey } from "@solana/web3.js";
 import { useCallback, useEffect, useState } from "react";
 import { Fetchable, Saloon } from "../models/types";
 import toast from "react-hot-toast";
@@ -6,9 +5,11 @@ import { useCurrentUser } from "../contexts/UserContextProvider";
 import { concatUnique } from "../utils";
 
 export default function useSaloons({
+  creator,
   tags,
 }: {
-  tags: string[];
+  creator?: string;
+  tags?: string[];
 }): Fetchable<Saloon[]> {
   const { token } = useCurrentUser();
   const [saloons, setSaloons] = useState<Saloon[]>([]);
@@ -23,7 +24,9 @@ export default function useSaloons({
       console.log("fetching saloons", page);
       try {
         const response = await fetch(
-          `/api/saloon/all?page=${page}&limit=${pageSize}`,
+          `/api/saloon/all?page=${page}&limit=${pageSize}${
+            creator ? `&creator=${creator}` : ""
+          }${tags ? `&tags=${tags.join(",")}` : ""}`,
           {
             headers: {
               authorization: token ? `Bearer ${token}` : undefined,
@@ -46,7 +49,7 @@ export default function useSaloons({
       }
       setIsLoading(false);
     },
-    [token, pageSize]
+    [token, pageSize, tags, creator]
   );
 
   const fetchMore = useCallback(async () => {

@@ -159,19 +159,6 @@ export default async function handler(
           `;
           posts = postsQuery.rows;
         }
-        // else if () {
-        //   // The user is subscribed
-        //   // Can only view post starting from the moment it joined
-        //   const postsQuery = await sql`
-        //   SELECT * FROM posts AS P JOIN saloons AS sa ON p.collectionMint = sa.collectionMint JOIN subscriptions AS su ON p.collectionMint = su.collectionMint
-        //   WHERE p.collectionMint = ${
-        //     saloon.collectionMint
-        //   } AND ownerChangedTimestamp <= creationTimestamp
-        //   ORDER BY creationTimestamp DESC
-        //   LIMIT ${limit} OFFSET ${limit * page}
-        //   `;
-        //   posts = postsQuery.rows;
-        // }
         posts = posts.map(
           (r): Post => ({
             id: r.id,

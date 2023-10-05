@@ -34,72 +34,73 @@ const ForwardRefWrapper = forwardRef<HTMLDivElement, ForwardRefWrapperProps>(
 );
 ForwardRefWrapper.displayName = "ForwardRefWrapper";
 
-export const SaloonsList = () => {
-  const saloons = useSaloons({ tags: [] });
-  console.log(saloons);
+export const SaloonsList = ({
+  creator,
+  tags,
+}: {
+  creator?: string;
+  tags?: string[];
+}) => {
+  const saloons = useSaloons({ creator, tags });
+
   return (
     <Flex direction="column">
-      <Table.Root>
-        <Table.Body className="align-middle">
-          <InfiniteScroll
-            page={0}
-            loadMore={saloons?.fetchMore}
-            hasMore={saloons?.hasMore}
-            loading={<Heading>Fetching more</Heading>}
-            className="w-fit m-auto"
-          >
+      <InfiniteScroll
+        page={0}
+        loadMore={saloons?.fetchMore}
+        hasMore={saloons?.hasMore}
+        loading={<Heading>Fetching more</Heading>}
+      >
+        <Table.Root>
+          <Table.Header className="bg-brand-gray-2 w-100">
+            <Table.Row className="pl-2">
+              <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Creator</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell className="hidden sm:table-cell">
+                Subscriptions
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell className="hidden sm:table-cell">
+                Post period
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Actions</Table.ColumnHeaderCell>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body className="align-middle">
             {saloons?.data.map((s, i) => (
-              <>
-                {i === 0 ? (
-                  <Table.Header className="bg-brand-gray-2 w-100">
-                    <Table.Row className="pl-2">
-                      <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
-                      <Table.ColumnHeaderCell>Owner</Table.ColumnHeaderCell>
-                      <Table.ColumnHeaderCell className="hidden sm:table-cell">
-                        Subscriptions
-                      </Table.ColumnHeaderCell>
-                      <Table.ColumnHeaderCell className="hidden sm:table-cell">
-                        Post period
-                      </Table.ColumnHeaderCell>
-                      <Table.ColumnHeaderCell>Actions</Table.ColumnHeaderCell>
-                    </Table.Row>
-                  </Table.Header>
-                ) : null}
-                <Table.Row
-                  key={s.collectionMint}
-                  className="bg-brand-gray w-full"
-                >
-                  <Table.RowHeaderCell>
-                    <Flex gap="2" align="center" className="pl-2">
-                      <Avatar src={s.metadata.image} fallback="?" />
-                      <Flex direction="column" gap="1">
-                        <Text weight={"bold"}>{s.metadata.name}</Text>
-                        <TagsPicker tags={s?.tags || []} />
-                      </Flex>
+              <Table.Row
+                key={s.collectionMint}
+                className="bg-brand-gray w-full"
+              >
+                <Table.RowHeaderCell>
+                  <Flex gap="2" align="center" className="pl-2">
+                    <Avatar src={s.metadata.image} fallback="?" />
+                    <Flex direction="column" gap="1">
+                      <Text weight={"bold"}>{s.metadata.name}</Text>
+                      <TagsPicker tags={s?.tags || []} />
                     </Flex>
-                  </Table.RowHeaderCell>
-                  <Table.Cell>
-                    <UserBadge user={s.owner} />
-                  </Table.Cell>
-                  <Table.Cell className="hidden sm:table-cell">
-                    {s?.nSubscriptions || 0}
-                  </Table.Cell>
-                  <Table.Cell className="hidden sm:table-cell">
-                    every {formatTime(s.postCooldown)}
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Link href={`/saloon/${s.collectionMint}`}>
-                      <Button variant="soft" size="1">
-                        <EnterIcon /> enter
-                      </Button>
-                    </Link>
-                  </Table.Cell>
-                </Table.Row>
-              </>
+                  </Flex>
+                </Table.RowHeaderCell>
+                <Table.Cell>
+                  <UserBadge user={s.owner} />
+                </Table.Cell>
+                <Table.Cell className="hidden sm:table-cell">
+                  {s?.nSubscriptions || 0}
+                </Table.Cell>
+                <Table.Cell className="hidden sm:table-cell">
+                  every {formatTime(s.postCooldown)}
+                </Table.Cell>
+                <Table.Cell>
+                  <Link href={`/saloon/${s.collectionMint}`}>
+                    <Button variant="soft" size="1">
+                      <EnterIcon /> enter
+                    </Button>
+                  </Link>
+                </Table.Cell>
+              </Table.Row>
             ))}
-          </InfiniteScroll>
-        </Table.Body>
-      </Table.Root>
+          </Table.Body>
+        </Table.Root>
+      </InfiniteScroll>
     </Flex>
   );
 };

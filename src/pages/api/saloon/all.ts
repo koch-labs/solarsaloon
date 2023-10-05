@@ -9,11 +9,11 @@ export default async function handler(
   response: NextApiResponse
 ) {
   try {
-    const { limit, page } = Object.assign(
+    const { limit, page, creator, tags } = Object.assign(
       { limit: 20, page: 0 },
       request.query
     );
-    const query = await sql`
+    const queryString = `
     SELECT * FROM 
     saloons
     JOIN users on users.publicKey = saloons.owner
@@ -23,7 +23,13 @@ export default async function handler(
         subscriptions
         GROUP BY collectionMint 
     ) AS countquery USING (collectionMint)
+    ${creator ? "WHERE " : ""}
+    ${creator ? `saloons.owner = $1` : ""}
     LIMIT ${limit} OFFSET ${limit * page}`;
+    const query = await sql.query(
+      queryString,
+      [creator as any].filter(Boolean)
+    );
     const connection = new Connection(
       (process.env.SOLANA_NETWORK === "devnet"
         ? process.env.HELIUS_RPC_DEVNET

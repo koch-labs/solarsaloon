@@ -8,6 +8,7 @@ import {
   Heading,
   Box,
 } from "@radix-ui/themes";
+import InfiniteScroll from "react-infinite-scroller";
 import numeral from "numeral";
 import Link from "next/link";
 import { Saloon } from "../../models/types";
@@ -15,35 +16,35 @@ import { formatTime, shortKey } from "../../utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { tokens } from "../../utils/tokens";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import useSubscriptions from "../../hooks/useSubscriptions";
 
 export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
   const wallet = useWallet();
   const token = tokens.find((t) => t.publicKey.toString() === saloon.taxMint);
+  const subscriptions = useSubscriptions(saloon?.collectionMint);
 
   return (
     <Box>
       <Heading align="center" size="5">
         Subscriptions
       </Heading>
-      <Table.Root className="bg-brand-gray-2">
-        <Table.Header>
-          <Table.Row>
-            <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Current price</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Last post</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
-          </Table.Row>
-        </Table.Header>
-
-        <Table.Body className="align-middle bg-brand-gray">
-          {saloon?.subscriptions
-            ?.sort((a, b) =>
-              a.tokenState?.currentSellingPrice >
-              b.tokenState?.currentSellingPrice
-                ? -1
-                : 1
-            )
-            .map((s) => (
+      <InfiniteScroll
+        page={0}
+        loadMore={subscriptions?.fetchMore}
+        hasMore={subscriptions?.hasMore}
+        loading={<Heading>Fetching more</Heading>}
+      >
+        <Table.Root className="bg-brand-gray-2">
+          <Table.Header>
+            <Table.Row>
+              <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Current price</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>Last post</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell></Table.ColumnHeaderCell>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body className="align-middle bg-brand-gray">
+            {subscriptions?.data?.map((s) => (
               <Table.Row key={s?.tokenMint}>
                 <Table.RowHeaderCell>
                   <Flex gap={"2"}>
@@ -82,8 +83,9 @@ export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
                 </Table.Cell>
               </Table.Row>
             ))}
-        </Table.Body>
-      </Table.Root>
+          </Table.Body>
+        </Table.Root>
+      </InfiniteScroll>
     </Box>
   );
 };

@@ -27,7 +27,7 @@ import { useCurrentUser } from "../../contexts/UserContextProvider";
 
 const UserView: React.FC<{ publicKey: string }> = ({ publicKey }) => {
   const { user: currentUser, token } = useCurrentUser();
-  const { user, saloons, reload } = useUser(publicKey);
+  const user = useUser(publicKey);
   const [name, setName] = useState<string>();
 
   const handleSetName = useCallback(async () => {
@@ -40,8 +40,8 @@ const UserView: React.FC<{ publicKey: string }> = ({ publicKey }) => {
         username: name,
       }),
     });
-    reload();
-  }, [name, token, reload]);
+    user.reload();
+  }, [name, token, user]);
 
   return (
     <Container className="content-center">
@@ -89,7 +89,9 @@ const UserView: React.FC<{ publicKey: string }> = ({ publicKey }) => {
             </Flex>
             <Flex direction="column" align="center" gap="5" className="w-full">
               <Heading>
-                {user?.username ? user.username : shortKey(user?.publicKey)}
+                {user?.data?.user.username
+                  ? user.data.user.username
+                  : shortKey(user?.data?.user.publicKey)}
               </Heading>
               {currentUser?.publicKey === publicKey ? (
                 <Card>
@@ -106,7 +108,9 @@ const UserView: React.FC<{ publicKey: string }> = ({ publicKey }) => {
                 </Card>
               ) : null}
               <Flex className="w-full" direction="column">
-                {saloons ? <SaloonsList saloons={saloons} /> : null}
+                {user?.data?.user.publicKey ? (
+                  <SaloonsList creator={user.data.user.publicKey} />
+                ) : null}
               </Flex>
             </Flex>
           </Flex>

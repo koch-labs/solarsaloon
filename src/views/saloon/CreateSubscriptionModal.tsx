@@ -24,12 +24,13 @@ import { useCurrentUser } from "../../contexts/UserContextProvider";
 export default function CreateSubscriptionModal({
   setOpen,
   open,
-  saloon,
+  saloon: fetchable,
 }: {
   setOpen: (boolean) => void;
   open: boolean;
   saloon: Fetchable<Saloon>;
 }) {
+  const { data: saloon } = fetchable;
   const token = tokens.find((e) => e.publicKey.toString() === saloon?.taxMint);
   const { token: userToken } = useCurrentUser();
   const { connection } = useConnection();
@@ -165,12 +166,12 @@ export default function CreateSubscriptionModal({
 
       await connection.confirmTransaction(conf);
 
-      saloon?.reload();
+      fetchable?.reload();
       setOpen(false);
     } catch (err) {
       console.log(err);
       toast.error(String(err));
-      saloon.reload();
+      fetchable.reload();
     } finally {
       setIsWaiting(false);
     }
@@ -183,6 +184,7 @@ export default function CreateSubscriptionModal({
     name,
     description,
     setOpen,
+    fetchable,
   ]);
 
   return (
