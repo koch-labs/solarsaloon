@@ -25,14 +25,14 @@ export default function ManageSubscription({
         </Heading>
         {user?.publicKey &&
         ((subscription?.data?.subscription?.currentOwner &&
-          subscription?.data?.subscription.currentOwner.publicKey ===
-            user.publicKey) ||
+          subscription?.data?.subscription.currentOwner?.publicKey ===
+            user?.publicKey) ||
           (subscription?.data?.saloon?.owner?.publicKey &&
-            subscription?.data?.saloon.owner.publicKey === user.publicKey)) ? (
+            subscription?.data?.saloon.owner.publicKey === user?.publicKey)) ? (
           <CreatePostCard subscription={subscription} reload={posts.reload} />
         ) : null}
-        {user.publicKey === subscription?.data?.ownerBidState?.bidder ||
-        user.publicKey === subscription?.data?.saloon?.owner.publicKey ? (
+        {user?.publicKey === subscription?.data?.ownerBidState?.bidder ||
+        user?.publicKey === subscription?.data?.saloon?.owner.publicKey ? (
           <PostsList subscription={subscription} posts={posts} />
         ) : (
           <Text size="5" align="center" m="5">

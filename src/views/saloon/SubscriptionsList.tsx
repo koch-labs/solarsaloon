@@ -62,7 +62,8 @@ export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
                 <Table.Cell>
                   {numeral(s.tokenState?.currentSellingPrice || "0")
                     .divide(10 ** (token.decimals || 0))
-                    .format("0.0a")}
+                    .format("0.0a")}{" "}
+                  ${token?.symbol}
                 </Table.Cell>
                 <Table.Cell>
                   {new Date(s.lastPost).valueOf() <= 0 ? (
