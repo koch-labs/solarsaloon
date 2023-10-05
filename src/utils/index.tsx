@@ -56,4 +56,27 @@ const formatTime = (ms: number) => {
   return `${numeral(days).format("0")} days`;
 };
 
-export { cn, formatDate, numberToCurrencyString, clamp, shortKey, formatTime };
+function concatUnique<T>(
+  arrs: T[][],
+  equals: (a: T, b: T) => boolean = (a, b) => a === b
+) {
+  const res: T[] = [];
+  for (const arr of arrs) {
+    for (const i of arr) {
+      if (!res.find((item) => equals(item, i))) {
+        res.push(i);
+      }
+    }
+  }
+  return res;
+}
+
+export {
+  cn,
+  formatDate,
+  numberToCurrencyString,
+  clamp,
+  shortKey,
+  formatTime,
+  concatUnique,
+};

@@ -6,9 +6,11 @@ import {
 
 export type EndpointTypes = "mainnet" | "devnet" | "localnet";
 
-export type Fetchable<T> = T & {
+export type Fetchable<T> = {
+  data: T;
   reload: () => Promise<void>;
-  fetchNextPage?: () => Promise<void>;
+  fetchMore?: () => Promise<void>;
+  hasMore?: boolean;
 };
 
 export interface User {
@@ -33,6 +35,7 @@ export interface Saloon {
   tags: string[];
   metadata: DigitalAssetStandardMetadata;
   subscriptions?: Subscription[];
+  nSubscriptions?: number;
 }
 
 export interface Subscription {

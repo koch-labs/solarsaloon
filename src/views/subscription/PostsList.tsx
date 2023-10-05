@@ -10,7 +10,7 @@ import {
   Container,
   Separator,
 } from "@radix-ui/themes";
-import InfiniteScroll from "react-infinite-scroll-component";
+import InfiniteScroll from "react-infinite-scroller";
 import { Fetchable, FullSubscription, Post } from "../../models/types";
 import dynamic from "next/dynamic";
 import { formatTime, shortKey } from "../../utils";
@@ -23,10 +23,11 @@ const MarkdownPreview = dynamic(
 );
 
 export const PostsList = ({
-  subscription,
+  subscription: fetchable,
 }: {
   subscription: Fetchable<FullSubscription>;
 }) => {
+  const { data: subscription } = fetchable;
   document.documentElement.setAttribute("data-color-mode", "light");
   const { user } = useCurrentUser();
   const posts = subscription.posts;
@@ -41,25 +42,10 @@ export const PostsList = ({
   return (
     <>
       <InfiniteScroll
-        dataLength={posts?.length} //This is important field to render the next data
-        next={subscription.fetchNextPage}
+        pageStart={0}
+        loadMore={fetchable.fetchMore}
         hasMore={true}
         loader={<h4>Loading...</h4>}
-        endMessage={
-          <p style={{ textAlign: "center" }}>
-            <b>Yay! You have seen it all</b>
-          </p>
-        }
-        // below props only if you need pull down functionality
-        // refreshFunction={this.refresh}
-        // pullDownToRefresh
-        // pullDownToRefreshThreshold={50}
-        // pullDownToRefreshContent={
-        //   <h3 style={{ textAlign: "center" }}>&#8595; Pull down to refresh</h3>
-        // }
-        // releaseToRefreshContent={
-        //   <h3 style={{ textAlign: "center" }}>&#8593; Release to refresh</h3>
-        // }
       >
         {posts.map((post, index) => (
           <>

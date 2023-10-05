@@ -53,8 +53,8 @@ export default function useSubscription(
   }, [fetchSubscription]);
 
   return {
-    ...subscription,
+    data: subscription,
     reload: async () => fetchSubscription(),
-    fetchNextPage: async () => setCurrentPage((old) => old + 1),
+    fetchMore: async () => setCurrentPage((old) => old + 1),
   };
 }

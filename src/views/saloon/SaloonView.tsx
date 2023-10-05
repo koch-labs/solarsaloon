@@ -32,7 +32,10 @@ import { PencilIcon } from "@heroicons/react/24/outline";
 import UserBadge from "../../components/UserBadge";
 import TagsPicker from "../../components/TagsPicker";
 
-const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({ saloon }) => {
+const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({
+  saloon: fetchable,
+}) => {
+  const { data: saloon } = fetchable;
   const { user } = useCurrentUser();
 
   return (
@@ -72,7 +75,7 @@ const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({ saloon }) => {
       {saloon &&
       user?.publicKey &&
       saloon.owner?.publicKey === user.publicKey ? (
-        <CreateSubscription saloon={saloon} />
+        <CreateSubscription saloon={fetchable} />
       ) : null}
       <SubscriptionsList saloon={saloon} />
     </Flex>

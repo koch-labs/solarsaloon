@@ -17,7 +17,12 @@ export default async function handler(
     SELECT * FROM 
     saloons
     JOIN users on users.publicKey = saloons.owner
-    JOIN saloonMetadata as m ON m.collectionMint = saloons.collectionMint
+    JOIN saloonMetadata as m USING (collectionMint)
+    LEFT JOIN (
+        SELECT collectionMint, COUNT(*) AS nSubscriptions FROM
+        subscriptions
+        GROUP BY collectionMint 
+    ) AS countquery USING (collectionMint)
     LIMIT ${limit} OFFSET ${limit * page}`;
     const connection = new Connection(
       (process.env.SOLANA_NETWORK === "devnet"
@@ -49,6 +54,7 @@ export default async function handler(
       postCooldown: s.postcooldown,
       tags: s.tags,
       metadata: s.metadata,
+      nSubscriptions: s.nsubscriptions,
     }));
     return response.status(200).json({
       saloons,

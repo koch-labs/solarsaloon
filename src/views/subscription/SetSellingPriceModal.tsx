@@ -16,12 +16,13 @@ import useFees from "../../hooks/useFees";
 export default function SetSellingPriceModal({
   setOpen,
   open,
-  subscription,
+  subscription: fetchable,
 }: {
   setOpen: (boolean) => void;
   open: boolean;
   subscription: Fetchable<FullSubscription>;
 }) {
+  const { data: subscription } = fetchable;
   const token = tokens.find(
     (e) => e.publicKey.toString() === subscription?.saloon?.taxMint
   );
@@ -108,7 +109,7 @@ export default function SetSellingPriceModal({
         },
       });
 
-      subscription.reload();
+      fetchable.reload();
       setOpen(false);
     } finally {
       setIsWaiting(false);
@@ -121,6 +122,7 @@ export default function SetSellingPriceModal({
     subscription,
     token,
     user,
+    fetchable,
     setOpen,
     timeLeft,
   ]);
