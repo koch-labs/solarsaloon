@@ -27,7 +27,7 @@ export default function WithdrawFundsModal({
   externalAccount?: boolean;
 }) {
   const token = tokens.find(
-    (e) => e.publicKey.toString() === subscription?.saloon?.taxMint
+    (e) => e.publicKey.toString() === subscription?.data?.saloon?.taxMint
   );
   const { connection } = useConnection();
   const user = useCurrentUser();
@@ -41,14 +41,14 @@ export default function WithdrawFundsModal({
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
   const { amount: amountLeft, timeLeft } = useFees({
     price: Number(
-      numeral(subscription?.tokenState?.currentSellingPrice || 0)
+      numeral(subscription?.data?.tokenState?.currentSellingPrice || 0)
         .divide(10 ** (token?.decimals || 0))
         .format("0.000")
     ),
-    taxRate: Number(subscription?.saloon?.config?.taxRate),
-    lastUpdate: Number(subscription?.bidState?.lastUpdate),
+    taxRate: Number(subscription?.data?.saloon?.config?.taxRate),
+    lastUpdate: Number(subscription?.data?.bidState?.lastUpdate),
     depositAmount: Number(
-      numeral(subscription?.bidState?.amount)
+      numeral(subscription?.data?.bidState?.amount)
         .divide(10 ** (token?.decimals || 0))
         .format("0.000")
     ),
@@ -74,8 +74,10 @@ export default function WithdrawFundsModal({
         await rentBuilders
           .updateBid({
             provider,
-            collectionMint: new PublicKey(subscription.saloon.collectionMint),
-            tokenMint: new PublicKey(subscription.tokenState.tokenMint),
+            collectionMint: new PublicKey(
+              subscription?.data?.saloon.collectionMint
+            ),
+            tokenMint: new PublicKey(subscription?.data?.tokenState.tokenMint),
           })
           .builder.transaction()
       );
@@ -84,18 +86,24 @@ export default function WithdrawFundsModal({
           .decreaseBid({
             provider,
             amount: new BN(Math.round(amount * 10 ** (token?.decimals || 0))),
-            collectionMint: new PublicKey(subscription.saloon.collectionMint),
-            tokenMint: new PublicKey(subscription.subscription.tokenMint),
-            authoritiesGroup: new PublicKey(
-              subscription.saloon.authoritiesGroup
+            collectionMint: new PublicKey(
+              subscription?.data?.saloon.collectionMint
             ),
-            taxMint: new PublicKey(subscription.saloon.taxMint),
+            tokenMint: new PublicKey(
+              subscription?.data?.subscription?.tokenMint
+            ),
+            authoritiesGroup: new PublicKey(
+              subscription?.data?.saloon.authoritiesGroup
+            ),
+            taxMint: new PublicKey(subscription?.data?.saloon.taxMint),
             tokenProgram: token.tokenProgram,
           })
           .builder.transaction()
       );
 
-      if (subscription.saloon.taxMint === tokens[0].publicKey.toString()) {
+      if (
+        subscription?.data?.saloon.taxMint === tokens[0].publicKey.toString()
+      ) {
         // Closing wsol account to recover sol
         tx.add(
           createCloseAccountInstruction(
@@ -116,11 +124,13 @@ export default function WithdrawFundsModal({
       const conf = await wallet.sendTransaction(tx, connection);
       await connection.confirmTransaction(conf);
 
-      await fetch("/api/subscription/change", {
+      await fetch("/api/subscription?.data/change", {
         method: "POST",
         body: JSON.stringify({
-          tokenMint: subscription.subscription.tokenMint,
-          currentPrice: numeral(subscription.ownerBidState.sellingPrice || 0)
+          tokenMint: subscription?.data?.subscription?.tokenMint,
+          currentPrice: numeral(
+            subscription?.data?.ownerBidState.sellingPrice || 0
+          )
             .divide(10 ** (token?.decimals || 0))
             .format("0.000"),
           expirationDate: new Date(Date.now() + timeLeft),
@@ -154,12 +164,12 @@ export default function WithdrawFundsModal({
         <Dialog.Description size="2" mb="4"></Dialog.Description>
         <Flex direction="column" gap="1" className="text-sm">
           <Text>Choose the amount of {token?.name} you want to withraw.</Text>
-          {subscription.subscription?.currentOwner.publicKey ===
+          {subscription?.data?.subscription?.currentOwner.publicKey ===
           wallet?.publicKey?.toString() ? (
             <Text color="crimson">
               Withdrawing everything you have might will make your subscription
               claimable by anyone for{" "}
-              {numeral(subscription?.saloon?.config.minimumSellPrice)
+              {numeral(subscription?.data?.saloon?.config.minimumSellPrice)
                 .divide(10 ** token?.decimals)
                 .format("0.0a")}{" "}
               ${token?.symbol}

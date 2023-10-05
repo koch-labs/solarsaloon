@@ -31,18 +31,18 @@ export default function ClaimFeesButton({
     [wallet, connection]
   );
   const token = tokens.find(
-    (e) => e.publicKey.toString() === subscription?.saloon?.taxMint
+    (e) => e.publicKey.toString() === subscription?.data?.saloon?.taxMint
   );
   const { amount } = useFees({
     price: Number(
-      numeral(subscription?.ownerBidState?.sellingPrice)
+      numeral(subscription?.data?.ownerBidState?.sellingPrice)
         .divide(10 ** (token?.decimals || 0))
         .format("0.000")
     ),
-    taxRate: Number(subscription?.saloon?.config?.taxRate),
-    lastUpdate: Number(subscription?.ownerBidState?.lastUpdate),
+    taxRate: Number(subscription?.data?.saloon?.config?.taxRate),
+    lastUpdate: Number(subscription?.data?.ownerBidState?.lastUpdate),
     depositAmount: Number(
-      numeral(subscription?.saloon?.config?.collectedTax)
+      numeral(subscription?.data?.saloon?.config?.collectedTax)
         .divide(10 ** (token?.decimals || 0))
         .format("0.000")
     ),
@@ -77,9 +77,13 @@ export default function ClaimFeesButton({
         await builders
           .updateBid({
             provider,
-            bidder: new PublicKey(subscription.ownerBidState.bidder),
-            collectionMint: new PublicKey(subscription.saloon.collectionMint),
-            tokenMint: new PublicKey(subscription.subscription.tokenMint),
+            bidder: new PublicKey(subscription?.data.ownerBidState.bidder),
+            collectionMint: new PublicKey(
+              subscription?.data.saloon.collectionMint
+            ),
+            tokenMint: new PublicKey(
+              subscription?.data.subscription?.tokenMint
+            ),
           })
           .builder.transaction()
       );
@@ -88,14 +92,18 @@ export default function ClaimFeesButton({
           .withdrawTax({
             provider,
             admin: wallet.publicKey,
-            collectionMint: new PublicKey(subscription.saloon.collectionMint),
+            collectionMint: new PublicKey(
+              subscription?.data.saloon.collectionMint
+            ),
             taxMint: token.publicKey,
             taxTokenProgram: token.tokenProgram,
           })
           .builder.transaction()
       );
 
-      if (subscription.saloon.taxMint === tokens[0].publicKey.toString()) {
+      if (
+        subscription?.data.saloon.taxMint === tokens[0].publicKey.toString()
+      ) {
         // Closing wsol account to recover sol
         tx.add(
           createCloseAccountInstruction(
@@ -139,7 +147,7 @@ export default function ClaimFeesButton({
         skipPreflight: true,
       });
       await connection.confirmTransaction(conf);
-      subscription.reload();
+      subscription?.reload();
     } finally {
       setIsWaiting(false);
     }

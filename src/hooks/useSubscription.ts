@@ -17,7 +17,6 @@ export default function useSubscription(
   const { token } = useCurrentUser();
   const [subscription, setSubscription] = useState<FullSubscription>();
   const [currentPage, setCurrentPage] = useState(0);
-  console.log(currentPage);
 
   const fetchSubscription = useCallback(async () => {
     if (!tokenMint) return;

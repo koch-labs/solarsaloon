@@ -39,7 +39,7 @@ export default function BuyTokenModal({
   subscription: Fetchable<FullSubscription>;
 }) {
   const token = tokens.find(
-    (e) => e.publicKey.toString() === subscription?.saloon?.taxMint
+    (e) => e.publicKey.toString() === subscription?.data?.saloon?.taxMint
   );
   const { connection } = useConnection();
   const user = useCurrentUser();
@@ -58,16 +58,16 @@ export default function BuyTokenModal({
     timeLeft,
   } = useFees({
     price: newPrice,
-    taxRate: Number(subscription?.saloon?.config?.taxRate),
+    taxRate: Number(subscription?.data?.saloon?.config?.taxRate),
     lastUpdate: Date.now(),
-    depositAmount: Number(subscription?.saloon?.config?.taxRate),
+    depositAmount: Number(subscription?.data?.saloon?.config?.taxRate),
   });
   const currentPrice = useMemo(
     () =>
       amountLeft === 0
-        ? new BN(subscription?.saloon?.config?.minimumSellPrice || 0)
-        : new BN(subscription?.ownerBidState?.sellingPrice || 0),
-    [subscription, amountLeft]
+        ? new BN(subscription?.data?.saloon?.config?.minimumSellPrice || 0)
+        : new BN(subscription?.data?.ownerBidState?.sellingPrice || 0),
+    [subscription?.data, amountLeft]
   );
 
   const handleBuy = useCallback(async () => {
@@ -84,9 +84,11 @@ export default function BuyTokenModal({
       tx.feePayer = wallet.publicKey;
       tx.minNonceContextSlot = slot;
 
-      const taxMint = new PublicKey(subscription.saloon.taxMint);
-      const collectionMint = new PublicKey(subscription.saloon.collectionMint);
-      const tokenMint = new PublicKey(subscription.tokenState.tokenMint);
+      const taxMint = new PublicKey(subscription?.data.saloon.taxMint);
+      const collectionMint = new PublicKey(
+        subscription?.data.saloon.collectionMint
+      );
+      const tokenMint = new PublicKey(subscription?.data.tokenState.tokenMint);
       const amount = currentPrice.add(
         new BN(taxesPerYear * 10 ** (token?.decimals || 0))
           .mul(new BN(Math.round(prepaidDuration)))
@@ -108,14 +110,14 @@ export default function BuyTokenModal({
         )
       );
 
-      if (!subscription.bidState) {
+      if (!subscription?.data.bidState) {
         tx.add(
           await rentBuilders
             .createBid({
               provider,
               collectionMint,
               authoritiesGroup: new PublicKey(
-                subscription.saloon.authoritiesGroup
+                subscription?.data.saloon.authoritiesGroup
               ),
               tokenMint,
             })
@@ -166,11 +168,13 @@ export default function BuyTokenModal({
           wallet.publicKey,
           getAssociatedTokenAddressSync(
             token.publicKey,
-            getConfigKey(new PublicKey(subscription.saloon.collectionMint)),
+            getConfigKey(
+              new PublicKey(subscription?.data.saloon.collectionMint)
+            ),
             true,
             token.tokenProgram
           ),
-          getConfigKey(new PublicKey(subscription.saloon.collectionMint)),
+          getConfigKey(new PublicKey(subscription?.data.saloon.collectionMint)),
           token.publicKey,
           token.tokenProgram
         )
@@ -185,14 +189,14 @@ export default function BuyTokenModal({
             collectionMint,
             tokenMint,
             authoritiesGroup: new PublicKey(
-              subscription?.saloon?.authoritiesGroup
+              subscription?.data?.saloon?.authoritiesGroup
             ),
             tokenProgram: new PublicKey(token?.tokenProgram),
           })
           .builder.transaction()
       );
 
-      if (!subscription.ownerBidState) {
+      if (!subscription?.data.ownerBidState) {
         // Token has no owner, claim it
         tx.add(
           await rentBuilders
@@ -203,7 +207,7 @@ export default function BuyTokenModal({
               ),
               newOwner: wallet.publicKey,
               oldOwner: new PublicKey(
-                subscription.subscription.currentOwner.publicKey
+                subscription?.data?.subscription?.currentOwner.publicKey
               ),
               collectionMint,
               tokenMint: tokenMint,
@@ -218,7 +222,7 @@ export default function BuyTokenModal({
             .updateBid({
               provider,
               bidder: new PublicKey(
-                subscription.subscription.currentOwner.publicKey
+                subscription?.data?.subscription.currentOwner.publicKey
               ),
               collectionMint,
               tokenMint,
@@ -233,10 +237,12 @@ export default function BuyTokenModal({
                 Math.round(newPrice * 10 ** (token?.decimals || 0))
               ),
               owner: new PublicKey(
-                subscription.subscription.currentOwner.publicKey
+                subscription?.data.subscription?.currentOwner.publicKey
               ),
-              collectionMint: new PublicKey(subscription.saloon.collectionMint),
-              tokenMint: new PublicKey(subscription.tokenState.tokenMint),
+              collectionMint: new PublicKey(
+                subscription?.data.saloon.collectionMint
+              ),
+              tokenMint: new PublicKey(subscription?.data.tokenState.tokenMint),
               tokenProgram: TOKEN_2022_PROGRAM_ID,
             })
             .builder.transaction()
@@ -248,10 +254,10 @@ export default function BuyTokenModal({
       });
       await connection.confirmTransaction(conf);
 
-      await fetch("/api/subscription/change", {
+      await fetch("/api/subscription?.data/change", {
         method: "POST",
         body: JSON.stringify({
-          tokenMint: subscription.subscription.tokenMint,
+          tokenMint: subscription?.data.subscription?.tokenMint,
           currentPrice: newPrice,
           expirationDate: new Date(Date.now() + timeLeft),
         }),
@@ -260,7 +266,7 @@ export default function BuyTokenModal({
         },
       });
 
-      subscription.reload();
+      subscription?.reload();
       setOpen(false);
     } finally {
       setIsWaiting(false);
@@ -283,14 +289,14 @@ export default function BuyTokenModal({
   return (
     <Dialog.Root open={open}>
       <Dialog.Content style={{ maxWidth: 450 }}>
-        <Dialog.Title>buy a subscription</Dialog.Title>
+        <Dialog.Title>buy a subscription?.data</Dialog.Title>
         <Dialog.Description size="2" mb="4">
           pay{" "}
           {numeral(currentPrice.toString() || 0)
             .divide(10 ** (token?.decimals || 0))
             .format("0.000a")}{" "}
-          ${token?.symbol || "???"} upfront, to acquire the subscription from
-          the current owner
+          ${token?.symbol || "???"} upfront, to acquire the subscription?.data
+          from the current owner
         </Dialog.Description>
         <Flex direction="column" gap="3">
           <Flex direction="column">
@@ -303,7 +309,7 @@ export default function BuyTokenModal({
             />
             <Text size="1" color="gray">
               you will pay {numeral(taxesPerYear / 365).format("0.000a")} $
-              {token?.symbol} every day you own the subscription.
+              {token?.symbol} every day you own the subscription?.data.
             </Text>
           </Flex>
           <Flex direction="column">
@@ -329,8 +335,8 @@ export default function BuyTokenModal({
             </Text>
           </Flex>
           <Text>
-            you have {numeral(subscription?.userBalance).format("0.000a")} $
-            {token?.symbol}
+            you have {numeral(subscription?.data?.userBalance).format("0.000a")}{" "}
+            ${token?.symbol}
           </Text>
           <Flex gap="3" mt="4" justify="end">
             <Dialog.Close>
@@ -348,7 +354,7 @@ export default function BuyTokenModal({
                 onClick={handleBuy}
                 disabled={
                   newPrice === 0 ||
-                  subscription?.userBalance <
+                  subscription?.data?.userBalance <
                     Number(
                       numeral(
                         (taxesPerYear * Math.round(prepaidDuration)) /

@@ -16,6 +16,7 @@ import dynamic from "next/dynamic";
 import { formatTime, shortKey } from "../../utils";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
 import UserBadge from "../../components/UserBadge";
+import usePosts from "../../hooks/usePosts";
 
 const MarkdownPreview = dynamic(
   () => import("@uiw/react-markdown-preview").then((mod) => mod.default),
@@ -23,36 +24,43 @@ const MarkdownPreview = dynamic(
 );
 
 export const PostsList = ({
-  subscription: fetchable,
+  subscription,
+  posts,
 }: {
   subscription: Fetchable<FullSubscription>;
+  posts: Fetchable<Post[]>;
 }) => {
-  const { data: subscription } = fetchable;
   document.documentElement.setAttribute("data-color-mode", "light");
   const { user } = useCurrentUser();
-  const posts = subscription.posts;
-  const arrivalIndex = posts
+
+  const arrivalIndex = posts?.data
     ?.map(
       (p) =>
         new Date(p.creationTimestamp).valueOf() >
-        new Date(subscription?.subscription?.ownerChangedTimestamp).valueOf()
+        new Date(
+          subscription?.data?.subscription?.ownerChangedTimestamp
+        ).valueOf()
     )
     .indexOf(false);
 
   return (
     <>
       <InfiniteScroll
-        pageStart={0}
-        loadMore={fetchable.fetchMore}
-        hasMore={true}
-        loader={<h4>Loading...</h4>}
+        page={0}
+        loadMore={posts?.fetchMore}
+        hasMore={posts?.hasMore}
+        loading={<Heading>Fetching more</Heading>}
       >
-        {posts.map((post, index) => (
+        {posts?.data?.map((post, index) => (
           <>
             {index === arrivalIndex ? (
-              <Flex align="center" justify="between">
+              <Flex
+                key={post.id + post.creationTimestamp + "separator"}
+                align="center"
+                justify="between"
+              >
                 <Separator orientation="horizontal" size="4" />
-                <Badge color="gray">Your subscription started here</Badge>
+                <Badge color="gray">Subscription holder changed here</Badge>
                 <Separator orientation="horizontal" size="4" />
               </Flex>
             ) : null}

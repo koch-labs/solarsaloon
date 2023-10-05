@@ -10,10 +10,11 @@ import WithdrawFundsModal from "./WithdrawFundsModal";
 import useFees from "../../hooks/useFees";
 
 export default function DepositWidget({
-  subscription,
+  subscription: fetchable,
 }: {
   subscription: Fetchable<FullSubscription>;
 }) {
+  const { data: subscription } = fetchable;
   const token = tokens.find(
     (t) => t.publicKey.toString() === subscription?.saloon?.taxMint
   );
@@ -59,12 +60,12 @@ export default function DepositWidget({
       <DepositFundsModal
         setOpen={setOpenDeposit}
         open={openDeposit}
-        subscription={subscription}
+        subscription={fetchable}
       />
       <WithdrawFundsModal
         setOpen={setOpenWithdraw}
         open={openWithdraw}
-        subscription={subscription}
+        subscription={fetchable}
       />
     </Flex>
   );

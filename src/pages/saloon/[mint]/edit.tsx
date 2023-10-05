@@ -20,8 +20,8 @@ const EditSaloonPage: React.FC = () => {
           { href: "/saloons", name: "saloons list" },
           saloon
             ? {
-                href: `/saloon/${saloon.collectionMint}/edit`,
-                name: `${saloon.metadata.name}`,
+                href: `/saloon/${saloon.data?.collectionMint}/edit`,
+                name: `${saloon.data?.metadata.name}`,
               }
             : undefined,
         ].filter(Boolean)}

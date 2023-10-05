@@ -30,23 +30,23 @@ export default function SubscriptionHeader({
 }) {
   const { user } = useCurrentUser();
   const token = tokens.find(
-    (t) => t.publicKey.toString() === subscription?.saloon?.taxMint
+    (t) => t.publicKey.toString() === subscription?.data?.saloon?.taxMint
   );
   const [openBuy, setOpenBuy] = useState(false);
   const [openPrice, setOpenPrice] = useState(false);
   const { timeLeft, amount } = useFees({
     price: Number(
-      numeral(subscription?.tokenState?.currentSellingPrice)
+      numeral(subscription?.data?.tokenState?.currentSellingPrice)
         .divide(10 ** (token?.decimals || 0))
         .format("0.000")
     ),
-    taxRate: Number(subscription?.saloon?.config?.taxRate),
+    taxRate: Number(subscription?.data?.saloon?.config?.taxRate),
     depositAmount: Number(
-      numeral(subscription?.ownerBidState?.amount)
+      numeral(subscription?.data?.ownerBidState?.amount)
         .divide(10 ** (token?.decimals || 0))
         .format("0.000")
     ),
-    lastUpdate: Number(subscription?.ownerBidState?.lastUpdate),
+    lastUpdate: Number(subscription?.data?.ownerBidState?.lastUpdate),
     increaseDeposit: false,
   });
 
@@ -54,8 +54,8 @@ export default function SubscriptionHeader({
     <Flex align="center" className="justify-around grid grid-cols-4" m="5">
       <Image
         src={
-          subscription?.subscription?.metadata?.image ||
-          subscription?.saloon?.metadata?.image
+          subscription?.data?.subscription?.metadata?.image ||
+          subscription?.data?.saloon?.metadata?.image
         }
         width={250}
         height={250}
@@ -65,28 +65,28 @@ export default function SubscriptionHeader({
       <Flex direction="column" className="grid grid-cols-3 col-span-3 gap-1">
         <Flex direction="column" className="col-span-2" gap="1">
           <Heading>
-            {subscription?.subscription?.metadata?.name ||
-              subscription?.saloon?.metadata?.name ||
-              shortKey(subscription?.saloon?.collectionMint)}
+            {subscription?.data?.subscription?.metadata?.name ||
+              subscription?.data?.saloon?.metadata?.name ||
+              shortKey(subscription?.data?.saloon?.collectionMint)}
           </Heading>
           <hr className="w-48" />
-          {subscription?.subscription?.metadata?.description ||
-          subscription?.saloon?.metadata?.description ? (
+          {subscription?.data?.subscription?.metadata?.description ||
+          subscription?.data?.saloon?.metadata?.description ? (
             <Text>
-              {subscription?.subscription?.metadata?.description ||
-                subscription?.saloon?.metadata.description}
+              {subscription?.data?.subscription?.metadata?.description ||
+                subscription?.data?.saloon?.metadata.description}
             </Text>
           ) : null}
           <Flex gap="2" align="center">
             <Text>creator:</Text>
-            <UserBadge user={subscription?.saloon?.owner} />
+            <UserBadge user={subscription?.data?.saloon?.owner} />
           </Flex>
           <Flex gap="2" align="center">
             <Text>owner:</Text>
-            <UserBadge user={subscription?.subscription?.currentOwner} />
+            <UserBadge user={subscription?.data?.subscription?.currentOwner} />
           </Flex>
-          <Flex>current owner has {formatTime(timeLeft)}</Flex>
-          {subscription?.saloon?.owner?.publicKey === user?.publicKey ? (
+          <Flex>current owner has {formatTime(timeLeft)} left</Flex>
+          {subscription?.data?.saloon?.owner?.publicKey === user?.publicKey ? (
             <Button variant="ghost" color="gray" className="w-44 m-1">
               <Flex gap="2">
                 <PencilIcon width="16" />
@@ -98,30 +98,32 @@ export default function SubscriptionHeader({
         <Flex gap="2" direction="column">
           {user &&
           (timeLeft === 0 ||
-            subscription.subscription?.currentOwner?.publicKey !==
+            subscription?.data?.subscription?.currentOwner?.publicKey !==
               user?.publicKey ||
-            subscription?.ownerBidState?.bidder !== user?.publicKey) ? (
+            subscription?.data?.ownerBidState?.bidder !== user?.publicKey) ? (
             <Button onClick={() => setOpenBuy(true)}>
               buy this subscription (
               {amount <= 0
-                ? numeral(subscription?.saloon?.config?.minimumSellPrice)
+                ? numeral(subscription?.data?.saloon?.config?.minimumSellPrice)
                     .divide(10 ** (token?.decimals || 0))
                     .format("0.00a")
-                : numeral(subscription?.ownerBidState?.sellingPrice)
+                : numeral(subscription?.data?.ownerBidState?.sellingPrice)
                     .divide(10 ** (token?.decimals || 0))
                     .format("0.00a")}{" "}
               ${token?.symbol})
             </Button>
           ) : null}
-          {user && subscription?.ownerBidState?.bidder === user?.publicKey ? (
+          {user &&
+          subscription?.data?.ownerBidState?.bidder === user?.publicKey ? (
             <Button variant="soft" onClick={() => setOpenPrice(true)}>
               update selling price
             </Button>
           ) : null}
-          {user && subscription?.bidState?.amount !== "0" ? (
+          {user && subscription?.data?.bidState?.amount !== "0" ? (
             <DepositWidget subscription={subscription} />
           ) : null}
-          {user && subscription.saloon?.owner.publicKey === user?.publicKey ? (
+          {user &&
+          subscription?.data?.saloon?.owner.publicKey === user?.publicKey ? (
             <ClaimFeesButton subscription={subscription} />
           ) : null}
         </Flex>

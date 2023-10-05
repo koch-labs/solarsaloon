@@ -30,7 +30,7 @@ export default function DepositFundsModal({
 }) {
   const user = useCurrentUser();
   const token = tokens.find(
-    (e) => e.publicKey.toString() === subscription?.saloon?.taxMint
+    (e) => e.publicKey.toString() === subscription?.data?.saloon?.taxMint
   );
   const { connection } = useConnection();
   const wallet = useWallet();
@@ -42,15 +42,15 @@ export default function DepositFundsModal({
   const [amount, setAmount] = useState(0);
   const { timeLeft } = useFees({
     price: Number(
-      numeral(subscription?.ownerBidState?.sellingPrice || 0)
+      numeral(subscription?.data?.ownerBidState?.sellingPrice || 0)
         .divide(10 ** (token?.decimals || 0))
         .format("0.000")
     ),
-    taxRate: Number(subscription?.saloon?.config?.taxRate),
+    taxRate: Number(subscription?.data?.saloon?.config?.taxRate),
     lastUpdate: Date.now(),
     depositAmount:
       Number(
-        numeral(subscription?.bidState?.amount || 0)
+        numeral(subscription?.data?.bidState?.amount || 0)
           .divide(10 ** (token?.decimals || 0))
           .format("0.000")
       ) + amount,
@@ -101,16 +101,20 @@ export default function DepositFundsModal({
         tx.add(createSyncNativeInstruction(wrappedSolAccount));
       }
 
-      if (!subscription.bidState) {
+      if (!subscription?.data?.bidState) {
         tx.add(
           await rentBuilders
             .createBid({
               provider,
-              collectionMint: new PublicKey(subscription.saloon.collectionMint),
-              authoritiesGroup: new PublicKey(
-                subscription.saloon.authoritiesGroup
+              collectionMint: new PublicKey(
+                subscription?.data?.saloon.collectionMint
               ),
-              tokenMint: new PublicKey(subscription.subscription.tokenMint),
+              authoritiesGroup: new PublicKey(
+                subscription?.data?.saloon.authoritiesGroup
+              ),
+              tokenMint: new PublicKey(
+                subscription?.data?.subscription?.tokenMint
+              ),
               tokenProgram: token.tokenProgram,
             })
             .builder.transaction()
@@ -120,8 +124,10 @@ export default function DepositFundsModal({
         await rentBuilders
           .updateBid({
             provider,
-            collectionMint: new PublicKey(subscription.saloon.collectionMint),
-            tokenMint: new PublicKey(subscription.tokenState.tokenMint),
+            collectionMint: new PublicKey(
+              subscription?.data?.saloon.collectionMint
+            ),
+            tokenMint: new PublicKey(subscription?.data?.tokenState.tokenMint),
           })
           .builder.transaction()
       );
@@ -130,11 +136,15 @@ export default function DepositFundsModal({
           wallet.publicKey,
           getAssociatedTokenAddressSync(
             token.publicKey,
-            getConfigKey(new PublicKey(subscription.saloon.collectionMint)),
+            getConfigKey(
+              new PublicKey(subscription?.data?.saloon.collectionMint)
+            ),
             true,
             token.tokenProgram
           ),
-          getConfigKey(new PublicKey(subscription.saloon.collectionMint)),
+          getConfigKey(
+            new PublicKey(subscription?.data?.saloon.collectionMint)
+          ),
           token.publicKey,
           token.tokenProgram
         )
@@ -144,12 +154,16 @@ export default function DepositFundsModal({
           .increaseBid({
             provider,
             amount: new BN(Math.round(amount * 10 ** token.decimals)),
-            collectionMint: new PublicKey(subscription.saloon.collectionMint),
-            tokenMint: new PublicKey(subscription.subscription.tokenMint),
-            authoritiesGroup: new PublicKey(
-              subscription.saloon.authoritiesGroup
+            collectionMint: new PublicKey(
+              subscription?.data?.saloon.collectionMint
             ),
-            taxMint: new PublicKey(subscription.saloon.taxMint),
+            tokenMint: new PublicKey(
+              subscription?.data?.subscription?.tokenMint
+            ),
+            authoritiesGroup: new PublicKey(
+              subscription?.data?.saloon.authoritiesGroup
+            ),
+            taxMint: new PublicKey(subscription?.data?.saloon.taxMint),
             tokenProgram: token.tokenProgram,
           })
           .builder.transaction()
@@ -158,11 +172,13 @@ export default function DepositFundsModal({
       const conf = await wallet.sendTransaction(tx, connection);
       await connection.confirmTransaction(conf);
 
-      await fetch("/api/subscription/change", {
+      await fetch("/api/subscription?.data/change", {
         method: "POST",
         body: JSON.stringify({
-          tokenMint: subscription.subscription.tokenMint,
-          currentPrice: numeral(subscription.ownerBidState.sellingPrice || 0)
+          tokenMint: subscription?.data?.subscription?.tokenMint,
+          currentPrice: numeral(
+            subscription?.data?.ownerBidState.sellingPrice || 0
+          )
             .divide(10 ** (token?.decimals || 0))
             .format("0.000"),
           expirationDate: new Date(Date.now() + timeLeft),
@@ -226,7 +242,7 @@ export default function DepositFundsModal({
               </Text>
               <Text weight="light">
                 Your balance:{" "}
-                {numeral(subscription.userBalance || 0).format("0.0a")} $
+                {numeral(subscription?.data?.userBalance || 0).format("0.0a")} $
                 {token?.symbol || "???"}
               </Text>
             </Flex>
@@ -241,7 +257,9 @@ export default function DepositFundsModal({
                 <Button
                   size="1"
                   variant="ghost"
-                  onClick={() => setAmount(Number(subscription?.userBalance))}
+                  onClick={() =>
+                    setAmount(Number(subscription?.data?.userBalance))
+                  }
                 >
                   MAX
                 </Button>
