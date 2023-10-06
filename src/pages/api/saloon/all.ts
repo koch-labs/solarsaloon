@@ -23,13 +23,19 @@ export default async function handler(
         subscriptions
         GROUP BY collectionMint 
     ) AS countquery USING (collectionMint)
-    ${creator ? "WHERE " : ""}
+    ${creator || tags?.length > 0 ? "WHERE " : ""}
     ${creator ? `saloons.owner = $1` : ""}
+    ${
+      tags?.length > 0
+        ? `${creator ? "AND saloons.tags @> ($2)" : "saloons.tags @> ($1)"}`
+        : ""
+    }
     LIMIT ${limit} OFFSET ${limit * page}`;
-    const query = await sql.query(
-      queryString,
-      [creator as any].filter(Boolean)
-    );
+    const args = [
+      creator as any,
+      typeof tags === "string" ? tags.split(",") : (tags as string[]),
+    ].filter(Boolean);
+    const query = await sql.query(queryString, args);
     const connection = new Connection(
       (process.env.SOLANA_NETWORK === "devnet"
         ? process.env.HELIUS_RPC_DEVNET

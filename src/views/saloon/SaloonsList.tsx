@@ -11,7 +11,7 @@ import {
 import { EnterIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
 import numeral from "numeral";
-import { Saloon } from "../../models/types";
+import { Fetchable, Saloon } from "../../models/types";
 import UserBadge from "../../components/UserBadge";
 import { formatTime } from "../../utils";
 import TagsPicker from "../../components/TagsPicker";
@@ -34,15 +34,7 @@ const ForwardRefWrapper = forwardRef<HTMLDivElement, ForwardRefWrapperProps>(
 );
 ForwardRefWrapper.displayName = "ForwardRefWrapper";
 
-export const SaloonsList = ({
-  creator,
-  tags,
-}: {
-  creator?: string;
-  tags?: string[];
-}) => {
-  const saloons = useSaloons({ creator, tags });
-
+export const SaloonsList = ({ saloons }: { saloons?: Fetchable<Saloon[]> }) => {
   return (
     <Flex direction="column">
       <InfiniteScroll

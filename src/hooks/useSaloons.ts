@@ -21,12 +21,17 @@ export default function useSaloons({
   const fetchSaloons = useCallback(
     async (page: number) => {
       setIsLoading(true);
-      console.log("fetching saloons", page);
       try {
+        console.log(
+          `/api/saloon/all?page=${page}&limit=${pageSize}${
+            creator ? `&creator=${creator}` : ""
+          }${tags?.length > 0 ? `&tags=${tags.join(",")}` : ""}`,
+          tags
+        );
         const response = await fetch(
           `/api/saloon/all?page=${page}&limit=${pageSize}${
             creator ? `&creator=${creator}` : ""
-          }${tags ? `&tags=${tags.join(",")}` : ""}`,
+          }${tags?.length > 0 ? `&tags=${tags}` : ""}`,
           {
             headers: {
               authorization: token ? `Bearer ${token}` : undefined,
@@ -35,7 +40,6 @@ export default function useSaloons({
         );
         const { saloons } = await response.json();
         setHasMore(saloons?.length >= pageSize);
-        console.log("found saloons at page", saloons.length, page);
         setSaloons((old) =>
           old
             ? concatUnique(
@@ -62,7 +66,9 @@ export default function useSaloons({
   }, [hasMore, isLoading, fetchSaloons]);
 
   useEffect(() => {
+    console.log("1", page);
     if (hasMore && !isLoading && page === 0) {
+      console.log("2");
       fetchSaloons(0);
     }
   }, [page, fetchSaloons, hasMore, isLoading]);
@@ -70,7 +76,11 @@ export default function useSaloons({
   return saloons
     ? {
         data: saloons,
-        reload: async () => fetchSaloons(page),
+        reload: async () => {
+          setSaloons([]);
+          setPage(0);
+          setHasMore(true);
+        },
         fetchMore,
         hasMore,
       }
