@@ -7,12 +7,12 @@ import logo from "../../assets/ss_logo_black.png";
 
 const Header: React.FC = () => {
   return (
-    <header className="pz-4">
+    <header className="pz-4 z-50">
       <div className="flex h-16 items-center justify-between py-4 px-2 md:px-8">
         <Link className="items-center space-x-2" href="/">
           <Flex gap="2" align="center">
             <Image src={logo} width={32} alt="SolarSaloon logo" />
-            <Heading>solar.saloon</Heading>
+            <Heading className="hidden sm:block">solar.saloon</Heading>
           </Flex>
         </Link>
         <AccountNav />
