@@ -66,9 +66,7 @@ export default function useSaloons({
   }, [hasMore, isLoading, fetchSaloons]);
 
   useEffect(() => {
-    console.log("1", page);
     if (hasMore && !isLoading && page === 0) {
-      console.log("2");
       fetchSaloons(0);
     }
   }, [page, fetchSaloons, hasMore, isLoading]);

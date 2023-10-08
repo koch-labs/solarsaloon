@@ -33,11 +33,11 @@ export function useCurrentUser(): UserContextState {
 export const CurrentUserProvider: FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [defaultToken, setDefaultToken] = useLocalStorage<string>(
+  const [defaultToken, setDefaultToken] = useLocalStorage<string | undefined>(
     "saloon_token",
     undefined
   );
-  const [defaultUser, setDefaultUser] = useLocalStorage<User>(
+  const [defaultUser, setDefaultUser] = useLocalStorage<User | undefined>(
     "saloon_user",
     undefined
   );
