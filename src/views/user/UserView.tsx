@@ -24,11 +24,13 @@ import useUser from "../../hooks/useUser";
 import { shortKey } from "../../utils";
 import { SaloonsList } from "../saloon/SaloonsList";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
+import useSaloons from "../../hooks/useSaloons";
 
 const UserView: React.FC<{ publicKey: string }> = ({ publicKey }) => {
   const { user: currentUser, token } = useCurrentUser();
   const user = useUser(publicKey);
   const [name, setName] = useState<string>();
+  const saloons = useSaloons({ creator: user?.data?.user?.publicKey });
 
   const handleSetName = useCallback(async () => {
     await fetch(`/api/user/change`, {
@@ -109,7 +111,7 @@ const UserView: React.FC<{ publicKey: string }> = ({ publicKey }) => {
               ) : null}
               <Flex className="w-full" direction="column">
                 {user?.data?.user.publicKey ? (
-                  <SaloonsList creator={user.data.user.publicKey} />
+                  <SaloonsList saloons={saloons} />
                 ) : null}
               </Flex>
             </Flex>
