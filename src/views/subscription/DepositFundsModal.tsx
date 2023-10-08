@@ -172,7 +172,7 @@ export default function DepositFundsModal({
       const conf = await wallet.sendTransaction(tx, connection);
       await connection.confirmTransaction(conf);
 
-      await fetch("/api/subscription?.data/change", {
+      await fetch("/api/subscription/change", {
         method: "POST",
         body: JSON.stringify({
           tokenMint: subscription?.data?.subscription?.tokenMint,
