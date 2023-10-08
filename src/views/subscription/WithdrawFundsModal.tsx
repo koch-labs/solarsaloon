@@ -13,7 +13,8 @@ import {
 } from "@solana/spl-token";
 import WaitingButton from "../../components/WaitingButton";
 import { Fetchable } from "../../models/types";
-import useCurrentFees from "../../hooks/useCurrentFees";
+import useFees from "../../hooks/useFees";
+import { useCurrentUser } from "../../contexts/UserContextProvider";
 
 export default function WithdrawFundsModal({
   setOpen,
@@ -26,9 +27,10 @@ export default function WithdrawFundsModal({
   externalAccount?: boolean;
 }) {
   const token = tokens.find(
-    (e) => e.publicKey.toString() === subscription?.saloon?.taxMint
+    (e) => e.publicKey.toString() === subscription?.data?.saloon?.taxMint
   );
   const { connection } = useConnection();
+  const user = useCurrentUser();
   const wallet = useWallet();
   const provider = useMemo(
     () =>
@@ -37,11 +39,19 @@ export default function WithdrawFundsModal({
   );
   const [amount, setAmount] = useState(0);
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
-  const { amount: amountLeft } = useCurrentFees({
-    token,
-    subscription,
-    bidState: subscription?.bidState,
-    increasing: false,
+  const { amount: amountLeft, timeLeft } = useFees({
+    price: Number(
+      numeral(subscription?.data?.tokenState?.currentSellingPrice || 0)
+        .divide(10 ** (token?.decimals || 0))
+        .format("0.000")
+    ),
+    taxRate: Number(subscription?.data?.saloon?.config?.taxRate),
+    lastUpdate: Number(subscription?.data?.bidState?.lastUpdate),
+    depositAmount: Number(
+      numeral(subscription?.data?.bidState?.amount)
+        .divide(10 ** (token?.decimals || 0))
+        .format("0.000")
+    ),
   });
 
   const handleWithdraw = useCallback(async () => {
@@ -64,8 +74,10 @@ export default function WithdrawFundsModal({
         await rentBuilders
           .updateBid({
             provider,
-            collectionMint: new PublicKey(subscription.saloon.collectionMint),
-            tokenMint: new PublicKey(subscription.tokenState.tokenMint),
+            collectionMint: new PublicKey(
+              subscription?.data?.saloon.collectionMint
+            ),
+            tokenMint: new PublicKey(subscription?.data?.tokenState.tokenMint),
           })
           .builder.transaction()
       );
@@ -74,18 +86,24 @@ export default function WithdrawFundsModal({
           .decreaseBid({
             provider,
             amount: new BN(Math.round(amount * 10 ** (token?.decimals || 0))),
-            collectionMint: new PublicKey(subscription.saloon.collectionMint),
-            tokenMint: new PublicKey(subscription.subscription.tokenMint),
-            authoritiesGroup: new PublicKey(
-              subscription.saloon.authoritiesGroup
+            collectionMint: new PublicKey(
+              subscription?.data?.saloon.collectionMint
             ),
-            taxMint: new PublicKey(subscription.saloon.taxMint),
+            tokenMint: new PublicKey(
+              subscription?.data?.subscription?.tokenMint
+            ),
+            authoritiesGroup: new PublicKey(
+              subscription?.data?.saloon.authoritiesGroup
+            ),
+            taxMint: new PublicKey(subscription?.data?.saloon.taxMint),
             tokenProgram: token.tokenProgram,
           })
           .builder.transaction()
       );
 
-      if (subscription.saloon.taxMint === tokens[0].publicKey.toString()) {
+      if (
+        subscription?.data?.saloon.taxMint === tokens[0].publicKey.toString()
+      ) {
         // Closing wsol account to recover sol
         tx.add(
           createCloseAccountInstruction(
@@ -105,12 +123,39 @@ export default function WithdrawFundsModal({
 
       const conf = await wallet.sendTransaction(tx, connection);
       await connection.confirmTransaction(conf);
+
+      await fetch("/api/subscription?.data/change", {
+        method: "POST",
+        body: JSON.stringify({
+          tokenMint: subscription?.data?.subscription?.tokenMint,
+          currentPrice: numeral(
+            subscription?.data?.ownerBidState.sellingPrice || 0
+          )
+            .divide(10 ** (token?.decimals || 0))
+            .format("0.000"),
+          expirationDate: new Date(Date.now() + timeLeft),
+        }),
+        headers: {
+          authorization: `Bearer ${user.token}`,
+        },
+      });
+
       subscription.reload();
       setOpen(false);
     } finally {
       setIsWaiting(false);
     }
-  }, [connection, wallet, amount, provider, subscription, token, setOpen]);
+  }, [
+    connection,
+    wallet,
+    amount,
+    provider,
+    subscription,
+    token,
+    setOpen,
+    timeLeft,
+    user,
+  ]);
 
   return (
     <Dialog.Root open={open}>
@@ -119,12 +164,12 @@ export default function WithdrawFundsModal({
         <Dialog.Description size="2" mb="4"></Dialog.Description>
         <Flex direction="column" gap="1" className="text-sm">
           <Text>Choose the amount of {token?.name} you want to withraw.</Text>
-          {subscription.subscription?.currentOwner.publicKey ===
+          {subscription?.data?.subscription?.currentOwner.publicKey ===
           wallet?.publicKey?.toString() ? (
             <Text color="crimson">
               Withdrawing everything you have might will make your subscription
               claimable by anyone for{" "}
-              {numeral(subscription?.saloon?.config.minimumSellPrice)
+              {numeral(subscription?.data?.saloon?.config.minimumSellPrice)
                 .divide(10 ** token?.decimals)
                 .format("0.0a")}{" "}
               ${token?.symbol}
@@ -138,13 +183,15 @@ export default function WithdrawFundsModal({
                 Amount
               </Text>
               <Text weight="light">
-                Deposited balance: {amountLeft} ${token?.symbol || "???"}
+                Deposited balance: {numeral(amountLeft).format("0.000")} $
+                {token?.symbol || "???"}
               </Text>
             </Flex>
             <TextField.Root>
               <TextField.Input
                 placeholder="Enter the amount to withdraw..."
                 onChange={(e) => setAmount(Number(e.target.value))}
+                type="number"
                 value={amount}
               />
               <TextField.Slot className="m-1">

@@ -11,6 +11,7 @@ import { Fetchable } from "../../models/types";
 import { TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 import WaitingButton from "../../components/WaitingButton";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
+import useFees from "../../hooks/useFees";
 
 export default function SetSellingPriceModal({
   setOpen,
@@ -22,7 +23,7 @@ export default function SetSellingPriceModal({
   subscription: Fetchable<FullSubscription>;
 }) {
   const token = tokens.find(
-    (e) => e.publicKey.toString() === subscription?.saloon?.taxMint
+    (e) => e.publicKey.toString() === subscription?.data?.saloon?.taxMint
   );
   const { connection } = useConnection();
   const wallet = useWallet();
@@ -34,9 +35,17 @@ export default function SetSellingPriceModal({
   );
   const [newPrice, setNewPrice] = useState<number>(0);
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
-  const taxesPerYear = new BN(newPrice * 10 ** (token?.decimals || 0))
-    .mul(new BN(subscription?.saloon?.config?.taxRate || 0))
-    .div(new BN(10000));
+  const { taxesPerYear, timeLeft } = useFees({
+    price: newPrice,
+    taxRate: Number(subscription?.data?.saloon?.config?.taxRate || 0),
+    lastUpdate: Date.now(),
+    depositAmount: Number(
+      numeral(subscription?.data?.bidState?.amount || 0)
+        .divide(10 ** (token?.decimals || 0))
+        .format("0.000a")
+    ),
+    increaseDeposit: false,
+  });
 
   const handleBuy = useCallback(async () => {
     setIsWaiting(true);
@@ -52,15 +61,17 @@ export default function SetSellingPriceModal({
       tx.feePayer = wallet.publicKey;
       tx.minNonceContextSlot = slot;
 
-      const collectionMint = new PublicKey(subscription.saloon.collectionMint);
-      const tokenMint = new PublicKey(subscription.tokenState.tokenMint);
+      const collectionMint = new PublicKey(
+        subscription?.data?.saloon.collectionMint
+      );
+      const tokenMint = new PublicKey(subscription?.data?.tokenState.tokenMint);
 
       tx.add(
         await rentBuilders
           .updateBid({
             provider,
             bidder: new PublicKey(
-              subscription.subscription.currentOwner.publicKey
+              subscription?.data?.subscription?.currentOwner.publicKey
             ),
             collectionMint,
             tokenMint,
@@ -73,10 +84,12 @@ export default function SetSellingPriceModal({
             provider,
             newPrice: new BN(Math.round(newPrice * 10 ** token.decimals)),
             owner: new PublicKey(
-              subscription.subscription.currentOwner.publicKey
+              subscription?.data?.subscription?.currentOwner.publicKey
             ),
-            collectionMint: new PublicKey(subscription.saloon.collectionMint),
-            tokenMint: new PublicKey(subscription.tokenState.tokenMint),
+            collectionMint: new PublicKey(
+              subscription?.data?.saloon.collectionMint
+            ),
+            tokenMint: new PublicKey(subscription?.data?.tokenState.tokenMint),
             tokenProgram: TOKEN_2022_PROGRAM_ID,
           })
           .builder.transaction()
@@ -90,8 +103,9 @@ export default function SetSellingPriceModal({
       await fetch("/api/subscription/change", {
         method: "POST",
         body: JSON.stringify({
-          tokenMint: subscription.subscription.tokenMint,
+          tokenMint: subscription?.data?.subscription?.tokenMint,
           currentPrice: newPrice,
+          expirationDate: new Date(Date.now() + timeLeft),
         }),
         headers: {
           authorization: `Bearer ${user.token}`,
@@ -112,6 +126,7 @@ export default function SetSellingPriceModal({
     token,
     user,
     setOpen,
+    timeLeft,
   ]);
 
   return (
@@ -121,17 +136,17 @@ export default function SetSellingPriceModal({
         <Dialog.Description size="2" mb="4">
           Change from the current price of{" "}
           {numeral(
-            subscription.tokenState?.ownerBidState
-              ? subscription.tokenState?.currentSellingPrice
+            subscription?.data?.tokenState?.ownerBidState
+              ? subscription?.data?.tokenState?.currentSellingPrice
               : "0"
           )
             .divide(10 ** (token?.decimals || 0))
             .format("0.0a")}{" "}
           ${token?.symbol || "???"} to{" "}
           {numeral(newPrice.toString()).format("0.0a")} $
-          {token?.symbol || "???"}. While you have the subscription, it will
-          cost you{" "}
-          {numeral(taxesPerYear.div(new BN(365)).toString())
+          {token?.symbol || "???"}. While you have the subscription?.data, it
+          will cost you{" "}
+          {numeral(taxesPerYear / 365)
             .divide(10 ** (token?.decimals || 0))
             .format("0.00a")
             .replace("NaN", "0")}{" "}

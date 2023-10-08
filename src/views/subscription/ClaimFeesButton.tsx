@@ -15,9 +15,8 @@ import {
   getAssociatedTokenAddressSync,
 } from "@solana/spl-token";
 import { Flex, Text } from "@radix-ui/themes";
-import useCurrentFees from "../../hooks/useCurrentFees";
 import { TREASURY } from "../../utils/constants";
-import useTaxPerPeriod from "../../hooks/useTaxPerPeriod";
+import useFees from "../../hooks/useFees";
 
 export default function ClaimFeesButton({
   subscription,
@@ -32,19 +31,22 @@ export default function ClaimFeesButton({
     [wallet, connection]
   );
   const token = tokens.find(
-    (e) => e.publicKey.toString() === subscription?.saloon?.taxMint
+    (e) => e.publicKey.toString() === subscription?.data?.saloon?.taxMint
   );
-  const { taxes, taxesPerYear } = useTaxPerPeriod({
-    taxRate: subscription?.saloon?.config?.taxRate,
-    collectedTax: subscription?.saloon?.config?.collectedTax,
-    currentPrice: subscription?.ownerBidState?.sellingPrice,
-    lastUpdate: subscription?.ownerBidState?.lastUpdate,
-  });
-  const { amount } = useCurrentFees({
-    subscription,
-    token,
-    bidState: subscription?.ownerBidState,
-    increasing: true,
+  const { amount } = useFees({
+    price: Number(
+      numeral(subscription?.data?.ownerBidState?.sellingPrice)
+        .divide(10 ** (token?.decimals || 0))
+        .format("0.000")
+    ),
+    taxRate: Number(subscription?.data?.saloon?.config?.taxRate),
+    lastUpdate: Number(subscription?.data?.ownerBidState?.lastUpdate),
+    depositAmount: Number(
+      numeral(subscription?.data?.saloon?.config?.collectedTax)
+        .divide(10 ** (token?.decimals || 0))
+        .format("0.000")
+    ),
+    increaseDeposit: true,
   });
   const [isWaiting, setIsWaiting] = useState(false);
 
@@ -75,9 +77,13 @@ export default function ClaimFeesButton({
         await builders
           .updateBid({
             provider,
-            bidder: new PublicKey(subscription.ownerBidState.bidder),
-            collectionMint: new PublicKey(subscription.saloon.collectionMint),
-            tokenMint: new PublicKey(subscription.subscription.tokenMint),
+            bidder: new PublicKey(subscription?.data.ownerBidState.bidder),
+            collectionMint: new PublicKey(
+              subscription?.data.saloon.collectionMint
+            ),
+            tokenMint: new PublicKey(
+              subscription?.data.subscription?.tokenMint
+            ),
           })
           .builder.transaction()
       );
@@ -86,14 +92,18 @@ export default function ClaimFeesButton({
           .withdrawTax({
             provider,
             admin: wallet.publicKey,
-            collectionMint: new PublicKey(subscription.saloon.collectionMint),
+            collectionMint: new PublicKey(
+              subscription?.data.saloon.collectionMint
+            ),
             taxMint: token.publicKey,
             taxTokenProgram: token.tokenProgram,
           })
           .builder.transaction()
       );
 
-      if (subscription.saloon.taxMint === tokens[0].publicKey.toString()) {
+      if (
+        subscription?.data.saloon.taxMint === tokens[0].publicKey.toString()
+      ) {
         // Closing wsol account to recover sol
         tx.add(
           createCloseAccountInstruction(
@@ -137,7 +147,7 @@ export default function ClaimFeesButton({
         skipPreflight: true,
       });
       await connection.confirmTransaction(conf);
-      subscription.reload();
+      subscription?.reload();
     } finally {
       setIsWaiting(false);
     }
@@ -148,19 +158,16 @@ export default function ClaimFeesButton({
       <WaitingButton color="green" loading={isWaiting} onClick={handleClaim}>
         claim fees
       </WaitingButton>
-      <Flex direction="column" gap="0" justify="center">
-        <Text weight="light" color="gray" size="2">
-          {numeral(taxes?.toString() || 0).format("0.00a")}
+      <Flex direction="column">
+        <Flex gap="1">
+          <Text weight="bold" size="2">
+            {numeral(amount).format("0.000a")} ${token?.symbol}
+          </Text>
+          <Text size="2">available</Text>
+        </Flex>
+        <Text size="1" color="gray">
+          {numeral(amount).divide(100).format("0.000a")} ${token?.symbol} fee
         </Text>
-        <Text weight="light" color="gray" size="1">
-          -{" "}
-        </Text>
-      </Flex>
-      <Flex gap="1">
-        <Text weight="bold" size="4">
-          ${token?.symbol}
-        </Text>
-        <Text>available</Text>
       </Flex>
     </Flex>
   );

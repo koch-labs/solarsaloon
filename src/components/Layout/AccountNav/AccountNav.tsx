@@ -30,11 +30,11 @@ const AccountNav: React.FC = () => {
       <Flex gap="4">
         <Button variant="ghost" onClick={() => wallet.disconnect()}>
           <WalletIcon width="20" />
-          disconnect wallet
+          <Text className="hidden sm:block">disconnect wallet</Text>
         </Button>
-        <Button variant="ghost" onClick={() => signIn()}>
+        <Button color="green" variant="ghost" onClick={() => signIn()}>
           <UserIcon width="20" />
-          sign in
+          <Text className="hidden sm:block">sign in</Text>
         </Button>
       </Flex>
     )

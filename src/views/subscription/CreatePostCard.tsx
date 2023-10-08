@@ -20,8 +20,10 @@ const MDEditor = dynamic(
 
 export default function CreatePostCard({
   subscription,
+  reload,
 }: {
   subscription: Fetchable<FullSubscription>;
+  reload: () => {};
 }) {
   const { token } = useCurrentUser();
   const [content, setContent] = useState<string>();
@@ -30,17 +32,17 @@ export default function CreatePostCard({
     await fetch(`/api/create/post`, {
       method: "POST",
       body: JSON.stringify({
-        tokenMint: subscription.subscription.tokenMint,
-        collectionMint: subscription.saloon.collectionMint,
+        tokenMint: subscription?.data.subscription?.tokenMint,
+        collectionMint: subscription?.data.saloon.collectionMint,
         content,
       }),
       headers: {
         authorization: `Bearer ${token}`,
       },
     });
-    subscription.reload();
+    reload();
     setContent("");
-  }, [subscription, content, token]);
+  }, [subscription, reload, content, token]);
 
   return (
     <Flex m="5" direction="column" gap="2">

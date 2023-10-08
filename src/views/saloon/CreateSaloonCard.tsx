@@ -13,10 +13,9 @@ export const CreateSaloonCard = () => {
           color="crimson"
         >
           <Text align="center">
-            Your saloon is the place where people come to hear about YOU.
+            Your saloon is your members-only room.
             <br />
-            Publish exclusive content in here to attract a limited number of
-            paid members.
+            Publish exclusive content for a limited number of paid members.
           </Text>
           <Link href="/saloon/create">
             <Button className="bg-crimson-200">create a saloon</Button>

@@ -17,10 +17,7 @@ export default async function handler(
   response: NextApiResponse
 ) {
   try {
-    const { limit, page, mint } = Object.assign(
-      { limit: 20, page: 0 },
-      request.query
-    );
+    const { mint } = request.query;
     const collectionMint = mint as string;
 
     const saloonQuery = await sql`
@@ -36,12 +33,6 @@ export default async function handler(
       });
     }
 
-    const subscriptionsQuery = await sql`
-    SELECT * FROM saloons AS sa JOIN subscriptions AS su ON sa.collectionMint = su.collectionMint
-    WHERE sa.collectionMint = ${collectionMint}
-    LIMIT ${limit} OFFSET ${limit * page};
-    `;
-
     // Fetch token states for each subscription
     const connection = new Connection(
       (process.env.SOLANA_NETWORK === "devnet"
@@ -50,49 +41,10 @@ export default async function handler(
         "?api-key=" +
         process.env.HELIUS_KEY
     );
-    const accounts = await connection.getMultipleAccountsInfo([
-      getConfigKey(new PublicKey(mint)),
-      ...subscriptionsQuery.rows.map((r) =>
-        getTokenStateKey(new PublicKey(mint), new PublicKey(r.tokenmint))
-      ),
-    ]);
-    const [configAccount, ...subsAccounts] = accounts;
-    const config = CollectionConfig.decode(configAccount.data).toJSON();
-    const tokenStates = subsAccounts
-      .filter(Boolean)
-      .map((a) => TokenState.decode(a.data).toJSON());
-
-    const subscriptions: Subscription[] = await Promise.all(
-      subscriptionsQuery.rows.map(async (r) => {
-        const largestOwners = await connection.getTokenLargestAccounts(
-          new PublicKey(r.tokenmint)
-        );
-        const currentOwner = (
-          await getAccount(
-            connection,
-            largestOwners.value[0].address,
-            undefined,
-            TOKEN_2022_PROGRAM_ID
-          )
-        ).owner.toString();
-
-        const ownerQuery = await sql`
-        SELECT * FROM users WHERE users.publicKey = ${currentOwner.toString()}
-        `;
-
-        return {
-          id: r.id,
-          tokenMint: r.tokenmint,
-          lastPost: r.lastpost,
-          tokenState: tokenStates.find((s) => s.tokenMint === r.tokenmint),
-          currentOwner: {
-            publicKey: ownerQuery.rows[0]?.publickey,
-            username: ownerQuery.rows[0]?.username,
-            lastLogin: ownerQuery.rows[0]?.lastlogin,
-          },
-        };
-      })
+    const configAccount = await connection.getAccountInfo(
+      getConfigKey(new PublicKey(mint))
     );
+    const config = CollectionConfig.decode(configAccount.data).toJSON();
 
     // Check if the querier owns any subscriptions
     const rawSaloon = saloonQuery.rows[0];
@@ -107,7 +59,8 @@ export default async function handler(
       authoritiesGroup: rawSaloon.authoritiesgroup,
       config,
       metadata: rawSaloon.metadata,
-      subscriptions,
+      postCooldown: rawSaloon.postcooldown,
+      tags: rawSaloon.tags,
     };
 
     return response.status(200).json({ saloon });

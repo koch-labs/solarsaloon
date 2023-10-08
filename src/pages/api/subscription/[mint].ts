@@ -24,6 +24,7 @@ export default async function handler(
       { limit: 20, page: 0 },
       request.query
     );
+    console.log(`querying subscription page=${page} limit=${limit}`);
 
     const subQuery = await sql`
     SELECT * FROM 
@@ -87,6 +88,8 @@ export default async function handler(
         username: ownerQuery.rows[0]?.username,
         lastLogin: ownerQuery.rows[0]?.lastlogin,
       },
+      ownerChangedTimestamp: subscriptionRow.ownerchangedtimestamp,
+      expirationTimestamp: subscriptionRow.expirationtimestamp,
     };
     const saloon: Saloon = {
       owner: {
@@ -98,6 +101,8 @@ export default async function handler(
       taxMint: subscriptionRow.taxmint,
       authoritiesGroup: subscriptionRow.authoritiesgroup,
       config,
+      postCooldown: subscriptionRow.postcooldown,
+      tags: subscriptionRow.tags,
       metadata: subscriptionRow.metadata,
     };
 
@@ -141,7 +146,10 @@ export default async function handler(
           userBalance = userAccount.value.uiAmount;
         }
 
-        if (user.publicKey === saloon.owner.publicKey) {
+        if (
+          user.publicKey === saloon.owner.publicKey ||
+          user.publicKey === subscription.currentOwner.publicKey
+        ) {
           // User is the creator
           const postsQuery = await sql`
           SELECT * FROM posts JOIN saloons ON posts.collectionMint = saloons.collectionMint
@@ -150,23 +158,15 @@ export default async function handler(
           LIMIT ${limit} OFFSET ${limit * page}
           `;
           posts = postsQuery.rows;
-        } else if (user.publicKey === subscription.currentOwner.publicKey) {
-          // The user is subscribed
-          // Can only view post starting from the moment it joined
-          const postsQuery = await sql`
-          SELECT * FROM posts AS P JOIN saloons AS sa ON p.collectionMint = sa.collectionMint JOIN subscriptions AS su ON p.collectionMint = su.collectionMint
-          WHERE p.collectionMint = ${
-            saloon.collectionMint
-          } AND ownerChangedTimestamp <= creationTimestamp 
-          ORDER BY creationTimestamp DESC
-          LIMIT ${limit} OFFSET ${limit * page}
-          `;
-          posts = postsQuery.rows;
         }
         posts = posts.map(
           (r): Post => ({
             id: r.id,
-            creator: r.creator,
+            creator: {
+              username: r.username,
+              lastLogin: r.lastlogin,
+              publicKey: r.creator,
+            },
             collectionMint: r.collectionMint,
             content: r.content,
             draft: r.draft,

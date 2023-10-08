@@ -6,8 +6,11 @@ import {
 
 export type EndpointTypes = "mainnet" | "devnet" | "localnet";
 
-export type Fetchable<T> = T & {
+export type Fetchable<T> = {
+  data: T;
   reload: () => Promise<void>;
+  fetchMore?: () => Promise<void>;
+  hasMore?: boolean;
 };
 
 export interface User {
@@ -28,8 +31,11 @@ export interface Saloon {
   taxMint: string;
   authoritiesGroup: string;
   config: CollectionConfigJSON;
+  postCooldown: number;
+  tags: string[];
   metadata: DigitalAssetStandardMetadata;
   subscriptions?: Subscription[];
+  nSubscriptions?: number;
 }
 
 export interface Subscription {
@@ -37,6 +43,9 @@ export interface Subscription {
   lastPost: string;
   tokenState: TokenStateJSON;
   currentOwner: User;
+  ownerChangedTimestamp: string;
+  expirationTimestamp: string;
+  metadata?: DigitalAssetStandardMetadata;
 }
 
 export interface FullSubscription {
@@ -51,7 +60,7 @@ export interface FullSubscription {
 
 export interface Post {
   id: number;
-  creator: string;
+  creator: User;
   collectionMint: string;
   content: string;
   draft: boolean;

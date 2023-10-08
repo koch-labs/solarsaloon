@@ -29,5 +29,7 @@ export default function useSaloon(saloonMint: string): Fetchable<Saloon> {
     fetchSaloon();
   }, [fetchSaloon]);
 
-  return saloon ? { ...saloon, reload: async () => fetchSaloon() } : undefined;
+  return saloon
+    ? { data: saloon, reload: async () => fetchSaloon() }
+    : undefined;
 }

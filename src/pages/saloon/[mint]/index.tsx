@@ -12,7 +12,7 @@ const SingleSaloonView: React.FC = () => {
     <div>
       <Head>
         <title>
-          {saloon?.metadata?.name || "Unknown saloon"} | Solar Saloon
+          {saloon?.data.metadata?.name || "Unknown saloon"} | Solar Saloon
         </title>
         <meta name="description" content="Solar Saloon" />
       </Head>
@@ -22,8 +22,8 @@ const SingleSaloonView: React.FC = () => {
           { href: "/saloons", name: "saloons list" },
           saloon
             ? {
-                href: `/saloon/${saloon.collectionMint}/edit`,
-                name: `${saloon.metadata.name}`,
+                href: `/saloon/${saloon?.data.collectionMint}/edit`,
+                name: `${saloon?.data.metadata.name}`,
               }
             : undefined,
         ].filter(Boolean)}

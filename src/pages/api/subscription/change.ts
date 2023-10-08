@@ -7,12 +7,17 @@ export default async function handler(
   response: NextApiResponse
 ) {
   try {
-    const { tokenMint, currentPrice } = JSON.parse(request.body);
+    const { tokenMint, currentPrice, expirationDate } = JSON.parse(
+      request.body
+    );
     const rawToken = request.headers.authorization.split("Bearer ")[1];
     jwt.verify(rawToken, process.env.JWT_KEY);
 
     await sql`
-    UPDATE subscriptions SET ownerChangedTimestamp=CURRENT_TIMESTAMP, currentPrice=${currentPrice} 
+    UPDATE subscriptions SET
+    ownerChangedTimestamp=CURRENT_TIMESTAMP,
+    expirationTimestamp=${expirationDate},
+    currentPrice=${currentPrice}
     WHERE tokenMint = ${tokenMint};`;
     response.status(200).json({});
   } catch (error) {

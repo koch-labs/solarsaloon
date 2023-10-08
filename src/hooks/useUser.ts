@@ -23,5 +23,5 @@ export default function useUser(publicKey: string): Fetchable<ExtendedUser> {
     fetchSaloon();
   }, [fetchSaloon]);
 
-  return { ...user, reload: async () => fetchSaloon() };
+  return { data: user, reload: async () => fetchSaloon() };
 }

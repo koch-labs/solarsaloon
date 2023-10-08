@@ -15,7 +15,10 @@ import useSaloon from "../../hooks/useSaloon";
 import Image from "next/image";
 import { Fetchable, Saloon } from "../../models/types";
 
-const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({ saloon }) => {
+const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({
+  saloon: fetchable,
+}) => {
+  const { data: saloon } = fetchable;
   const router = useRouter();
   const { token } = useCurrentUser();
   const [url, setUrl] = useState<string>(saloon.metadata?.image);

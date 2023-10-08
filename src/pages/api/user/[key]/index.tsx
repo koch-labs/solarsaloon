@@ -66,7 +66,9 @@ export default async function handler(
         taxMint: r.taxmint,
         authoritiesGroup: r.authoritiesgroup,
         config: configs[r.collectionmint],
+        postCooldown: r.postcooldown,
         metadata: r.metadata,
+        tags: r.tags,
       };
     });
 

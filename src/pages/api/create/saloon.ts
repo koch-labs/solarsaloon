@@ -8,13 +8,13 @@ export default async function handler(
   response: NextApiResponse
 ) {
   try {
-    const { collectionMint, authoritiesGroup, taxMint, postCooldown } =
+    const { collectionMint, authoritiesGroup, taxMint, postCooldown, tags } =
       JSON.parse(request.body);
     const rawToken = request.headers.authorization.split("Bearer ")[1];
     const user = jwt.verify(rawToken, process.env.JWT_KEY) as User;
     await sql`
-    INSERT INTO saloons (collectionMint, owner, authoritiesGroup, taxMint, postCooldown)
-    VALUES (${collectionMint}, ${user.publicKey}, ${authoritiesGroup}, ${taxMint}, ${postCooldown});
+    INSERT INTO saloons (collectionMint, owner, authoritiesGroup, taxMint, postCooldown, tags)
+    VALUES (${collectionMint}, ${user.publicKey}, ${authoritiesGroup}, ${taxMint}, ${postCooldown}, ${tags});
     `;
 
     const query =

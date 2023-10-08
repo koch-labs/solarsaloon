@@ -14,6 +14,7 @@ const App: FC<AppProps> = ({ Component, pageProps }) => {
     <>
       <Head>
         <title>Solar Saloon</title>
+        <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <ContextProvider>

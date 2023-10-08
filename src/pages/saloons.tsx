@@ -1,9 +1,9 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import { HomeView } from "../views";
 import NavigationPath from "../components/NavigationPath";
+import { SaloonsListView } from "../views/saloon/SaloonsListView";
 
-const Saloons: NextPage = (props) => {
+const Saloons: NextPage = () => {
   return (
     <>
       <Head>
@@ -16,7 +16,7 @@ const Saloons: NextPage = (props) => {
           { href: "/saloons", name: "saloons list" },
         ]}
       />
-      <HomeView />
+      <SaloonsListView />
     </>
   );
 };

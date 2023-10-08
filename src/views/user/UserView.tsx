@@ -24,11 +24,13 @@ import useUser from "../../hooks/useUser";
 import { shortKey } from "../../utils";
 import { SaloonsList } from "../saloon/SaloonsList";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
+import useSaloons from "../../hooks/useSaloons";
 
 const UserView: React.FC<{ publicKey: string }> = ({ publicKey }) => {
   const { user: currentUser, token } = useCurrentUser();
-  const { user, saloons, reload } = useUser(publicKey);
+  const user = useUser(publicKey);
   const [name, setName] = useState<string>();
+  const saloons = useSaloons({ creator: user?.data?.user?.publicKey });
 
   const handleSetName = useCallback(async () => {
     await fetch(`/api/user/change`, {
@@ -40,8 +42,8 @@ const UserView: React.FC<{ publicKey: string }> = ({ publicKey }) => {
         username: name,
       }),
     });
-    reload();
-  }, [name, token, reload]);
+    user.reload();
+  }, [name, token, user]);
 
   return (
     <Container className="content-center">
@@ -89,7 +91,9 @@ const UserView: React.FC<{ publicKey: string }> = ({ publicKey }) => {
             </Flex>
             <Flex direction="column" align="center" gap="5" className="w-full">
               <Heading>
-                {user?.username ? user.username : shortKey(user?.publicKey)}
+                {user?.data?.user.username
+                  ? user.data.user.username
+                  : shortKey(user?.data?.user.publicKey)}
               </Heading>
               {currentUser?.publicKey === publicKey ? (
                 <Card>
@@ -106,7 +110,9 @@ const UserView: React.FC<{ publicKey: string }> = ({ publicKey }) => {
                 </Card>
               ) : null}
               <Flex className="w-full" direction="column">
-                {saloons ? <SaloonsList saloons={saloons} /> : null}
+                {user?.data?.user.publicKey ? (
+                  <SaloonsList saloons={saloons} />
+                ) : null}
               </Flex>
             </Flex>
           </Flex>

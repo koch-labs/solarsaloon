@@ -9,16 +9,33 @@ export default async function handler(
   response: NextApiResponse
 ) {
   try {
-    const { limit, page } = Object.assign(
+    const { limit, page, creator, tags } = Object.assign(
       { limit: 20, page: 0 },
       request.query
     );
-    const query = await sql`
+    const queryString = `
     SELECT * FROM 
     saloons
     JOIN users on users.publicKey = saloons.owner
-    JOIN saloonMetadata as m ON m.collectionMint = saloons.collectionMint
+    JOIN saloonMetadata as m USING (collectionMint)
+    LEFT JOIN (
+        SELECT collectionMint, COUNT(*) AS nSubscriptions FROM
+        subscriptions
+        GROUP BY collectionMint 
+    ) AS countquery USING (collectionMint)
+    ${creator || tags?.length > 0 ? "WHERE " : ""}
+    ${creator ? `saloons.owner = $1` : ""}
+    ${
+      tags?.length > 0
+        ? `${creator ? "AND saloons.tags @> ($2)" : "saloons.tags @> ($1)"}`
+        : ""
+    }
     LIMIT ${limit} OFFSET ${limit * page}`;
+    const args = [
+      creator as any,
+      typeof tags === "string" ? tags.split(",") : (tags as string[]),
+    ].filter(Boolean);
+    const query = await sql.query(queryString, args);
     const connection = new Connection(
       (process.env.SOLANA_NETWORK === "devnet"
         ? process.env.HELIUS_RPC_DEVNET
@@ -46,7 +63,10 @@ export default async function handler(
       taxMint: s.taxmint,
       authoritiesGroup: s.authoritiesgroup,
       config: configDict[s.collectionmint],
+      postCooldown: s.postcooldown,
+      tags: s.tags,
       metadata: s.metadata,
+      nSubscriptions: s.nsubscriptions,
     }));
     return response.status(200).json({
       saloons,
