@@ -31,7 +31,7 @@
     "@zeit/next-css": "^1.0.1",
     "bn.js": "^5.2.1",
     "daisyui": "^1.24.3",
-    "date-fns": "^2.29.3",
+    "date-fns": "^2.30.0",
     "framer-motion": "^10.16.4",
     "immer": "^9.0.12",
     "jsonwebtoken": "^9.0.2",
