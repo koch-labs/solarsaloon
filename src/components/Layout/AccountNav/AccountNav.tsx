@@ -6,25 +6,27 @@ import { Button } from "@radix-ui/themes";
 import { useCurrentUser } from "../../../contexts/UserContextProvider";
 import Link from "next/link";
 import { UserIcon, WalletIcon } from "@heroicons/react/24/solid";
+import UserBadge from "../../UserBadge";
 
 const AccountNav: React.FC = () => {
-  const { signIn, logOff, isSignedIn } = useCurrentUser();
+  const { signIn, logOff, isSignedIn, user } = useCurrentUser();
   const walletModal = useWalletModal();
   const wallet = useWallet();
 
   return wallet.connected ? (
     isSignedIn ? (
-      <Flex gap="4">
+      <Flex gap="4" align="center">
         <Button variant="ghost" onClick={() => logOff()}>
           <WalletIcon width="20" />
           log off
         </Button>
-        <Link href={`/user/${wallet?.publicKey.toString()}`}>
+        {/* <Link href={`/user/${wallet?.publicKey.toString()}`}>
           <Button variant="ghost">
             <UserIcon width="20" />
             account
           </Button>
-        </Link>
+        </Link> */}
+        <UserBadge user={user} />
       </Flex>
     ) : (
       <Flex gap="4">

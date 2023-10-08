@@ -59,8 +59,12 @@ export default function BuyTokenModal({
   } = useFees({
     price: newPrice,
     taxRate: Number(subscription?.data?.saloon?.config?.taxRate),
-    lastUpdate: Date.now(),
-    depositAmount: Number(subscription?.data?.saloon?.config?.taxRate),
+    lastUpdate: Number(subscription?.data?.ownerBidState?.lastUpdate),
+    depositAmount: Number(
+      numeral(subscription?.data?.ownerBidState?.amount)
+        .divide(10 ** (token?.decimals || 0))
+        .format("0.00000")
+    ),
   });
   const currentPrice = useMemo(
     () =>
@@ -229,24 +233,47 @@ export default function BuyTokenModal({
             })
             .builder.transaction()
         );
-        tx.add(
-          await rentBuilders
-            .buyToken({
-              provider,
-              newSellPrice: new BN(
-                Math.round(newPrice * 10 ** (token?.decimals || 0))
-              ),
-              owner: new PublicKey(
-                subscription?.data.subscription?.currentOwner.publicKey
-              ),
-              collectionMint: new PublicKey(
-                subscription?.data.saloon.collectionMint
-              ),
-              tokenMint: new PublicKey(subscription?.data.tokenState.tokenMint),
-              tokenProgram: TOKEN_2022_PROGRAM_ID,
-            })
-            .builder.transaction()
-        );
+
+        if (amountLeft === 0) {
+          tx.add(
+            await rentBuilders
+              .claimToken({
+                provider,
+                newSellPrice: new BN(
+                  Math.round(newPrice * 10 ** (token?.decimals || 0))
+                ),
+                newOwner: wallet.publicKey,
+                oldOwner: new PublicKey(
+                  subscription?.data?.subscription?.currentOwner.publicKey
+                ),
+                collectionMint,
+                tokenMint: tokenMint,
+                tokenProgram: TOKEN_2022_PROGRAM_ID,
+              })
+              .builder.transaction()
+          );
+        } else {
+          tx.add(
+            await rentBuilders
+              .buyToken({
+                provider,
+                newSellPrice: new BN(
+                  Math.round(newPrice * 10 ** (token?.decimals || 0))
+                ),
+                owner: new PublicKey(
+                  subscription?.data.subscription?.currentOwner.publicKey
+                ),
+                collectionMint: new PublicKey(
+                  subscription?.data.saloon.collectionMint
+                ),
+                tokenMint: new PublicKey(
+                  subscription?.data.tokenState.tokenMint
+                ),
+                tokenProgram: TOKEN_2022_PROGRAM_ID,
+              })
+              .builder.transaction()
+          );
+        }
       }
 
       const conf = await wallet.sendTransaction(tx, connection, {
@@ -284,6 +311,7 @@ export default function BuyTokenModal({
     user,
     currentPrice,
     timeLeft,
+    amountLeft,
   ]);
 
   return (
