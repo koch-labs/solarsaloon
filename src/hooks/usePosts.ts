@@ -62,6 +62,7 @@ export default function usePosts(collectionMint: string): Fetchable<Post[]> {
         reload: async () => {
           setPosts([]);
           setPage(0);
+          setHasMore(true);
           fetchPosts(0);
         },
         fetchMore,

@@ -63,7 +63,7 @@ export default function BuyTokenModal({
     depositAmount: Number(
       numeral(subscription?.data?.ownerBidState?.amount)
         .divide(10 ** (token?.decimals || 0))
-        .format("0.00000")
+        .format("0.00000000000")
     ),
   });
   const currentPrice = useMemo(
@@ -234,7 +234,7 @@ export default function BuyTokenModal({
             .builder.transaction()
         );
 
-        if (amountLeft === 0) {
+        if (amountLeft !== 0) {
           tx.add(
             await rentBuilders
               .claimToken({
@@ -317,14 +317,14 @@ export default function BuyTokenModal({
   return (
     <Dialog.Root open={open}>
       <Dialog.Content style={{ maxWidth: 450 }}>
-        <Dialog.Title>buy a subscription?.data</Dialog.Title>
+        <Dialog.Title>buy a subscription</Dialog.Title>
         <Dialog.Description size="2" mb="4">
           pay{" "}
           {numeral(currentPrice.toString() || 0)
             .divide(10 ** (token?.decimals || 0))
             .format("0.000a")}{" "}
-          ${token?.symbol || "???"} upfront, to acquire the subscription?.data
-          from the current owner
+          ${token?.symbol || "???"} upfront, to acquire the subscription from
+          the current owner
         </Dialog.Description>
         <Flex direction="column" gap="3">
           <Flex direction="column">
@@ -337,7 +337,7 @@ export default function BuyTokenModal({
             />
             <Text size="1" color="gray">
               you will pay {numeral(taxesPerYear / 365).format("0.000a")} $
-              {token?.symbol} every day you own the subscription?.data.
+              {token?.symbol} every day you own the subscription.
             </Text>
           </Flex>
           <Flex direction="column">
@@ -371,7 +371,10 @@ export default function BuyTokenModal({
               <Button
                 variant="soft"
                 color="gray"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                  setIsWaiting(false);
+                }}
               >
                 cancel
               </Button>
