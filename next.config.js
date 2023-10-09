@@ -14,6 +14,7 @@ const nextConfig = {
     domains: [
       "madlads.s3.us-west-2.amazonaws.com",
       "images.unsplash.com",
+      "shdw-drive.genesysgo.net"
     ]
   }
 }

@@ -54,6 +54,7 @@ const CreateSaloon: React.FC = () => {
 
   const [name, setName] = useState<string>();
   const [description, setDescription] = useState<string>();
+  const [image, setImage] = useState<string>();
   const [taxToken, setTaxToken] = useState<Token>(tokens[0]);
   const [taxRate, setTaxRate] = useState<number>(Math.log10(100000));
   const [postCooldown, setPostCooldown] = useState<number>(86400000);
@@ -203,7 +204,8 @@ const CreateSaloon: React.FC = () => {
             name,
             description,
             symbol: "SOLSAL",
-            image: "https://madlads.s3.us-west-2.amazonaws.com/images/9967.png",
+            // image: "https://madlads.s3.us-west-2.amazonaws.com/images/9967.png",
+            image,
             external_url: "https://solarsaloon.com",
             seller_fee_basis_points: 0,
             attributes: [
@@ -216,7 +218,7 @@ const CreateSaloon: React.FC = () => {
               files: [
                 {
                   id: "portrait",
-                  uri: "https://madlads.s3.us-west-2.amazonaws.com/images/9967.png",
+                  uri: image,
                   type: "image/png",
                 },
               ],
@@ -256,6 +258,7 @@ const CreateSaloon: React.FC = () => {
     token,
     postCooldown,
     description,
+    image,
     isSignedIn,
     tags,
   ]);
@@ -313,6 +316,13 @@ const CreateSaloon: React.FC = () => {
                 <TextArea
                   placeholder="A short description of what happens in this saloon..."
                   onChange={(e) => setDescription(e.target.value)}
+                />
+              </Flex>
+              <Flex direction="column" width="100%">
+                <Text color="gray">saloon&apos;s image</Text>
+                <TextFieldInput
+                  placeholder="URI to your image"
+                  onChange={(e) => setImage(e.target.value)}
                 />
               </Flex>
               <Flex direction="column" width="100%">
