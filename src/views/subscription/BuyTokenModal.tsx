@@ -329,7 +329,7 @@ export default function BuyTokenModal({
         <Flex direction="column" gap="3">
           <Flex direction="column">
             <Text as="div" size="2" mb="1" weight="bold">
-              new sell price
+              new selling price
             </Text>
             <TextField.Input
               placeholder="Enter the new sell price..."

@@ -1,22 +1,17 @@
 import {
-  Button,
-  Card,
-  Table,
   Badge,
   Text,
   Flex,
   Heading,
-  Box,
   Container,
   Separator,
 } from "@radix-ui/themes";
 import InfiniteScroll from "react-infinite-scroller";
 import { Fetchable, FullSubscription, Post } from "../../models/types";
 import dynamic from "next/dynamic";
-import { formatTime, shortKey } from "../../utils";
+import { formatTime } from "../../utils";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
 import UserBadge from "../../components/UserBadge";
-import usePosts from "../../hooks/usePosts";
 
 const MarkdownPreview = dynamic(
   () => import("@uiw/react-markdown-preview").then((mod) => mod.default),

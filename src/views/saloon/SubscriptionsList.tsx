@@ -74,7 +74,9 @@ export const SubscriptionsList = ({
                     "never"
                   ) : (
                     <Text>
-                      {formatTime(Date.now() - new Date(s.lastPost).valueOf())}{" "}
+                      {formatTime(
+                        Date.now() - new Date(s.lastPost).valueOf() - 7200000
+                      )}{" "}
                       ago
                     </Text>
                   )}
