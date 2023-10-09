@@ -43,7 +43,7 @@ const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({
   return (
     <Flex gap={"3"} direction={"column"}>
       <Container>
-        <Flex align="center" className="justify-around grid grid-cols-4">
+        <Flex align="center" className="justify-around grid grid-cols-4" p="5">
           <Image
             src={saloon.metadata?.image}
             width={250}
