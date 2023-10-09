@@ -29,7 +29,7 @@ export default function usePosts(collectionMint: string): Fetchable<Post[]> {
           }
         );
         const { posts } = await response.json();
-        setHasMore(posts?.length >= pageSize);
+        setHasMore((posts?.length || 0) >= pageSize);
         setPosts((old) =>
           old ? concatUnique([old, posts], (a, b) => a.id === b.id) : posts
         );
@@ -42,13 +42,13 @@ export default function usePosts(collectionMint: string): Fetchable<Post[]> {
   );
 
   const fetchMore = useCallback(async () => {
-    if (hasMore && !isLoading) {
+    if (hasMore && !isLoading && collectionMint) {
       setPage((old) => {
         fetchPosts(old + 1);
         return old + 1;
       });
     }
-  }, [hasMore, isLoading, fetchPosts]);
+  }, [collectionMint, hasMore, isLoading, fetchPosts]);
 
   useEffect(() => {
     if (hasMore && !isLoading && page === 0) {
@@ -59,7 +59,12 @@ export default function usePosts(collectionMint: string): Fetchable<Post[]> {
   return posts
     ? {
         data: posts,
-        reload: async () => fetchPosts(page),
+        reload: async () => {
+          setPosts([]);
+          setPage(0);
+          setHasMore(true);
+          fetchPosts(0);
+        },
         fetchMore,
         hasMore,
       }

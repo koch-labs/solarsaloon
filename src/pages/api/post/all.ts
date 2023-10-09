@@ -55,7 +55,7 @@ export default async function handler(
 
     let posts = [];
     const ownerQuery =
-      await sql`SELECT * FROM users JOIN saloons ON users.publicKey = saloons.owner WHERE owner = ${user.publicKey}`;
+      await sql`SELECT * FROM users JOIN saloons ON users.publicKey = saloons.owner WHERE owner = ${user?.publicKey}`;
     if (
       currentOwner.toString() === user?.publicKey ||
       ownerQuery.rowCount > 0

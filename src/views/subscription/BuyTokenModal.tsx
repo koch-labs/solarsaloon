@@ -52,15 +52,25 @@ export default function BuyTokenModal({
   const [isWaiting, setIsWaiting] = useState(false);
   const [newPrice, setNewPrice] = useState(0);
   const [prepaidDuration, setPrepaidDuration] = useState(Math.log10(3600));
-  const {
-    taxesPerYear,
-    amount: amountLeft,
-    timeLeft,
-  } = useFees({
+  const { amount: amountLeft, timeLeft } = useFees({
+    price: Number(
+      numeral(subscription?.data?.ownerBidState?.sellingPrice)
+        .divide(10 ** (token?.decimals || 0))
+        .format("0.00000000000")
+    ),
+    taxRate: Number(subscription?.data?.saloon?.config?.taxRate),
+    lastUpdate: Number(subscription?.data?.ownerBidState?.lastUpdate),
+    depositAmount: Number(
+      numeral(subscription?.data?.ownerBidState?.amount)
+        .divide(10 ** (token?.decimals || 0))
+        .format("0.00000000000")
+    ),
+  });
+  const { taxesPerYear } = useFees({
     price: newPrice,
     taxRate: Number(subscription?.data?.saloon?.config?.taxRate),
     lastUpdate: Date.now(),
-    depositAmount: Number(subscription?.data?.saloon?.config?.taxRate),
+    depositAmount: 0,
   });
   const currentPrice = useMemo(
     () =>
@@ -229,24 +239,47 @@ export default function BuyTokenModal({
             })
             .builder.transaction()
         );
-        tx.add(
-          await rentBuilders
-            .buyToken({
-              provider,
-              newSellPrice: new BN(
-                Math.round(newPrice * 10 ** (token?.decimals || 0))
-              ),
-              owner: new PublicKey(
-                subscription?.data.subscription?.currentOwner.publicKey
-              ),
-              collectionMint: new PublicKey(
-                subscription?.data.saloon.collectionMint
-              ),
-              tokenMint: new PublicKey(subscription?.data.tokenState.tokenMint),
-              tokenProgram: TOKEN_2022_PROGRAM_ID,
-            })
-            .builder.transaction()
-        );
+
+        if (amountLeft === 0) {
+          tx.add(
+            await rentBuilders
+              .claimToken({
+                provider,
+                newSellPrice: new BN(
+                  Math.round(newPrice * 10 ** (token?.decimals || 0))
+                ),
+                newOwner: wallet.publicKey,
+                oldOwner: new PublicKey(
+                  subscription?.data?.subscription?.currentOwner.publicKey
+                ),
+                collectionMint,
+                tokenMint: tokenMint,
+                tokenProgram: TOKEN_2022_PROGRAM_ID,
+              })
+              .builder.transaction()
+          );
+        } else {
+          tx.add(
+            await rentBuilders
+              .buyToken({
+                provider,
+                newSellPrice: new BN(
+                  Math.round(newPrice * 10 ** (token?.decimals || 0))
+                ),
+                owner: new PublicKey(
+                  subscription?.data.subscription?.currentOwner.publicKey
+                ),
+                collectionMint: new PublicKey(
+                  subscription?.data.saloon.collectionMint
+                ),
+                tokenMint: new PublicKey(
+                  subscription?.data.tokenState.tokenMint
+                ),
+                tokenProgram: TOKEN_2022_PROGRAM_ID,
+              })
+              .builder.transaction()
+          );
+        }
       }
 
       const conf = await wallet.sendTransaction(tx, connection, {
@@ -254,7 +287,7 @@ export default function BuyTokenModal({
       });
       await connection.confirmTransaction(conf);
 
-      await fetch("/api/subscription?.data/change", {
+      await fetch("/api/subscription/change", {
         method: "POST",
         body: JSON.stringify({
           tokenMint: subscription?.data.subscription?.tokenMint,
@@ -284,24 +317,25 @@ export default function BuyTokenModal({
     user,
     currentPrice,
     timeLeft,
+    amountLeft,
   ]);
 
   return (
     <Dialog.Root open={open}>
       <Dialog.Content style={{ maxWidth: 450 }}>
-        <Dialog.Title>buy a subscription?.data</Dialog.Title>
+        <Dialog.Title>buy a subscription</Dialog.Title>
         <Dialog.Description size="2" mb="4">
           pay{" "}
           {numeral(currentPrice.toString() || 0)
             .divide(10 ** (token?.decimals || 0))
             .format("0.000a")}{" "}
-          ${token?.symbol || "???"} upfront, to acquire the subscription?.data
-          from the current owner
+          ${token?.symbol || "???"} upfront, to acquire the subscription from
+          the current owner
         </Dialog.Description>
         <Flex direction="column" gap="3">
           <Flex direction="column">
             <Text as="div" size="2" mb="1" weight="bold">
-              new sell price
+              new selling price
             </Text>
             <TextField.Input
               placeholder="Enter the new sell price..."
@@ -309,7 +343,7 @@ export default function BuyTokenModal({
             />
             <Text size="1" color="gray">
               you will pay {numeral(taxesPerYear / 365).format("0.000a")} $
-              {token?.symbol} every day you own the subscription?.data.
+              {token?.symbol} every day you own the subscription.
             </Text>
           </Flex>
           <Flex direction="column">
@@ -343,7 +377,10 @@ export default function BuyTokenModal({
               <Button
                 variant="soft"
                 color="gray"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                  setIsWaiting(false);
+                }}
               >
                 cancel
               </Button>

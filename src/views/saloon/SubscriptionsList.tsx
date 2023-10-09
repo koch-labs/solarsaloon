@@ -11,17 +11,21 @@ import {
 import InfiniteScroll from "react-infinite-scroller";
 import numeral from "numeral";
 import Link from "next/link";
-import { Saloon } from "../../models/types";
+import { Fetchable, Saloon, Subscription } from "../../models/types";
 import { formatTime, shortKey } from "../../utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { tokens } from "../../utils/tokens";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import useSubscriptions from "../../hooks/useSubscriptions";
 
-export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
+export const SubscriptionsList = ({
+  saloon,
+  subscriptions,
+}: {
+  saloon: Saloon;
+  subscriptions: Fetchable<Subscription[]>;
+}) => {
   const wallet = useWallet();
   const token = tokens.find((t) => t.publicKey.toString() === saloon.taxMint);
-  const subscriptions = useSubscriptions(saloon?.collectionMint);
 
   return (
     <Box>
@@ -70,7 +74,9 @@ export const SubscriptionsList = ({ saloon }: { saloon: Saloon }) => {
                     "never"
                   ) : (
                     <Text>
-                      {formatTime(Date.now() - new Date(s.lastPost).valueOf())}{" "}
+                      {formatTime(
+                        Date.now() - new Date(s.lastPost).valueOf() - 7200000
+                      )}{" "}
                       ago
                     </Text>
                   )}

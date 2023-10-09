@@ -51,7 +51,7 @@ export default function SubscriptionHeader({
   });
 
   return (
-    <Flex align="center" className="justify-around grid grid-cols-4" m="5">
+    <Flex align="center" className="justify-around grid grid-cols-4 p-5" m="5">
       <Image
         src={
           subscription?.data?.subscription?.metadata?.image ||
