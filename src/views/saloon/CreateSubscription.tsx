@@ -5,8 +5,9 @@ import { Fetchable, Saloon } from "../../models/types";
 import CreateSubscriptionModal from "./CreateSubscriptionModal";
 
 const CreateSubscription: React.FC<{
-  saloon: Fetchable<Saloon>;
-}> = ({ saloon }) => {
+  saloon: Saloon;
+  reloadSubscriptions: () => void;
+}> = ({ saloon, reloadSubscriptions }) => {
   const [openCreate, setOpenCreate] = useState(false);
 
   return (
@@ -26,6 +27,7 @@ const CreateSubscription: React.FC<{
         saloon={saloon}
         setOpen={setOpenCreate}
         open={openCreate}
+        reloadSubscriptions={reloadSubscriptions}
       />
     </Flex>
   );

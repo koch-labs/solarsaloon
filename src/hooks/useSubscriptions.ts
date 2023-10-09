@@ -65,7 +65,11 @@ export default function useSubscriptions(
   return subscriptions
     ? {
         data: subscriptions,
-        reload: async () => fetchSubscriptions(page),
+        reload: async () => {
+          setPage(0);
+          setHasMore(true);
+          fetchSubscriptions(0);
+        },
         fetchMore,
         hasMore,
       }

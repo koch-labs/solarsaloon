@@ -31,12 +31,14 @@ import Image from "next/image";
 import { PencilIcon } from "@heroicons/react/24/outline";
 import UserBadge from "../../components/UserBadge";
 import TagsPicker from "../../components/TagsPicker";
+import useSubscriptions from "../../hooks/useSubscriptions";
 
 const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({
   saloon: fetchable,
 }) => {
   const { data: saloon } = fetchable;
   const { user } = useCurrentUser();
+  const subscriptions = useSubscriptions(saloon?.collectionMint);
 
   return (
     <Flex gap={"3"} direction={"column"}>
@@ -75,9 +77,12 @@ const SaloonView: React.FC<{ saloon: Fetchable<Saloon> }> = ({
       {saloon &&
       user?.publicKey &&
       saloon.owner?.publicKey === user.publicKey ? (
-        <CreateSubscription saloon={fetchable} />
+        <CreateSubscription
+          saloon={fetchable?.data}
+          reloadSubscriptions={subscriptions?.reload}
+        />
       ) : null}
-      <SubscriptionsList saloon={saloon} />
+      <SubscriptionsList saloon={saloon} subscriptions={subscriptions} />
     </Flex>
   );
 };

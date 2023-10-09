@@ -24,13 +24,14 @@ import { useCurrentUser } from "../../contexts/UserContextProvider";
 export default function CreateSubscriptionModal({
   setOpen,
   open,
-  saloon: fetchable,
+  saloon,
+  reloadSubscriptions,
 }: {
   setOpen: (boolean) => void;
   open: boolean;
-  saloon: Fetchable<Saloon>;
+  saloon: Saloon;
+  reloadSubscriptions: () => void;
 }) {
-  const { data: saloon } = fetchable;
   const token = tokens.find((e) => e.publicKey.toString() === saloon?.taxMint);
   const { token: userToken } = useCurrentUser();
   const { connection } = useConnection();
@@ -131,7 +132,7 @@ export default function CreateSubscriptionModal({
             name,
             description,
             symbol: "SOLSALSUB",
-            image: "https://madlads.s3.us-west-2.amazonaws.com/images/9967.png",
+            image: saloon?.metadata?.image,
             external_url: "https://solarsaloon.com",
             seller_fee_basis_points: 0,
             attributes: [
@@ -144,7 +145,7 @@ export default function CreateSubscriptionModal({
               files: [
                 {
                   id: "portrait",
-                  uri: "https://madlads.s3.us-west-2.amazonaws.com/images/9967.png",
+                  uri: saloon?.metadata?.image,
                   type: "image/png",
                 },
               ],
@@ -166,16 +167,17 @@ export default function CreateSubscriptionModal({
 
       await connection.confirmTransaction(conf);
 
-      fetchable?.reload();
+      reloadSubscriptions();
       setOpen(false);
     } catch (err) {
       console.log(err);
       toast.error(String(err));
-      fetchable.reload();
+      reloadSubscriptions();
     } finally {
       setIsWaiting(false);
     }
   }, [
+    reloadSubscriptions,
     saloon,
     userToken,
     provider,
@@ -184,7 +186,6 @@ export default function CreateSubscriptionModal({
     name,
     description,
     setOpen,
-    fetchable,
   ]);
 
   return (
