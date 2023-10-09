@@ -93,18 +93,18 @@ export default function CreateSubscriptionModal({
           })
           .builder.transaction()
       );
-      tx.add(
-        await rentBuilders
-          .claimToken({
-            provider,
-            newSellPrice: new BN(0),
-            oldOwner: wallet.publicKey,
-            newOwner: wallet.publicKey,
-            collectionMint: new PublicKey(saloon.collectionMint),
-            tokenMint: tokenMintKeypair.publicKey,
-          })
-          .builder.transaction()
-      );
+      // tx.add(
+      //   await rentBuilders
+      //     .claimToken({
+      //       provider,
+      //       newSellPrice: new BN(0),
+      //       oldOwner: wallet.publicKey,
+      //       newOwner: wallet.publicKey,
+      //       collectionMint: new PublicKey(saloon.collectionMint),
+      //       tokenMint: tokenMintKeypair.publicKey,
+      //     })
+      //     .builder.transaction()
+      // );
 
       tx.sign(tokenMintKeypair);
       const signedTx = await wallet.signTransaction(tx);

@@ -52,12 +52,12 @@ export default function BuyTokenModal({
   const [isWaiting, setIsWaiting] = useState(false);
   const [newPrice, setNewPrice] = useState(0);
   const [prepaidDuration, setPrepaidDuration] = useState(Math.log10(3600));
-  const {
-    taxesPerYear,
-    amount: amountLeft,
-    timeLeft,
-  } = useFees({
-    price: newPrice,
+  const { amount: amountLeft, timeLeft } = useFees({
+    price: Number(
+      numeral(subscription?.data?.ownerBidState?.sellingPrice)
+        .divide(10 ** (token?.decimals || 0))
+        .format("0.00000000000")
+    ),
     taxRate: Number(subscription?.data?.saloon?.config?.taxRate),
     lastUpdate: Number(subscription?.data?.ownerBidState?.lastUpdate),
     depositAmount: Number(
@@ -65,6 +65,12 @@ export default function BuyTokenModal({
         .divide(10 ** (token?.decimals || 0))
         .format("0.00000000000")
     ),
+  });
+  const { taxesPerYear } = useFees({
+    price: newPrice,
+    taxRate: Number(subscription?.data?.saloon?.config?.taxRate),
+    lastUpdate: Date.now(),
+    depositAmount: 0,
   });
   const currentPrice = useMemo(
     () =>
@@ -234,7 +240,7 @@ export default function BuyTokenModal({
             .builder.transaction()
         );
 
-        if (amountLeft !== 0) {
+        if (amountLeft === 0) {
           tx.add(
             await rentBuilders
               .claimToken({
