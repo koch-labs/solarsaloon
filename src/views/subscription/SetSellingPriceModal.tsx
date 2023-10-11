@@ -46,7 +46,6 @@ export default function SetSellingPriceModal({
     ),
     increaseDeposit: false,
   });
-  console.log(timeLeft);
 
   const handleBuy = useCallback(async () => {
     setIsWaiting(true);

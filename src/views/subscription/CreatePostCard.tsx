@@ -6,6 +6,7 @@ import { useCurrentUser } from "../../contexts/UserContextProvider";
 import { Fetchable } from "../../models/types";
 import toast from "react-hot-toast";
 import WaitingButton from "../../components/WaitingButton";
+import { formatTime } from "../../utils";
 
 const MDEditor = dynamic(
   () => import("@uiw/react-md-editor").then((mod) => mod.default),
@@ -24,14 +25,14 @@ export default function CreatePostCard({
   const [content, setContent] = useState<string>();
   const timeUntilNextPost =
     new Date(subscription?.data?.subscription?.lastPost).valueOf() +
-    Number(subscription?.data?.saloon?.postCooldown) * 1000 -
-    Date.now();
+    Number(subscription?.data?.saloon?.postCooldown) -
+    Date.now() -
+    new Date().getTimezoneOffset() * 60000;
 
   const handlePost = useCallback(async () => {
     setIsWaiting(true);
 
     try {
-      console.log("ok");
       await fetch(`/api/create/post`, {
         method: "POST",
         body: JSON.stringify({
@@ -62,10 +63,12 @@ export default function CreatePostCard({
       <Flex justify="center" gap="4">
         <WaitingButton
           loading={isWaiting}
-          onClick={() => handlePost()}
+          onClick={handlePost}
           disabled={timeUntilNextPost > 0}
         >
-          create a post
+          {timeUntilNextPost > 0
+            ? `create a post in ${formatTime(timeUntilNextPost)}`
+            : "create a post"}
         </WaitingButton>
       </Flex>
     </Flex>

@@ -38,7 +38,10 @@ export default function ManageSubscription({
                   user?.publicKey)) ? (
               <CreatePostCard
                 subscription={subscription}
-                reload={posts.reload}
+                reload={async () => {
+                  subscription.reload();
+                  posts.reload();
+                }}
               />
             ) : null}
             {user?.publicKey === subscription?.data?.ownerBidState?.bidder ||

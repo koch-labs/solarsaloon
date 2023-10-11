@@ -17,7 +17,7 @@ export default async function handler(
     SELECT COUNT(*) FROM subscriptions JOIN saloons ON subscriptions.collectionMint = saloons.collectionMint
     WHERE
     subscriptions.tokenMint = ${tokenMint} AND
-    subscriptions.lastPost + (saloons.postCooldown || ' milliseconds')::interval <= CURRENT_TIMESTAMP
+    CURRENT_TIMESTAMP >= COALESCE(subscriptions.lastPost, 'epoch'::timestamp) + (COALESCE(saloons.postCooldown, 0) * interval '1 millisecond')
     `;
     const ownerQuery = await sql`
     SELECT COUNT(*) FROM saloons
