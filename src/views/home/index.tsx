@@ -56,7 +56,7 @@ export const HomeView: FC = ({}) => {
       <LazyShow>
         <Flex
           align="center"
-          className="my-80 m-auto px-5 grid grid-cols-2 z-30"
+          className="max-w-4xl my-96 m-auto px-5 grid grid-cols-2 z-30"
         >
           <Flex className="col-span-1" direction="column" align="center">
             <Heading size="9" align="center">
