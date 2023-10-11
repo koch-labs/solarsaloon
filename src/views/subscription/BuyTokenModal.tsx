@@ -240,7 +240,12 @@ export default function BuyTokenModal({
             .builder.transaction()
         );
 
-        if (amountLeft === 0) {
+        // Accounts with 0 selling price will never loose ownership on updates
+        // They need to be bought, not claimed, but it's free
+        if (
+          amountLeft === 0 &&
+          subscription?.data?.ownerBidState?.sellingPrice !== "0"
+        ) {
           tx.add(
             await rentBuilders
               .claimToken({

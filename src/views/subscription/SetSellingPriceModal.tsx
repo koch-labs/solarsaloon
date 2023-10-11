@@ -144,10 +144,9 @@ export default function SetSellingPriceModal({
             .format("0.0a")}{" "}
           ${token?.symbol || "???"} to{" "}
           {numeral(newPrice.toString()).format("0.0a")} $
-          {token?.symbol || "???"}. While you have the subscription?.data, it
-          will cost you{" "}
+          {token?.symbol || "???"}. While you have the subscription, it will
+          cost you{" "}
           {numeral(taxesPerYear / 365)
-            .divide(10 ** (token?.decimals || 0))
             .format("0.00a")
             .replace("NaN", "0")}{" "}
           ${token?.symbol} per day.
