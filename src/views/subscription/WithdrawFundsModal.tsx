@@ -133,7 +133,7 @@ export default function WithdrawFundsModal({
           )
             .divide(10 ** (token?.decimals || 0))
             .format("0.000"),
-          expirationDate: new Date(Date.now() + timeLeft),
+          expirationDate: new Date(Date.now() + timeLeft).toUTCString(),
         }),
         headers: {
           authorization: `Bearer ${user.token}`,

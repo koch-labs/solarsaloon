@@ -297,7 +297,7 @@ export default function BuyTokenModal({
         body: JSON.stringify({
           tokenMint: subscription?.data.subscription?.tokenMint,
           currentPrice: newPrice,
-          expirationDate: new Date(Date.now() + timeLeft),
+          expirationDate: new Date(Date.now() + timeLeft).toUTCString(),
         }),
         headers: {
           authorization: `Bearer ${user.token}`,
