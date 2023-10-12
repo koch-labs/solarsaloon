@@ -36,6 +36,7 @@ export interface Saloon {
   metadata: DigitalAssetStandardMetadata;
   subscriptions?: Subscription[];
   nSubscriptions?: number;
+  nPosts?: number;
 }
 
 export interface Subscription {
@@ -55,7 +56,6 @@ export interface FullSubscription {
   bidState?: BidStateJSON;
   ownerBidState?: BidStateJSON;
   userBalance?: number;
-  posts?: Post[];
 }
 
 export interface Post {
