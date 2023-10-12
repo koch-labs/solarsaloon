@@ -46,7 +46,7 @@ export default function WithdrawFundsModal({
         .format("0.000")
     ),
     taxRate: Number(subscription?.data?.saloon?.config?.taxRate),
-    lastUpdate: Number(subscription?.data?.bidState?.lastUpdate),
+    lastUpdate: Number(subscription?.data?.bidState?.lastUpdate) * 1000,
     depositAmount: Number(
       numeral(subscription?.data?.bidState?.amount)
         .divide(10 ** (token?.decimals || 0))

@@ -32,7 +32,7 @@ export default function DepositWidget({
         .divide(10 ** (token?.decimals || 0))
         .format("0.000")
     ),
-    lastUpdate: Number(subscription?.bidState?.lastUpdate || 0),
+    lastUpdate: Number(subscription?.bidState?.lastUpdate || 0) * 1000,
     increaseDeposit: false,
   });
 

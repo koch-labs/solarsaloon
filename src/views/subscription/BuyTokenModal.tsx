@@ -59,7 +59,7 @@ export default function BuyTokenModal({
         .format("0.00000000000")
     ),
     taxRate: Number(subscription?.data?.saloon?.config?.taxRate),
-    lastUpdate: Number(subscription?.data?.ownerBidState?.lastUpdate),
+    lastUpdate: Number(subscription?.data?.ownerBidState?.lastUpdate) * 1000,
     depositAmount: Number(
       numeral(subscription?.data?.ownerBidState?.amount)
         .divide(10 ** (token?.decimals || 0))

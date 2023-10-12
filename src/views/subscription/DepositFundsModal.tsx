@@ -16,6 +16,7 @@ import {
 import WaitingButton from "../../components/WaitingButton";
 import { useCurrentUser } from "../../contexts/UserContextProvider";
 import useFees from "../../hooks/useFees";
+import { formatTime } from "../../utils";
 
 export default function DepositFundsModal({
   setOpen,
@@ -39,7 +40,7 @@ export default function DepositFundsModal({
       wallet ? new AnchorProvider(connection, wallet as any, {}) : undefined,
     [wallet, connection]
   );
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState<string>();
   const { timeLeft } = useFees({
     price: Number(
       numeral(subscription?.data?.ownerBidState?.sellingPrice || 0)
@@ -48,13 +49,12 @@ export default function DepositFundsModal({
     ),
     taxRate: Number(subscription?.data?.saloon?.config?.taxRate),
     lastUpdate: Date.now(),
-    depositAmount:
-      Number(
-        numeral(subscription?.data?.bidState?.amount || 0)
-          .divide(10 ** (token?.decimals || 0))
-          .format("0.000")
-      ) + amount,
-    increaseDeposit: false,
+    depositAmount: Number(
+      numeral(subscription?.data?.bidState?.amount || 0)
+        .divide(10 ** (token?.decimals || 0))
+        .add(amount)
+        .format("0.000")
+    ),
   });
   const [isWaiting, setIsWaiting] = useState<boolean>(false);
 
@@ -95,7 +95,7 @@ export default function DepositFundsModal({
           SystemProgram.transfer({
             fromPubkey: wallet.publicKey,
             toPubkey: wrappedSolAccount,
-            lamports: Math.round(amount * 10 ** token.decimals),
+            lamports: Math.round(Number(amount) * 10 ** token.decimals),
           })
         );
         tx.add(createSyncNativeInstruction(wrappedSolAccount));
@@ -153,7 +153,7 @@ export default function DepositFundsModal({
         await rentBuilders
           .increaseBid({
             provider,
-            amount: new BN(Math.round(amount * 10 ** token.decimals)),
+            amount: new BN(Math.round(Number(amount) * 10 ** token.decimals)),
             collectionMint: new PublicKey(
               subscription?.data?.saloon.collectionMint
             ),
@@ -227,12 +227,10 @@ export default function DepositFundsModal({
             token and your account reaches 0, others will be able to buy the
             token from you for free.
           </Text>
-          {externalAccount ? (
-            <Text color="crimson">
-              This account belongs to someone else, are you sure you want to
-              deposit?
-            </Text>
-          ) : null}
+          <Text>
+            Adding {amount} ${token?.symbol} will make your subscription last up
+            to {formatTime(timeLeft)} longer.
+          </Text>
         </Flex>
         <Flex direction="column" gap="3">
           <label>
@@ -251,14 +249,14 @@ export default function DepositFundsModal({
               <TextField.Input
                 placeholder="Enter the amount to deposit..."
                 value={amount}
-                onChange={(e) => setAmount(Number(e.target.value))}
+                onChange={(e) => setAmount(e.target.value)}
               />
               <TextField.Slot className="m-1">
                 <Button
                   size="1"
                   variant="ghost"
                   onClick={() =>
-                    setAmount(Number(subscription?.data?.userBalance))
+                    setAmount(subscription?.data?.userBalance?.toString())
                   }
                 >
                   MAX
