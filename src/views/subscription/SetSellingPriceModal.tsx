@@ -105,7 +105,7 @@ export default function SetSellingPriceModal({
         body: JSON.stringify({
           tokenMint: subscription?.data?.subscription?.tokenMint,
           currentPrice: newPrice,
-          expirationDate: new Date(Date.now() + timeLeft),
+          expirationDate: new Date(Date.now() + timeLeft).toUTCString(),
         }),
         headers: {
           authorization: `Bearer ${user.token}`,
@@ -134,21 +134,20 @@ export default function SetSellingPriceModal({
       <Dialog.Content style={{ maxWidth: 450 }}>
         <Dialog.Title>update selling price</Dialog.Title>
         <Dialog.Description size="2" mb="4">
-          Change from the current price of{" "}
+          change from the current price of{" "}
           {numeral(
             subscription?.data?.tokenState?.ownerBidState
               ? subscription?.data?.tokenState?.currentSellingPrice
               : "0"
           )
             .divide(10 ** (token?.decimals || 0))
-            .format("0.0a")}{" "}
+            .format("0.000a")}{" "}
           ${token?.symbol || "???"} to{" "}
-          {numeral(newPrice.toString()).format("0.0a")} $
-          {token?.symbol || "???"}. While you have the subscription?.data, it
-          will cost you{" "}
+          {numeral(newPrice.toString()).format("0.000a")} $
+          {token?.symbol || "???"}. While you have the subscription, it will
+          cost you{" "}
           {numeral(taxesPerYear / 365)
-            .divide(10 ** (token?.decimals || 0))
-            .format("0.00a")
+            .format("0.000a")
             .replace("NaN", "0")}{" "}
           ${token?.symbol} per day.
         </Dialog.Description>

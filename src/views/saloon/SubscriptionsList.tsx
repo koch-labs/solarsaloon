@@ -75,7 +75,9 @@ export const SubscriptionsList = ({
                   ) : (
                     <Text>
                       {formatTime(
-                        Date.now() - new Date(s.lastPost).valueOf() - 7200000
+                        Date.now() -
+                          new Date(s.lastPost).valueOf() -
+                          new Date().getTimezoneOffset() * 60000
                       )}{" "}
                       ago
                     </Text>

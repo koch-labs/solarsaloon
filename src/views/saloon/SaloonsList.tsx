@@ -52,6 +52,9 @@ export const SaloonsList = ({ saloons }: { saloons?: Fetchable<Saloon[]> }) => {
                 Subscriptions
               </Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell className="hidden sm:table-cell">
+                Posts
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell className="hidden sm:table-cell">
                 Post period
               </Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell>Actions</Table.ColumnHeaderCell>
@@ -77,6 +80,9 @@ export const SaloonsList = ({ saloons }: { saloons?: Fetchable<Saloon[]> }) => {
                 </Table.Cell>
                 <Table.Cell className="hidden sm:table-cell">
                   {s?.nSubscriptions || 0}
+                </Table.Cell>
+                <Table.Cell className="hidden sm:table-cell">
+                  {s?.nPosts || 0}
                 </Table.Cell>
                 <Table.Cell className="hidden sm:table-cell">
                   every {formatTime(s.postCooldown)}

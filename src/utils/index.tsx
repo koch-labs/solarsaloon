@@ -59,10 +59,10 @@ const formatTime = (ms: number) => {
 function concatUnique<T>(
   arrs: T[][],
   equals: (a: T, b: T) => boolean = (a, b) => a === b
-) {
+): T[] {
   const res: T[] = [];
-  for (const arr of arrs) {
-    for (const i of arr) {
+  for (const arr of arrs || []) {
+    for (const i of arr || []) {
       if (!res.find((item) => equals(item, i))) {
         res.push(i);
       }

@@ -40,7 +40,7 @@ export default function ClaimFeesButton({
         .format("0.000")
     ),
     taxRate: Number(subscription?.data?.saloon?.config?.taxRate),
-    lastUpdate: Number(subscription?.data?.ownerBidState?.lastUpdate),
+    lastUpdate: Number(subscription?.data?.ownerBidState?.lastUpdate) * 1000,
     depositAmount: Number(
       numeral(subscription?.data?.saloon?.config?.collectedTax)
         .divide(10 ** (token?.decimals || 0))

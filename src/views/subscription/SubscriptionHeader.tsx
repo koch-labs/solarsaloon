@@ -46,7 +46,7 @@ export default function SubscriptionHeader({
         .divide(10 ** (token?.decimals || 0))
         .format("0.000")
     ),
-    lastUpdate: Number(subscription?.data?.ownerBidState?.lastUpdate),
+    lastUpdate: Number(subscription?.data?.ownerBidState?.lastUpdate) * 1000,
     increaseDeposit: false,
   });
 
@@ -96,23 +96,25 @@ export default function SubscriptionHeader({
           ) : null}
         </Flex>
         <Flex gap="2" direction="column">
-          {user &&
-          (timeLeft === 0 ||
-            subscription?.data?.subscription?.currentOwner?.publicKey !==
-              user?.publicKey ||
-            subscription?.data?.ownerBidState?.bidder !== user?.publicKey) ? (
-            <Button onClick={() => setOpenBuy(true)}>
-              buy this subscription (
-              {amount <= 0
-                ? numeral(subscription?.data?.saloon?.config?.minimumSellPrice)
-                    .divide(10 ** (token?.decimals || 0))
-                    .format("0.00a")
-                : numeral(subscription?.data?.ownerBidState?.sellingPrice)
-                    .divide(10 ** (token?.decimals || 0))
-                    .format("0.00a")}{" "}
-              ${token?.symbol})
-            </Button>
-          ) : null}
+          <Button
+            onClick={() => setOpenBuy(true)}
+            disabled={
+              !user ||
+              subscription?.data?.subscription?.currentOwner?.publicKey ===
+                user?.publicKey ||
+              subscription?.data?.ownerBidState?.bidder === user?.publicKey
+            }
+          >
+            buy this subscription (
+            {amount <= 0
+              ? numeral(subscription?.data?.saloon?.config?.minimumSellPrice)
+                  .divide(10 ** (token?.decimals || 0))
+                  .format("0.00a")
+              : numeral(subscription?.data?.ownerBidState?.sellingPrice)
+                  .divide(10 ** (token?.decimals || 0))
+                  .format("0.00a")}{" "}
+            ${token?.symbol})
+          </Button>
           {user &&
           subscription?.data?.ownerBidState?.bidder === user?.publicKey ? (
             <Button variant="soft" onClick={() => setOpenPrice(true)}>

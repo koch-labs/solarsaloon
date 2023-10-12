@@ -46,7 +46,7 @@ export default function WithdrawFundsModal({
         .format("0.000")
     ),
     taxRate: Number(subscription?.data?.saloon?.config?.taxRate),
-    lastUpdate: Number(subscription?.data?.bidState?.lastUpdate),
+    lastUpdate: Number(subscription?.data?.bidState?.lastUpdate) * 1000,
     depositAmount: Number(
       numeral(subscription?.data?.bidState?.amount)
         .divide(10 ** (token?.decimals || 0))
@@ -133,7 +133,7 @@ export default function WithdrawFundsModal({
           )
             .divide(10 ** (token?.decimals || 0))
             .format("0.000"),
-          expirationDate: new Date(Date.now() + timeLeft),
+          expirationDate: new Date(Date.now() + timeLeft).toUTCString(),
         }),
         headers: {
           authorization: `Bearer ${user.token}`,

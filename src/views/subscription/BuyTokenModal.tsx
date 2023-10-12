@@ -59,7 +59,7 @@ export default function BuyTokenModal({
         .format("0.00000000000")
     ),
     taxRate: Number(subscription?.data?.saloon?.config?.taxRate),
-    lastUpdate: Number(subscription?.data?.ownerBidState?.lastUpdate),
+    lastUpdate: Number(subscription?.data?.ownerBidState?.lastUpdate) * 1000,
     depositAmount: Number(
       numeral(subscription?.data?.ownerBidState?.amount)
         .divide(10 ** (token?.decimals || 0))
@@ -240,7 +240,12 @@ export default function BuyTokenModal({
             .builder.transaction()
         );
 
-        if (amountLeft === 0) {
+        // Accounts with 0 selling price will never loose ownership on updates
+        // They need to be bought, not claimed, but it's free
+        if (
+          amountLeft === 0 &&
+          subscription?.data?.ownerBidState?.sellingPrice !== "0"
+        ) {
           tx.add(
             await rentBuilders
               .claimToken({
@@ -292,7 +297,7 @@ export default function BuyTokenModal({
         body: JSON.stringify({
           tokenMint: subscription?.data.subscription?.tokenMint,
           currentPrice: newPrice,
-          expirationDate: new Date(Date.now() + timeLeft),
+          expirationDate: new Date(Date.now() + timeLeft).toUTCString(),
         }),
         headers: {
           authorization: `Bearer ${user.token}`,

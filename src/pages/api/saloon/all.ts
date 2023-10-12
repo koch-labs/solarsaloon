@@ -14,7 +14,13 @@ export default async function handler(
       request.query
     );
     const queryString = `
-    SELECT * FROM 
+    SELECT
+        saloons.*,
+        users.*,
+        m.*,
+        COALESCE(countquery.nSubscriptions, 0) AS nSubscriptions,
+        COALESCE(postscountquery.nPosts, 0) AS nPosts
+    FROM 
     saloons
     JOIN users on users.publicKey = saloons.owner
     JOIN saloonMetadata as m USING (collectionMint)
@@ -23,6 +29,11 @@ export default async function handler(
         subscriptions
         GROUP BY collectionMint 
     ) AS countquery USING (collectionMint)
+    LEFT JOIN (
+        SELECT collectionMint, COUNT(*) AS nPosts FROM
+        posts
+        GROUP BY collectionMint 
+    ) AS postscountquery USING (collectionMint)
     ${creator || tags?.length > 0 ? "WHERE " : ""}
     ${creator ? `saloons.owner = $1` : ""}
     ${
@@ -30,6 +41,7 @@ export default async function handler(
         ? `${creator ? "AND saloons.tags @> ($2)" : "saloons.tags @> ($1)"}`
         : ""
     }
+    ORDER BY nPosts DESC
     LIMIT ${limit} OFFSET ${limit * page}`;
     const args = [
       creator as any,
@@ -67,6 +79,7 @@ export default async function handler(
       tags: s.tags,
       metadata: s.metadata,
       nSubscriptions: s.nsubscriptions,
+      nPosts: s.nposts,
     }));
     return response.status(200).json({
       saloons,

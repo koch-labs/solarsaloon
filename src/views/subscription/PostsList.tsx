@@ -76,7 +76,8 @@ export const PostsList = ({
                   <Text size={"2"}>
                     {formatTime(
                       Date.now() -
-                        (new Date(post.creationTimestamp).valueOf() + 7200000)
+                        (new Date(post.creationTimestamp).valueOf() +
+                          new Date().getTimezoneOffset() * 60000)
                     )}{" "}
                     ago
                   </Text>

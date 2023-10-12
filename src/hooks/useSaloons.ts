@@ -22,12 +22,6 @@ export default function useSaloons({
     async (page: number) => {
       setIsLoading(true);
       try {
-        console.log(
-          `/api/saloon/all?page=${page}&limit=${pageSize}${
-            creator ? `&creator=${creator}` : ""
-          }${tags?.length > 0 ? `&tags=${tags.join(",")}` : ""}`,
-          tags
-        );
         const response = await fetch(
           `/api/saloon/all?page=${page}&limit=${pageSize}${
             creator ? `&creator=${creator}` : ""

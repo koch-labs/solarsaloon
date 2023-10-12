@@ -66,6 +66,7 @@ export default async function handler(
           posts
           JOIN saloons USING (collectionMint)
           JOIN subscriptions USING (collectionMint)
+          JOIN users ON users.publicKey = posts.creator
           WHERE subscriptions.tokenMint = ${tokenMint}
           ORDER BY creationTimestamp DESC
           LIMIT ${limit} OFFSET ${limit * page}
