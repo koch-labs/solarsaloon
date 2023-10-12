@@ -52,7 +52,7 @@ export default function DepositFundsModal({
     depositAmount: Number(
       numeral(subscription?.data?.bidState?.amount || 0)
         .divide(10 ** (token?.decimals || 0))
-        .add(amount)
+        .add(amount || 0)
         .format("0.000")
     ),
   });
@@ -95,7 +95,7 @@ export default function DepositFundsModal({
           SystemProgram.transfer({
             fromPubkey: wallet.publicKey,
             toPubkey: wrappedSolAccount,
-            lamports: Math.round(Number(amount) * 10 ** token.decimals),
+            lamports: Math.round(Number(amount || 0) * 10 ** token.decimals),
           })
         );
         tx.add(createSyncNativeInstruction(wrappedSolAccount));
@@ -153,7 +153,9 @@ export default function DepositFundsModal({
         await rentBuilders
           .increaseBid({
             provider,
-            amount: new BN(Math.round(Number(amount) * 10 ** token.decimals)),
+            amount: new BN(
+              Math.round(Number(amount || 0) * 10 ** token.decimals)
+            ),
             collectionMint: new PublicKey(
               subscription?.data?.saloon.collectionMint
             ),
@@ -228,8 +230,8 @@ export default function DepositFundsModal({
             token from you for free.
           </Text>
           <Text>
-            Adding {amount} ${token?.symbol} will make your subscription last up
-            to {formatTime(timeLeft)} longer.
+            Adding {amount || 0} ${token?.symbol} will make your subscription
+            last up to {formatTime(timeLeft)} longer.
           </Text>
         </Flex>
         <Flex direction="column" gap="3">
