@@ -26,7 +26,7 @@ export default function CreatePostCard({
   const timeUntilNextPost =
     new Date(subscription?.data?.subscription?.lastPost).valueOf() +
     Number(subscription?.data?.saloon?.postCooldown) -
-    Date.now() -
+    Date.now() +
     new Date().getTimezoneOffset() * 60000;
 
   const handlePost = useCallback(async () => {
